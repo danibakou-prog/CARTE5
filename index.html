@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Activation Portal</title>
+    
+    <!-- Load Premium Latin Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --gold-primary: #bf953f;
+            --gold-light: #fcf6ba;
+            --gold-dark: #8a642d;
+            --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 55%, #aa771c 100%);
+            --luxury-shadow: 0 50px 100px -20px rgba(0,0,0,0.12), 0 30px 60px -30px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            background: #f8f9fa;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(191, 149, 63, 0.03) 0%, transparent 80%),
+                linear-gradient(rgba(220, 220, 220, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(220, 220, 220, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: var(--luxury-shadow);
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .gold-accent-line {
+            height: 6px;
+            background: var(--gold-gradient);
+            border-radius: 40px 40px 0 0;
+        }
+
+        .token-display-box {
+            background: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            transition: all 0.5s ease;
+        }
+
+        .token-display-box::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(252, 246, 186, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .token-display-box:hover::after {
+            opacity: 1;
+        }
+
+        .token-text {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 2px;
+        }
+
+        .copy-trigger {
+            background: var(--gold-gradient);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .copy-trigger:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px -5px rgba(138, 100, 45, 0.4);
+        }
+
+        .copy-trigger::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .copy-trigger:hover::before {
+            left: 100%;
+        }
+
+        .instruction-pill {
+            background: #ffffff;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .instruction-pill:hover {
+            border-color: var(--gold-primary);
+            transform: translateX(5px);
+        }
+
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card rounded-[3rem] p-1">
+        <div class="gold-accent-line"></div>
+        
+        <div class="bg-white rounded-[2.8rem] overflow-hidden">
+            <!-- Header Section -->
+            <div class="px-10 pt-10 pb-6 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center shadow-lg transform rotate-6">
+                        <i data-lucide="crown" class="w-7 h-7 text-[#fcf6ba]"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black text-gray-900 tracking-tight">ELITE SYSTEM</h1>
+                        <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            ELITE MEMBER ACCESS
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Status</div>
+                    <div class="text-[11px] font-black text-emerald-600 uppercase">Active & Secured</div>
+                </div>
+            </div>
+
+            <!-- Content Body -->
+            <div class="px-10 py-4">
+                
+                <!-- Instruction Steps -->
+                <div class="space-y-3 mb-10">
+                    <div class="instruction-pill p-4 rounded-2xl flex items-center gap-4 group">
+                        <div class="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">01</div>
+                        <p class="text-xs font-bold text-gray-600">Click to copy your unique Royal Activation Token.</p>
+                    </div>
+                    <div class="instruction-pill p-4 rounded-2xl flex items-center gap-4 group">
+                        <div class="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">02</div>
+                        <p class="text-xs font-bold text-gray-600">Enter this code into the Verification Center inside the app.</p>
+                    </div>
+                </div>
+
+                <!-- Token Area -->
+                <div class="relative group">
+                    <div class="flex justify-between items-center mb-3 px-2">
+                        <span class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Authentication Token</span>
+                        <div class="flex gap-1">
+                            <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                            <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                            <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+                        </div>
+                    </div>
+
+                    <div id="copyArea" class="token-display-box p-12 flex flex-col items-center justify-center cursor-pointer shadow-2xl">
+                        <!-- Updated Token Code -->
+                        <code id="tokenValue" class="token-text text-3xl md:text-5xl font-black mb-2">ULTRA-K88-MAX</code>
+                        <div class="text-[9px] text-gray-500 font-bold tracking-[0.4em] uppercase opacity-60">Verified Premium Asset</div>
+                    </div>
+
+                    <!-- Floating Copy Button -->
+                    <button id="floatingBtn" class="copy-trigger absolute -bottom-6 left-1/2 -translate-x-1/2 px-10 py-4 rounded-2xl flex items-center gap-3 shadow-xl">
+                        <i data-lucide="copy" class="w-4 h-4 text-[#4a3701]"></i>
+                        <span class="text-xs font-black text-[#4a3701] uppercase tracking-tighter">Copy Code Now</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Section -->
+            <div class="mt-16 px-10 pb-10">
+                <div class="pt-8 border-t border-gray-100 flex justify-between items-center">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase mb-1">Security Protocol</span>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                            <span class="text-[10px] font-black text-gray-800 uppercase">AES-256 Encryption Active</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-2 rounded-xl flex items-center gap-2">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-gray-400"></i>
+                        <span id="timestamp" class="text-[10px] font-bold text-gray-500 tracking-tighter">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Notification (Toast) -->
+    <div id="successToast" class="fixed bottom-12 left-1/2 -translate-x-1/2 translate-y-40 opacity-0 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] z-50">
+        <div class="bg-black text-white px-8 py-5 rounded-[2rem] shadow-2xl flex items-center gap-5 min-w-[320px]">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="font-black text-sm">Copied Successfully</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Token Added to Clipboard</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        const copyArea = document.getElementById('copyArea');
+        const floatingBtn = document.getElementById('floatingBtn');
+        const toast = document.getElementById('successToast');
+        const tokenElement = document.getElementById('tokenValue');
+
+        // Dynamic Digital Clock
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                           now.getMinutes().toString().padStart(2, '0') + ":" + 
+                           now.getSeconds().toString().padStart(2, '0');
+            const el = document.getElementById('timestamp');
+            if(el) el.innerText = timeStr;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // High Compatibility Copy Function
+        function handleCopy(e) {
+            const token = tokenElement.innerText;
+            const textArea = document.createElement("textarea");
+            textArea.value = token;
+            
+            // Hidden textarea for execution
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            document.body.appendChild(textArea);
+            
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                // Using document.execCommand('copy') as per instructions for iFrame compatibility
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showSuccessFeedback(e);
+                }
+            } catch (err) {
+                console.error('Copy execution failed:', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Visual Feedback
+        function showSuccessFeedback(e) {
+            // Ripple Animation
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            const rect = copyArea.getBoundingClientRect();
+            
+            const x = e.clientX ? e.clientX - rect.left : rect.width / 2;
+            const y = e.clientY ? e.clientY - rect.top : rect.height / 2;
+            
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
+            copyArea.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+
+            // Toast Animation
+            toast.classList.remove('translate-y-40', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-40', 'opacity-0');
+            }, 3000);
+        }
+
+        // Event Listeners
+        copyArea.addEventListener('click', handleCopy);
+        floatingBtn.addEventListener('click', handleCopy);
+    </script>
+</body>
+</html>
