@@ -1,314 +1,1125 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royal Activation Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ياسر تاكسي 🚗</title>
     
-    <!-- Load Premium Latin Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Leaflet & Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Compat SDK (يعمل في المتصفح مباشرة) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     
     <style>
         :root {
-            --gold-primary: #bf953f;
-            --gold-light: #fcf6ba;
-            --gold-dark: #8a642d;
-            --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 55%, #aa771c 100%);
-            --luxury-shadow: 0 50px 100px -20px rgba(0,0,0,0.12), 0 30px 60px -30px rgba(0,0,0,0.15);
+            --primary: #00b894;
+            --primary-dark: #00a383;
+            --secondary: #3498db;
+            --bg: #f8f9fa;
+            --text: #2d3436;
+            --card: #ffffff;
+            --shadow: 0 4px 16px rgba(0,0,0,0.12);
+            --danger: #e74c3c;
+            --warning: #f39c12;
         }
-
-        body {
-            font-family: 'Montserrat', 'Inter', sans-serif;
-            background: #f8f9fa;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(191, 149, 63, 0.03) 0%, transparent 80%),
-                linear-gradient(rgba(220, 220, 220, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(220, 220, 220, 0.05) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 24px;
-        }
-
-        .main-card {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: var(--luxury-shadow);
-            width: 100%;
-            max-width: 500px;
-            position: relative;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        .gold-accent-line {
-            height: 6px;
-            background: var(--gold-gradient);
-            border-radius: 40px 40px 0 0;
-        }
-
-        .token-display-box {
-            background: #1a1a1a;
-            position: relative;
-            overflow: hidden;
-            border-radius: 24px;
-            transition: all 0.5s ease;
-        }
-
-        .token-display-box::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(252, 246, 186, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .token-display-box:hover::after {
-            opacity: 1;
-        }
-
-        .token-text {
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'Courier New', Courier, monospace;
-            letter-spacing: 2px;
-        }
-
-        .copy-trigger {
-            background: var(--gold-gradient);
-            position: relative;
-            z-index: 10;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .copy-trigger:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 30px -5px rgba(138, 100, 45, 0.4);
-        }
-
-        .copy-trigger::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: 0.5s;
-        }
-
-        .copy-trigger:hover::before {
-            left: 100%;
-        }
-
-        .instruction-pill {
-            background: #ffffff;
-            border: 1px solid #f0f0f0;
-            transition: all 0.3s ease;
-        }
-
-        .instruction-pill:hover {
-            border-color: var(--gold-primary);
-            transform: translateX(5px);
-        }
-
-        @keyframes ripple {
-            to { transform: scale(4); opacity: 0; }
-        }
-
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg); min-height: 100vh; padding: 8px; color: var(--text); }
+        .app { max-width: 440px; margin: 0 auto; background: var(--card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); position: relative; min-height: 100vh; }
+        
+        /* Views Management */
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Header Styles */
+        .header { background: var(--primary); color: #fff; padding: 14px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 1.2em; font-weight: 700; flex: 1; text-align: center; }
+        .back-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Main View Styles */
+        .main-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 20px; text-align: center; }
+        .main-logo { font-size: 4em; margin-bottom: 15px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .main-title { font-size: 1.6em; color: var(--primary-dark); margin-bottom: 8px; font-weight: 800; }
+        .main-subtitle { color: #666; font-size: 0.95em; margin-bottom: 35px; line-height: 1.4; }
+        .main-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; max-width: 320px; padding: 18px 24px; border: none; border-radius: 16px; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 16px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .main-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .btn-passenger { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+        .btn-driver { background: linear-gradient(135deg, var(--secondary), #2980b9); }
+        .btn-icon { font-size: 1.4em; }
+        .main-footer { margin-top: 20px; font-size: 0.8em; color: #999; }
+        
+        /* Map & Request View Styles */
+        #map { height: 280px; width: 100%; position: relative; }
+        .leaflet-routing-container { display: none !important; }
+        .pulse-marker { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,184,148,0.7); } 70% { box-shadow: 0 0 0 15px rgba(0,184,148,0); } 100% { box-shadow: 0 0 0 0 rgba(0,184,148,0); } }
+        .panel { padding: 14px; background: var(--card); }
+        .location-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        .loc-row { display: flex; flex-direction: column; gap: 6px; background: #f1f3f5; padding: 10px; border-radius: 10px; }
+        .loc-header { display: flex; align-items: center; gap: 8px; }
+        .loc-icon { font-size: 1.3em; }
+        .loc-label { font-size: 0.75em; color: #666; }
+        .loc-input-group { display: flex; gap: 6px; }
+        .loc-input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85em; outline: none; transition: 0.2s; }
+        .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,184,148,0.2); }
+        .loc-btn { padding: 8px 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85em; transition: 0.2s; white-space: nowrap; }
+        .loc-btn:hover { background: var(--primary-dark); }
+        .loc-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
+        .loc-btn.gps-btn { background: #3498db; }
+        .loc-btn.gps-btn:hover { background: #2980b9; }
+        .loc-coords { font-size: 0.7em; color: #888; margin-top: 2px; }
+        .loc-text { font-size: 0.9em; font-weight: 500; }
+        .loc-sub { font-size: 0.75em; color: #666; margin-top: 2px; }
+        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+        .info-card { background: #e8f5e9; padding: 8px; border-radius: 10px; text-align: center; }
+        .info-card .val { font-weight: bold; font-size: 1em; color: #2e7d32; }
+        .info-card .label { font-size: 0.75em; color: #555; margin-top: 2px; }
+        .price-display { background: #fff3cd; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: #856404; margin-bottom: 10px; border: 1px solid #ffeeba; }
+        .car-selector { display: flex; gap: 8px; margin-bottom: 12px; }
+        .car-opt { flex: 1; background: #f8f9fa; border: 2px solid transparent; border-radius: 12px; padding: 10px 6px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .car-opt.selected { border-color: var(--primary); background: #e6f9f4; }
+        .car-opt .ico { font-size: 1.4em; }
+        .car-opt .name { font-weight: 600; font-size: 0.8em; margin-top: 4px; }
+        .car-opt .rate { color: var(--primary); font-size: 0.75em; }
+        .book-btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-size: 1em; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .book-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
+        .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
+        .status-bar { padding: 10px; text-align: center; font-size: 0.85em; color: #555; background: #f8f9fa; border-radius: 8px; margin-top: 10px; display: none; }
+        .status-bar.show { display: block; animation: fadeIn 0.3s; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 6px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .driver-card { background: #e3f2fd; border-radius: 12px; padding: 14px; margin-top: 12px; display: none; }
+        .driver-card.show { display: block; animation: slideUp 0.4s; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .d-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .d-avatar { width: 50px; height: 50px; border-radius: 50%; background: #bbdefb; display: flex; align-items: center; justify-content: center; font-size: 1.6em; }
+        .d-name { font-weight: 700; font-size: 1em; }
+        .d-meta { font-size: 0.8em; color: #555; margin-top: 2px; }
+        .d-stars { color: #ffc107; margin-top: 4px; }
+        .d-eta { background: #fff; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600; color: var(--primary-dark); margin-top: 10px; }
+        .cancel-btn { width: 100%; padding: 12px; background: var(--danger); color: #fff; border: none; border-radius: 10px; margin-top: 10px; font-weight: 600; cursor: pointer; }
+        .hint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.75em; pointer-events: none; z-index: 1000; }
+        .autocomplete { position: relative; }
+        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+        .autocomplete-results.show { display: block; }
+        .autocomplete-item { padding: 10px 12px; cursor: pointer; font-size: 0.85em; border-bottom: 1px solid #f1f1f1; }
+        .autocomplete-item:hover { background: #e8f5e9; }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        
+        /* Driver Registration View Styles */
+        .form-group { margin-bottom: 16px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9em; color: #444; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 0.95em; outline: none; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
+        .register-btn { width: 100%; padding: 14px; background: var(--secondary); color: #fff; border: none; border-radius: 12px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .register-btn:hover { background: #2980b9; transform: translateY(-1px); }
+        .register-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .form-note { font-size: 0.8em; color: #777; margin-top: 15px; text-align: center; }
+        
+        /* Driver Dashboard Styles */
+        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; }
+        .driver-info { display: flex; align-items: center; gap: 10px; }
+        .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; }
+        .driver-name { font-weight: 600; font-size: 0.95em; }
+        .driver-status { font-size: 0.8em; opacity: 0.9; }
+        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; }
+        .status-toggle.active { background: #2ecc71; }
+        .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
+        .request-card { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-right: 4px solid var(--primary); transition: 0.2s; }
+        .request-card:hover { transform: translateX(-3px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+        .request-card.urgent { border-right-color: var(--danger); background: #fff5f5; }
+        .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .req-time { font-size: 0.8em; color: #666; background: #e8f4fd; padding: 4px 10px; border-radius: 15px; }
+        .req-urgent { font-size: 0.75em; color: var(--danger); font-weight: 600; }
+        .req-route { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .req-point { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9em; }
+        .req-point .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+        .req-point.pickup .dot { background: var(--primary); }
+        .req-point.dest .dot { background: var(--danger); }
+        .req-price { font-weight: 700; color: var(--primary-dark); font-size: 1.1em; margin-bottom: 10px; }
+        .req-actions { display: flex; gap: 8px; }
+        .req-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
+        .accept-btn { background: var(--primary); color: #fff; }
+        .accept-btn:hover { background: var(--primary-dark); }
+        .decline-btn { background: #ecf0f1; color: #555; }
+        .decline-btn:hover { background: #bdc3c7; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
+        .empty-state .icon { font-size: 3em; margin-bottom: 15px; opacity: 0.5; }
+        .refresh-btn { width: 100%; padding: 12px; background: #ecf0f1; color: #333; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+        .refresh-btn:hover { background: #bdc3c7; }
+        
+        /* Toast Notification */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 0.9em; z-index: 2000; transition: transform 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--primary); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); color: #333; }
+        
+        /* Firebase Status Indicator */
+        .firebase-status { position: fixed; top: 10px; right: 10px; padding: 5px 12px; border-radius: 20px; font-size: 0.75em; z-index: 1001; cursor: pointer; }
+        .firebase-status.connected { background: #2ecc71; color: #fff; }
+        .firebase-status.local { background: #9b59b6; color: #fff; }
+        .firebase-status.connecting { background: #f39c12; color: #fff; }
+        .firebase-status.error { background: #e74c3c; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div class="main-card rounded-[3rem] p-1">
-        <div class="gold-accent-line"></div>
-        
-        <div class="bg-white rounded-[2.8rem] overflow-hidden">
-            <!-- Header Section -->
-            <div class="px-10 pt-10 pb-6 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-black flex items-center justify-center shadow-lg transform rotate-6">
-                        <i data-lucide="crown" class="w-7 h-7 text-[#fcf6ba]"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-black text-gray-900 tracking-tight">ELITE SYSTEM</h1>
-                        <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            ELITE MEMBER ACCESS
-                        </p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Status</div>
-                    <div class="text-[11px] font-black text-emerald-600 uppercase">Active & Secured</div>
-                </div>
-            </div>
+<!-- Firebase Status Indicator -->
+<div class="firebase-status connecting" id="firebaseStatus" onclick="toggleDebug()">🔄 جاري الاتصال...</div>
 
-            <!-- Content Body -->
-            <div class="px-10 py-4">
+<div class="app">
+    <!-- ========== VIEW 1: MAIN MENU ========== -->
+    <div id="view-main" class="view active">
+        <div class="header" style="justify-content: center;">
+            <h1>🚗 ياسر تاكسي</h1>
+        </div>
+        <div class="main-view">
+            <div class="main-logo">🚖</div>
+            <h2 class="main-title">ياسر تاكسي</h2>
+            <p class="main-subtitle">حلّك السريع والآمن للتنقل في المدينة • خدمة 24/7</p>
+            
+            <button class="main-btn btn-passenger" onclick="switchView('view-request')">
+                <span class="btn-icon">👤</span>
+                طلب سيارة الآن
+            </button>
+            
+            <button class="main-btn btn-driver" onclick="switchView('view-register')">
+                <span class="btn-icon">🚙</span>
+                تسجيل سيارتي (سائق)
+            </button>
+            
+            <div class="main-footer">
+                <p>© 2026 ياسر تاكسي - جميع الحقوق محفوظة</p>
+                <p style="margin-top: 5px; font-size: 0.75em;">🔐 آمن • ⚡ سريع • ✅ موثوق</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== VIEW 2: REQUEST RIDE (Passenger) ========== -->
+    <div id="view-request" class="view">
+        <div class="header">
+            <button class="back-btn" onclick="switchView('view-main')">← رجوع</button>
+            <h1>📍 طلب رحلة</h1>
+        </div>
+        <div id="map"></div>
+        <div class="hint">📍 انقر على الخريطة أو اكتب العنوان لتحديد الموقع</div>
+
+        <div class="panel">
+            <div class="location-box">
+                <!-- موقع الانطلاق -->
+                <div class="loc-row">
+                    <div class="loc-header">
+                        <span class="loc-icon">📍</span>
+                        <span class="loc-label">موقع الانطلاق</span>
+                    </div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
+                            <button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️ GPS</button>
+                        </div>
+                        <div class="autocomplete-results" id="pickupResults"></div>
+                    </div>
+                    <div class="loc-coords" id="pickupCoords">جاري تحديد موقعك...</div>
+                </div>
                 
-                <!-- Instruction Steps -->
-                <div class="space-y-3 mb-10">
-                    <div class="instruction-pill p-4 rounded-2xl flex items-center gap-4 group">
-                        <div class="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">01</div>
-                        <p class="text-xs font-bold text-gray-600">Click to copy your unique Royal Activation Token.</p>
+                <!-- موقع الوصول -->
+                <div class="loc-row">
+                    <div class="loc-header">
+                        <span class="loc-icon">🏁</span>
+                        <span class="loc-label">الوجهة المطلوبة</span>
                     </div>
-                    <div class="instruction-pill p-4 rounded-2xl flex items-center gap-4 group">
-                        <div class="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">02</div>
-                        <p class="text-xs font-bold text-gray-600">Enter this code into the Verification Center inside the app.</p>
-                    </div>
-                </div>
-
-                <!-- Token Area -->
-                <div class="relative group">
-                    <div class="flex justify-between items-center mb-3 px-2">
-                        <span class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Authentication Token</span>
-                        <div class="flex gap-1">
-                            <div class="w-1 h-1 rounded-full bg-gray-200"></div>
-                            <div class="w-1 h-1 rounded-full bg-gray-200"></div>
-                            <div class="w-1 h-1 rounded-full bg-amber-400"></div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
+                            <button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
                         </div>
+                        <div class="autocomplete-results" id="destResults"></div>
                     </div>
-
-                    <div id="copyArea" class="token-display-box p-12 flex flex-col items-center justify-center cursor-pointer shadow-2xl">
-                        <!-- Updated Token Code -->
-                        <code id="tokenValue" class="token-text text-3xl md:text-5xl font-black mb-2">ZENITH-V55-ULTRA</code>
-                        <div class="text-[9px] text-gray-500 font-bold tracking-[0.4em] uppercase opacity-60">Verified Premium Asset</div>
-                    </div>
-
-                    <!-- Floating Copy Button -->
-                    <button id="floatingBtn" class="copy-trigger absolute -bottom-6 left-1/2 -translate-x-1/2 px-10 py-4 rounded-2xl flex items-center gap-3 shadow-xl">
-                        <i data-lucide="copy" class="w-4 h-4 text-[#4a3701]"></i>
-                        <span class="text-xs font-black text-[#4a3701] uppercase tracking-tighter">Copy Code Now</span>
-                    </button>
+                    <div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
                 </div>
             </div>
 
-            <!-- Footer Section -->
-            <div class="mt-16 px-10 pb-10">
-                <div class="pt-8 border-t border-gray-100 flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] font-bold text-gray-400 uppercase mb-1">Security Protocol</span>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
-                            <span class="text-[10px] font-black text-gray-800 uppercase">AES-256 Encryption Active</span>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-2 rounded-xl flex items-center gap-2">
-                        <i data-lucide="clock" class="w-3.5 h-3.5 text-gray-400"></i>
-                        <span id="timestamp" class="text-[10px] font-bold text-gray-500 tracking-tighter">00:00:00</span>
+            <div class="route-info" id="routeInfo" style="opacity: 0.4; pointer-events: none;">
+                <div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
+                <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
+                <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
+            </div>
+
+            <div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
+
+            <div class="car-selector">
+                <div class="car-opt selected" onclick="selectCar(this, 'اقتصادي', 15)">
+                    <div class="ico">🚗</div><div class="name">اقتصادي</div><div class="rate">15 د.ج/كم</div>
+                </div>
+                <div class="car-opt" onclick="selectCar(this, 'مريح', 25)">
+                    <div class="ico">🚙</div><div class="name">مريح</div><div class="rate">25 د.ج/كم</div>
+                </div>
+                <div class="car-opt" onclick="selectCar(this, 'عائلي', 40)">
+                    <div class="ico">🚐</div><div class="name">عائلي</div><div class="rate">40 د.ج/كم</div>
+                </div>
+            </div>
+
+            <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة الآن</button>
+            <div class="status-bar" id="statusBar"></div>
+
+            <div class="driver-card" id="driverCard">
+                <div class="d-header">
+                    <div class="d-avatar">👨‍✈️</div>
+                    <div style="flex:1">
+                        <div class="d-name" id="dName">---</div>
+                        <div class="d-meta" id="dMeta">---</div>
+                        <div class="d-stars">⭐⭐⭐⭐⭐ (4.9)</div>
                     </div>
                 </div>
+                <div class="d-eta" id="dEta">جاري التحميل...</div>
+                <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
             </div>
         </div>
     </div>
 
-    <!-- Success Notification (Toast) -->
-    <div id="successToast" class="fixed bottom-12 left-1/2 -translate-x-1/2 translate-y-40 opacity-0 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] z-50">
-        <div class="bg-black text-white px-8 py-5 rounded-[2rem] shadow-2xl flex items-center gap-5 min-w-[320px]">
-            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
-                <i data-lucide="sparkles" class="w-5 h-5"></i>
+    <!-- ========== VIEW 3: DRIVER REGISTRATION ========== -->
+    <div id="view-register" class="view">
+        <div class="header">
+            <button class="back-btn" onclick="switchView('view-main')">← رجوع</button>
+            <h1>🚙 تسجيل سائق</h1>
+        </div>
+        <div class="panel" style="padding: 20px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="font-size: 3em; margin-bottom: 10px;">🚕</div>
+                <h3 style="color: var(--secondary); margin-bottom: 5px;">انضم لأسطول ياسر تاكسي</h3>
+                <p style="color: #666; font-size: 0.9em;">سجّل بياناتك وابدأ في استقبال طلبات الركاب</p>
             </div>
-            <div>
-                <p class="font-black text-sm">Copied Successfully</p>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Token Added to Clipboard</p>
-            </div>
+            
+            <form id="driverForm" onsubmit="registerDriver(event)">
+                <div class="form-group">
+                    <label>👤 الاسم الكامل</label>
+                    <input type="text" id="driverName" required placeholder="أدخل اسمك الثلاثي">
+                </div>
+                
+                <div class="form-group">
+                    <label>📱 رقم الهاتف</label>
+                    <input type="tel" id="driverPhone" required placeholder="05XXXXXXXX" pattern="0[5-7][0-9]{8}">
+                </div>
+                
+                <div class="form-group">
+                    <label>🚗 نوع السيارة</label>
+                    <select id="carType" required>
+                        <option value="">اختر نوع السيارة</option>
+                        <option value="اقتصادية">🚗 اقتصادية (تويوتا، هيونداي...)</option>
+                        <option value="مريحة">🚙 مريحة (كيا، نيسان...)</option>
+                        <option value="عائلية">🚐 عائلية (فان، ميني فان...)</option>
+                        <option value="فاخرة">✨ فاخرة (مرسيدس، بي إم دبليو...)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔢 رقم لوحة السيارة</label>
+                    <input type="text" id="carPlate" required placeholder="مثال: 12345-16 أو أي تنسيق آخر">
+                </div>
+                
+                <div class="form-group">
+                    <label>🎫 رخصة السياقة (سارية المفعول)</label>
+                    <select id="licenseValid" required>
+                        <option value="">اختر الحالة</option>
+                        <option value="نعم">✅ نعم، سارية المفعول</option>
+                        <option value="لا">❌ لا، تحتاج تجديد</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📍 منطقة العمل المفضلة</label>
+                    <select id="workArea" required>
+                        <option value="">اختر المنطقة</option>
+                        <option value="الجزائر العاصمة">🏙️ الجزائر العاصمة</option>
+                        <option value="وهران">🌊 وهران</option>
+                        <option value="قسنطينة">🏔️ قسنطينة</option>
+                        <option value="عنابة">🏖️ عنابة</option>
+                        <option value="جميع المناطق">🗺️ جميع المناطق</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="register-btn" id="registerBtn">✅ إكمال التسجيل والبدء</button>
+            </form>
+            
+            <p class="form-note">
+                🔐 بياناتك محفوظة في فايرباس • يعمل مع فايرباس أو محلياً تلقائياً
+            </p>
         </div>
     </div>
 
-    <script>
-        // Initialize Icons
-        lucide.createIcons();
+    <!-- ========== VIEW 4: DRIVER DASHBOARD ========== -->
+    <div id="view-dashboard" class="view">
+        <div class="dashboard-header">
+            <div class="driver-info">
+                <div class="driver-avatar">👨‍✈️</div>
+                <div>
+                    <div class="driver-name" id="dashDriverName">اسم السائق</div>
+                    <div class="driver-status" id="dashDriverArea">منطقة العمل</div>
+                </div>
+            </div>
+            <button class="status-toggle active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
+        </div>
+        
+        <div style="padding: 12px; background: #e8f4fd; font-size: 0.85em; display: flex; justify-content: space-between; align-items: center;">
+            <span>📋 طلبات جديدة في منطقتك</span>
+            <span id="requestsCount" style="background: var(--primary); color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: bold;">0</span>
+        </div>
+        
+        <div class="requests-list" id="requestsList">
+            <div class="empty-state">
+                <div class="icon">🔍</div>
+                <p>لا توجد طلبات حالياً في منطقتك</p>
+                <p style="font-size: 0.85em; margin-top: 5px; color: #999;">تحقق مرة أخرى بعد قليل</p>
+                <button class="refresh-btn" onclick="loadRequests()">🔄 تحديث القائمة</button>
+            </div>
+        </div>
+        
+        <div style="padding: 12px; border-top: 1px solid #eee;">
+            <button class="refresh-btn" onclick="loadRequests()" style="background: var(--primary); color: #fff;">🔄 تحديث الطلبات</button>
+            <button class="refresh-btn" onclick="switchView('view-main')" style="margin-top: 8px; background: #ecf0f1;">🏠 العودة للرئيسية</button>
+        </div>
+    </div>
+</div>
 
-        const copyArea = document.getElementById('copyArea');
-        const floatingBtn = document.getElementById('floatingBtn');
-        const toast = document.getElementById('successToast');
-        const tokenElement = document.getElementById('tokenValue');
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
 
-        // Dynamic Digital Clock
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                           now.getMinutes().toString().padStart(2, '0') + ":" + 
-                           now.getSeconds().toString().padStart(2, '0');
-            const el = document.getElementById('timestamp');
-            if(el) el.innerText = timeStr;
+<script>
+    // ==================== GLOBAL VARIABLES ====================
+    let db, auth, analytics, app;
+    let useFirebase = true;
+    let currentUser = null;
+    let driverLocationInterval = null;
+    let requestTimeouts = {};
+    let activeRequestListener = null;
+    let map, pickupMarker, destMarker, routeControl;
+    let pickupPos = null, destPos = null;
+    let selectedRate = 15, baseFare = 80, distKm = 0, timeMin = 0;
+    let rideState = 'idle';
+    let mapClickEnabled = false;
+    let pickupDebounce, destDebounce;
+    let currentDriver = null;
+    let driverAvailable = true;
+    let currentRideId = null;
+    let firebaseInitTimeout;
+
+    // ==================== FIREBASE INITIALIZATION ====================
+    function initFirebase() {
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY",
+                authDomain: "birine-app.firebaseapp.com",
+                projectId: "birine-app",
+                storageBucket: "birine-app.firebasestorage.app",
+                messagingSenderId: "359460161481",
+                appId: "1:359460161481:web:5739dcc79ed79275928a18",
+                measurementId: "G-GX972M18B4"
+            };
+
+            app = firebase.initializeApp(firebaseConfig);
+            analytics = firebase.analytics(app);
+            db = firebase.firestore(app);
+            auth = firebase.auth();
+            
+            // Enable offline persistence
+            db.enablePersistence().catch(err => {
+                console.log('⚠️ تعذر تفعيل التخزين المؤقت:', err.code);
+            });
+
+            // Auth state listener
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                console.log('✅ حالة المصادقة:', user ? 'مسجل' : 'غير مسجل');
+            });
+
+            updateFirebaseStatus('connected', '✅ متصل');
+            console.log('✅ فايرباس متصل بنجاح!');
+            
+            if (firebaseInitTimeout) clearTimeout(firebaseInitTimeout);
+            
+        } catch (error) {
+            console.error('❌ فشل تهيئة فايرباس:', error);
+            enableFallbackMode();
         }
-        setInterval(updateTime, 1000);
-        updateTime();
+    }
 
-        // High Compatibility Copy Function
-        function handleCopy(e) {
-            const token = tokenElement.innerText;
-            const textArea = document.createElement("textarea");
-            textArea.value = token;
-            
-            // Hidden textarea for execution
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "0";
-            document.body.appendChild(textArea);
-            
-            textArea.focus();
-            textArea.select();
-            
+    // Fallback timeout - switch to localStorage if Firebase doesn't connect in 8 seconds
+    firebaseInitTimeout = setTimeout(() => {
+        console.warn('⏰ مهلة اتصال فايرباس انتهت، التحويل للوضع المحلي');
+        enableFallbackMode();
+    }, 8000);
+
+    // Enable localStorage fallback mode
+    function enableFallbackMode() {
+        useFirebase = false;
+        updateFirebaseStatus('local', '📱 وضع محلي');
+        showToast('📱 يعمل في الوضع المحلي (بدون فايرباس)', 'warning');
+        loadLocalDriver();
+    }
+
+    // Update Firebase status indicator
+    function updateFirebaseStatus(status, text) {
+        const el = document.getElementById('firebaseStatus');
+        el.className = `firebase-status ${status}`;
+        el.textContent = text;
+    }
+
+    // Toggle debug info
+    window.toggleDebug = function() {
+        alert(`🔧 حالة النظام:\n• فايرباس: ${useFirebase ? '✅ متصل' : '❌ غير متصل'}\n• الوضع: ${useFirebase ? 'أونلاين' : 'محلي'}\n• السائق: ${currentDriver ? currentDriver.name : 'غير مسجل'}`);
+    };
+
+    // ==================== FIREBASE/LOCAL STORAGE ABSTRACTION ====================
+    
+    // Save driver (Firebase or Local)
+    async function saveDriver(driverData) {
+        if (useFirebase && db) {
             try {
-                // Using document.execCommand('copy') as per instructions for iFrame compatibility
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showSuccessFeedback(e);
+                const userCredential = await auth.signInAnonymously();
+                const driverRef = await db.collection('drivers').add({
+                    ...driverData,
+                    userId: userCredential.user.uid,
+                    location: driverData.location || { lat: 36.753, lng: 3.058 },
+                    available: true,
+                    rating: 4.9,
+                    trips: 0,
+                    registered: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                startLocationUpdates(driverRef.id);
+                return { success: true, id: driverRef.id };
+            } catch (e) {
+                console.error('❌ Firebase save error:', e);
+                enableFallbackMode();
+                return saveToLocal(driverData);
+            }
+        } else {
+            return saveToLocal(driverData);
+        }
+    }
+
+    // Save to localStorage
+    function saveToLocal(driverData) {
+        const id = 'local_' + Date.now();
+        const drivers = JSON.parse(localStorage.getItem('yasserDrivers') || '[]');
+        const driver = { id, ...driverData, location: driverData.location || { lat: 36.753, lng: 3.058 }, available: true, registered: new Date().toISOString() };
+        drivers.push(driver);
+        localStorage.setItem('yasserDrivers', JSON.stringify(drivers));
+        startLocalLocationUpdates(id);
+        return { success: true, id };
+    }
+
+    // Load local driver session
+    function loadLocalDriver() {
+        const saved = localStorage.getItem('yasserDriverSession');
+        if (saved) {
+            currentDriver = JSON.parse(saved);
+            if (currentDriver.workArea) {
+                document.getElementById('dashDriverName').textContent = currentDriver.name;
+                document.getElementById('dashDriverArea').textContent = `📍 ${currentDriver.workArea}`;
+            }
+        }
+    }
+
+    // Create ride request (Firebase or Local)
+    async function createRideRequest(rideData) {
+        if (useFirebase && db) {
+            try {
+                const ref = await db.collection('rideRequests').add({
+                    ...rideData,
+                    status: 'pending',
+                    assignedDrivers: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+                });
+                return { success: true, id: ref.id };
+            } catch (e) {
+                console.error('❌ Firebase request error:', e);
+                enableFallbackMode();
+                return createLocalRequest(rideData);
+            }
+        } else {
+            return createLocalRequest(rideData);
+        }
+    }
+
+    // Create local request
+    function createLocalRequest(rideData) {
+        const id = 'req_' + Date.now();
+        const requests = JSON.parse(localStorage.getItem('yasserRequests') || '[]');
+        requests.unshift({ id, ...rideData, status: 'pending', createdAt: new Date().toISOString() });
+        localStorage.setItem('yasserRequests', JSON.stringify(requests));
+        return { success: true, id };
+    }
+
+    // Find nearest drivers
+    async function findNearestDrivers(pickupLat, pickupLng, limit = 3) {
+        if (useFirebase && db) {
+            try {
+                const snapshot = await db.collection('drivers')
+                    .where('available', '==', true)
+                    .orderBy('lastUpdate', 'desc')
+                    .limit(10)
+                    .get();
+                
+                const drivers = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.location) {
+                        const dist = calculateDistance(pickupLat, pickupLng, data.location.lat, data.location.lng);
+                        if (dist <= 10) drivers.push({ id: doc.id, ...data, distance: dist.toFixed(2) });
+                    }
+                });
+                return drivers.sort((a,b) => a.distance - b.distance).slice(0, limit);
+            } catch (e) {
+                console.error('❌ Find drivers error:', e);
+                enableFallbackMode();
+                return findLocalDrivers(pickupLat, pickupLng, limit);
+            }
+        } else {
+            return findLocalDrivers(pickupLat, pickupLng, limit);
+        }
+    }
+
+    // Find local drivers
+    function findLocalDrivers(pickupLat, pickupLng, limit = 3) {
+        const drivers = JSON.parse(localStorage.getItem('yasserDrivers') || '[]');
+        const nearby = drivers.filter(d => {
+            if (!d.available || !d.location) return false;
+            const dist = calculateDistance(pickupLat, pickupLng, d.location.lat, d.location.lng);
+            return dist <= 10;
+        }).map(d => ({ ...d, distance: calculateDistance(pickupLat, pickupLng, d.location.lat, d.location.lng).toFixed(2) }));
+        return nearby.sort((a,b) => a.distance - b.distance).slice(0, limit);
+    }
+
+    // Calculate distance between two points (Haversine formula)
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                 Math.sin(dLng/2) * Math.sin(dLng/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    // Start location updates for driver
+    function startLocationUpdates(driverId) {
+        if (driverLocationInterval) clearInterval(driverLocationInterval);
+        driverLocationInterval = setInterval(async () => {
+            if (!driverAvailable || !useFirebase) return;
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    try {
+                        await db.collection('drivers').doc(driverId).update({
+                            location: { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy },
+                            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } catch(e) { console.warn('⚠️ Location update failed'); }
+                }, null, { enableHighAccuracy: true, timeout: 5000 });
+            }
+        }, 30000);
+    }
+
+    // Start local location updates
+    function startLocalLocationUpdates(driverId) {
+        if (driverLocationInterval) clearInterval(driverLocationInterval);
+        driverLocationInterval = setInterval(() => {
+            if (!driverAvailable || !currentDriver) return;
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const drivers = JSON.parse(localStorage.getItem('yasserDrivers') || '[]');
+                    const idx = drivers.findIndex(d => d.id === driverId);
+                    if (idx !== -1) {
+                        drivers[idx].location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        drivers[idx].lastUpdate = new Date().toISOString();
+                        localStorage.setItem('yasserDrivers', JSON.stringify(drivers));
+                    }
+                }, null, { enableHighAccuracy: true });
+            }
+        }, 30000);
+    }
+
+    // ==================== UI FUNCTIONS ====================
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        if (viewId === 'view-request' && !map) setTimeout(initMap, 100);
+        if (viewId === 'view-dashboard' && currentDriver) loadRequests();
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // ==================== MAP & ROUTING ====================
+    function initMap() {
+        map = L.map('map', { zoomControl: false }).setView([36.753, 3.058], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        setupAutocomplete('pickupInput', 'pickupResults', (lat, lng, name) => {
+            pickupPos = [lat, lng];
+            document.getElementById('pickupCoords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            document.getElementById('pickupInput').value = name;
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker(pickupPos, { icon: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30,30] }) }).addTo(map);
+            map.setView(pickupPos, 16);
+            if (destPos) drawRoute();
+        });
+
+        setupAutocomplete('destInput', 'destResults', (lat, lng, name) => {
+            destPos = [lat, lng];
+            document.getElementById('destCoords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            document.getElementById('destInput').value = name;
+            if (destMarker) map.removeLayer(destMarker);
+            destMarker = L.marker(destPos, { icon: L.divIcon({ className: '', html: '🏁', iconSize: [24,24] }) }).addTo(map);
+            map.setView(destPos, 16);
+            if (pickupPos) drawRoute();
+        });
+
+        if ('geolocation' in navigator) useGPS();
+        else fallbackLocation();
+
+        map.on('click', e => {
+            if (!mapClickEnabled || rideState !== 'idle') return;
+            selectDestinationFromMap(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    function useGPS() {
+        const btn = document.getElementById('gpsBtn');
+        btn.disabled = true; btn.textContent = '🔄 جاري...';
+        navigator.geolocation.getCurrentPosition(pos => {
+            pickupPos = [pos.coords.latitude, pos.coords.longitude];
+            document.getElementById('pickupCoords').textContent = `${pickupPos[0].toFixed(4)}, ${pickupPos[1].toFixed(4)}`;
+            document.getElementById('pickupInput').value = 'موقعي الحالي';
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker(pickupPos, { icon: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30,30] }) }).addTo(map);
+            map.setView(pickupPos, 16);
+            btn.textContent = '🛰️ GPS'; btn.disabled = false;
+            if (destPos) drawRoute();
+        }, () => { fallbackLocation(); btn.textContent = '❌ خطأ'; setTimeout(() => { btn.textContent = '🛰️ GPS'; btn.disabled = false; }, 2000); }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    function fallbackLocation() {
+        pickupPos = [36.753, 3.058];
+        document.getElementById('pickupCoords').textContent = 'موقع افتراضي: الجزائر العاصمة';
+        document.getElementById('pickupInput').value = 'الجزائر العاصمة';
+        pickupMarker = L.marker(pickupPos).addTo(map);
+        if (destPos) drawRoute();
+    }
+
+    function enableMapClick() {
+        mapClickEnabled = true;
+        const btn = document.getElementById('mapBtn');
+        btn.textContent = '✅ انقر على الخريطة'; btn.style.background = '#27ae60';
+        setTimeout(() => { mapClickEnabled = false; btn.textContent = '🗺️ خريطة'; btn.style.background = ''; }, 10000);
+        showToast('📍 انقر على أي مكان في الخريطة لتحديد الوجهة (لديك 10 ثواني)', 'warning');
+    }
+
+    function selectDestinationFromMap(lat, lng) {
+        destPos = [lat, lng];
+        document.getElementById('destCoords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        document.getElementById('destInput').value = 'محدد عبر الخريطة';
+        if (destMarker) map.removeLayer(destMarker);
+        destMarker = L.marker(destPos, { icon: L.divIcon({ className: '', html: '🏁', iconSize: [24,24] }) }).addTo(map);
+        map.setView(destPos, 16);
+        mapClickEnabled = false;
+        document.getElementById('mapBtn').textContent = '🗺️ خريطة';
+        document.getElementById('mapBtn').style.background = '';
+        if (pickupPos) drawRoute();
+    }
+
+    function setupAutocomplete(inputId, resultsId, callback) {
+        const input = document.getElementById(inputId);
+        const results = document.getElementById(resultsId);
+        input.addEventListener('input', function() {
+            const query = this.value.trim();
+            clearTimeout(inputId === 'pickupInput' ? pickupDebounce : destDebounce);
+            if (query.length < 3) { results.classList.remove('show'); return; }
+            const debounce = inputId === 'pickupInput' ? (pickupDebounce = setTimeout(searchLocation, 400)) : (destDebounce = setTimeout(searchLocation, 400));
+            async function searchLocation() {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=dz&limit=5`, { headers: { 'Accept-Language': 'ar' } });
+                    const data = await response.json();
+                    if (data.length > 0) {
+                        results.innerHTML = data.map(item => `<div class="autocomplete-item" data-lat="${item.lat}" data-lng="${item.lon}" data-name="${item.display_name}">${item.display_name}</div>`).join('');
+                        results.classList.add('show');
+                        results.querySelectorAll('.autocomplete-item').forEach(item => {
+                            item.onclick = function() {
+                                const lat = parseFloat(this.dataset.lat), lng = parseFloat(this.dataset.lng), name = this.dataset.name;
+                                results.classList.remove('show'); callback(lat, lng, name);
+                            };
+                        });
+                    } else { results.innerHTML = '<div class="autocomplete-item">🔍 لم يتم العثور على نتائج</div>'; results.classList.add('show'); }
+                } catch (err) { console.error('Geocoding error:', err); results.innerHTML = '<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; results.classList.add('show'); }
+            }
+        });
+        document.addEventListener('click', e => { if (e.target !== input && !results.contains(e.target)) results.classList.remove('show'); });
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') results.classList.remove('show'); });
+    }
+
+    function drawRoute() {
+        if (!pickupPos || !destPos) return;
+        if (routeControl) map.removeControl(routeControl);
+        routeControl = L.Routing.control({
+            waypoints: [L.latLng(pickupPos), L.latLng(destPos)], routeWhileDragging: false, addWaypoints: false, show: false, createMarker: () => null,
+            lineOptions: { styles: [{ color: '#00b894', weight: 5, opacity: 0.85 }] }
+        }).addTo(map);
+        routeControl.on('routesfound', e => {
+            const route = e.routes[0];
+            distKm = (route.summary.totalDistance / 1000).toFixed(1); timeMin = Math.round(route.summary.totalTime / 60);
+            document.getElementById('routeInfo').style.opacity = '1'; document.getElementById('routeInfo').style.pointerEvents = 'auto';
+            document.getElementById('distVal').textContent = `${distKm} كم`; document.getElementById('timeVal').textContent = `~${timeMin} دقيقة`;
+            document.getElementById('statusVal').textContent = 'جاهز'; updatePrice(); document.getElementById('bookBtn').disabled = false;
+        });
+        routeControl.on('routingerror', () => { document.getElementById('statusVal').textContent = 'خطأ'; showToast('⚠️ تعذر رسم الطريق', 'error'); });
+    }
+
+    function updatePrice() { const total = baseFare + Math.round(distKm * selectedRate); document.getElementById('priceBox').innerHTML = `💰 السعر التقريبي: <span style="font-size:1.2em">${total}</span> د.ج`; }
+    function selectCar(el, name, rate) { document.querySelectorAll('.car-opt').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); selectedRate = rate; if (distKm > 0) updatePrice(); }
+
+    // ==================== BOOK RIDE WITH 30-SEC TIMEOUT ====================
+    async function bookRide() {
+        if (!pickupPos || !destPos) { showToast('⚠️ يرجى تحديد موقع الانطلاق والوجهة أولاً', 'error'); return; }
+        rideState = 'searching';
+        const btn = document.getElementById('bookBtn'), bar = document.getElementById('statusBar');
+        btn.disabled = true; bar.classList.add('show'); bar.innerHTML = '🔍 جاري البحث عن أقرب سائق... <span class="spinner"></span>';
+
+        const rideData = {
+            pickup: { lat: pickupPos[0], lng: pickupPos[1], name: document.getElementById('pickupInput').value },
+            destination: { lat: destPos[0], lng: destPos[1], name: document.getElementById('destInput').value },
+            distance: parseFloat(distKm), time: timeMin,
+            carType: document.querySelector('.car-opt.selected .name').textContent,
+            price: baseFare + Math.round(distKm * selectedRate),
+            workArea: document.getElementById('workArea')?.value || 'جميع المناطق'
+        };
+
+        const result = await createRideRequest(rideData);
+        if (!result.success) { showToast('❌ فشل في إنشاء الطلب', 'error'); rideState = 'idle'; btn.disabled = false; bar.classList.remove('show'); return; }
+        currentRideId = result.id;
+
+        document.getElementById('driverCard').classList.add('show');
+        document.getElementById('dName').textContent = 'جاري البحث...';
+        document.getElementById('dMeta').textContent = 'نبحث عن أقرب سائق متاح';
+        document.getElementById('dEta').textContent = '⏳ يرجى الانتظار، سيتم إشعارك فور قبول السائق';
+        document.getElementById('statusVal').textContent = 'قيد المطابقة';
+
+        // Find nearest drivers and send request with 30-sec timeout
+        const nearestDrivers = await findNearestDrivers(pickupPos[0], pickupPos[1], 3);
+        if (nearestDrivers.length === 0) {
+            bar.innerHTML = '⚠️ لا يوجد سائقين متاحين قريبين';
+            setTimeout(() => { rideState = 'idle'; btn.disabled = false; bar.classList.remove('show'); }, 3000);
+            return;
+        }
+
+        // Send to first driver with 30-second timeout chain
+        await sendRequestWithTimeout(result.id, nearestDrivers, 0);
+
+        // Setup real-time listener for status updates
+        const unsubscribe = useFirebase && db ? 
+            db.collection('rideRequests').doc(result.id).onSnapshot(docSnap => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.status === 'accepted') {
+                        rideState = 'matched';
+                        bar.innerHTML = '✅ تم قبول طلبك! السائق في الطريق';
+                        if (data.acceptedBy) {
+                            db.collection('drivers').doc(data.acceptedBy).get().then(driverSnap => {
+                                if (driverSnap.exists()) {
+                                    const driver = driverSnap.data();
+                                    document.getElementById('dName').textContent = driver.name;
+                                    document.getElementById('dMeta').textContent = `${driver.carType} • ${driver.carPlate}`;
+                                    const eta = Math.max(2, Math.round(data.distance / 3));
+                                    document.getElementById('dEta').textContent = `🚗 ${driver.name} في الطريق • سيصل خلال ~${eta} دقائق`;
+                                    showToast(`✅ قبل السائق ${driver.name} طلبك!`, 'success');
+                                }
+                            });
+                        }
+                        unsubscribe();
+                    } else if (data.status === 'expired' || data.status === 'cancelled') {
+                        rideState = 'idle';
+                        bar.innerHTML = '⚠️ لم يتم العثور على سائق، حاول مرة أخرى';
+                        document.getElementById('driverCard').classList.remove('show');
+                        btn.disabled = false;
+                        showToast('⚠️ لم يتم العثور على سائق، حاول مرة أخرى', 'warning');
+                        unsubscribe();
+                    }
                 }
-            } catch (err) {
-                console.error('Copy execution failed:', err);
+            }) : null;
+    }
+
+    // Send request to drivers with 30-second timeout chain
+    async function sendRequestWithTimeout(requestId, drivers, index) {
+        if (index >= drivers.length) {
+            // No more drivers, expire request
+            if (useFirebase && db) {
+                await db.collection('rideRequests').doc(requestId).update({ status: 'expired' });
+            }
+            showToast('⚠️ لم يستجب أي سائق، حاول مرة أخرى', 'warning');
+            return;
+        }
+
+        const driver = drivers[index];
+        
+        // Update request with current driver assignment
+        if (useFirebase && db) {
+            await db.collection('rideRequests').doc(requestId).update({
+                assignedDrivers: firebase.firestore.FieldValue.arrayUnion(driver.id),
+                currentDriverIndex: index
+            });
+        }
+
+        // Set 30-second timeout
+        const timeoutId = setTimeout(async () => {
+            // Check if request is still pending
+            let isPending = true;
+            if (useFirebase && db) {
+                const reqSnap = await db.collection('rideRequests').doc(requestId).get();
+                if (reqSnap.exists()) {
+                    isPending = reqSnap.data().status === 'pending';
+                }
             }
             
-            document.body.removeChild(textArea);
+            if (isPending) {
+                showToast(`⏰ لم يرد ${driver.name}، جاري البحث عن سائق آخر...`, 'warning');
+                await sendRequestWithTimeout(requestId, drivers, index + 1);
+            }
+        }, 30000); // 30 seconds
+
+        requestTimeouts[requestId] = timeoutId;
+        showToast(`🔔 تم إشعار ${driver.name} (${driver.distance} كم)...`, 'success');
+    }
+
+    function cancelRide() {
+        if (confirm('هل تريد إلغاء هذه الرحلة؟')) {
+            if (currentRideId && useFirebase && db) {
+                db.collection('rideRequests').doc(currentRideId).update({ 
+                    status: 'cancelled',
+                    cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+            rideState = 'idle';
+            document.getElementById('driverCard').classList.remove('show');
+            document.getElementById('bookBtn').disabled = false;
+            document.getElementById('statusBar').classList.remove('show');
+            document.getElementById('statusVal').textContent = 'ملغي';
+            setTimeout(() => document.getElementById('statusVal').textContent = 'جاهز', 1000);
+            showToast('❌ تم إلغاء الرحلة', 'warning');
+            currentRideId = null;
+        }
+    }
+
+    // ==================== DRIVER REGISTRATION ====================
+    async function registerDriver(e) {
+        e.preventDefault();
+        const name = document.getElementById('driverName').value;
+        const phone = document.getElementById('driverPhone').value;
+        const carType = document.getElementById('carType').value;
+        const carPlate = document.getElementById('carPlate').value;
+        const licenseValid = document.getElementById('licenseValid').value;
+        const workArea = document.getElementById('workArea').value;
+        
+        if (licenseValid === 'لا') { showToast('⚠️ يجب أن تكون رخصة السياقة سارية المفعول', 'error'); return; }
+
+        const registerBtn = document.getElementById('registerBtn');
+        registerBtn.disabled = true; registerBtn.textContent = '🔄 جاري التسجيل...';
+        
+        // Get current location
+        let location = { lat: 36.753, lng: 3.058 };
+        if ('geolocation' in navigator) {
+            try {
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }), reject, { enableHighAccuracy: true, timeout: 5000 });
+                });
+                location = pos;
+            } catch(err) { console.warn('⚠️ GPS failed, using default'); }
         }
 
-        // Visual Feedback
-        function showSuccessFeedback(e) {
-            // Ripple Animation
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple-effect');
-            const rect = copyArea.getBoundingClientRect();
-            
-            const x = e.clientX ? e.clientX - rect.left : rect.width / 2;
-            const y = e.clientY ? e.clientY - rect.top : rect.height / 2;
-            
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
-            copyArea.appendChild(ripple);
-            
-            setTimeout(() => ripple.remove(), 600);
-
-            // Toast Animation
-            toast.classList.remove('translate-y-40', 'opacity-0');
+        const result = await saveDriver({ name, phone, carType, carPlate, licenseValid, workArea, location });
+        
+        if (result.success) {
+            showToast('✅ تم التسجيل بنجاح! 🎉', 'success');
+            currentDriver = { id: result.id, name, workArea, available: true };
+            localStorage.setItem('yasserDriverSession', JSON.stringify(currentDriver));
             setTimeout(() => {
-                toast.classList.add('translate-y-40', 'opacity-0');
-            }, 3000);
+                document.getElementById('dashDriverName').textContent = name;
+                document.getElementById('dashDriverArea').textContent = `📍 ${workArea}`;
+                switchView('view-dashboard');
+                loadRequests();
+            }, 1500);
+        } else {
+            showToast('❌ فشل التسجيل: ' + (result.error || 'خطأ غير معروف'), 'error');
+            registerBtn.disabled = false; registerBtn.textContent = '✅ إكمال التسجيل والبدء';
         }
+    }
 
-        // Event Listeners
-        copyArea.addEventListener('click', handleCopy);
-        floatingBtn.addEventListener('click', handleCopy);
-    </script>
+    // ==================== DRIVER DASHBOARD ====================
+    function toggleDriverStatus() {
+        const toggle = document.getElementById('statusToggle');
+        driverAvailable = !driverAvailable;
+        if (currentDriver?.id && useFirebase && db) {
+            db.collection('drivers').doc(currentDriver.id).update({ 
+                available: driverAvailable, 
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+        }
+        if (driverAvailable) { 
+            toggle.textContent = '🟢 متاح'; 
+            toggle.classList.add('active'); 
+            showToast('✅ أنت متاح الآن لاستقبال الطلبات', 'success'); 
+            loadRequests(); 
+        } else { 
+            toggle.textContent = '🔴 غير متاح'; 
+            toggle.classList.remove('active'); 
+            showToast('🔕 تم إيقاف استقبال الطلبات مؤقتاً', 'warning'); 
+        }
+    }
+
+    function loadRequests() {
+        const list = document.getElementById('requestsList'), countEl = document.getElementById('requestsCount');
+        if (!currentDriver || !driverAvailable) { 
+            list.innerHTML = '<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل الاستقبال</button></div>'; 
+            return; 
+        }
+        
+        list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري تحميل الطلبات...</div>';
+        
+        if (useFirebase && db) {
+            if (activeRequestListener) activeRequestListener();
+            activeRequestListener = db.collection('rideRequests')
+                .where('status', '==', 'pending')
+                .where('workArea', '==', currentDriver.workArea)
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .onSnapshot(snapshot => {
+                    const requests = []; 
+                    snapshot.forEach(doc => { 
+                        const d = doc.data(); 
+                        if (!d.assignedDrivers?.includes(currentDriver.id)) {
+                            requests.push({ id: doc.id, ...d });
+                        }
+                    });
+                    renderRequests(requests, list, countEl);
+                }, err => { 
+                    console.error('Listener error:', err); 
+                    enableFallbackMode(); 
+                    loadRequests(); 
+                });
+        } else {
+            const requests = JSON.parse(localStorage.getItem('yasserRequests') || '[]')
+                .filter(r => r.status === 'pending' && r.workArea === currentDriver.workArea && new Date() - new Date(r.createdAt) < 30*60*1000);
+            renderRequests(requests, list, countEl);
+        }
+    }
+
+    function renderRequests(requests, list, countEl) {
+        countEl.textContent = requests.length;
+        if (requests.length === 0) { 
+            list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة حالياً</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>'; 
+            return; 
+        }
+        list.innerHTML = requests.map(req => {
+            const isUrgent = req.time <= 15;
+            const createdAt = req.createdAt?.toDate?.() || new Date(req.createdAt);
+            const minutesAgo = Math.floor((Date.now() - createdAt)/60000);
+            return `<div class="request-card ${isUrgent ? 'urgent' : ''}">
+                <div class="req-header">
+                    <span class="req-time">🕐 منذ ${minutesAgo} دقيقة</span>
+                    ${isUrgent ? '<span class="req-urgent">⚡ عاجل</span>' : ''}
+                </div>
+                <div class="req-route">
+                    <div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${req.pickup?.name || 'موقع'}</div></div>
+                    <div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${req.destination?.name || 'موقع'}</div></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.9em;color:#666">
+                    <span>🚗 ${req.carType}</span>
+                    <span>📏 ${req.distance} كم • ⏱️ ${req.time} د</span>
+                </div>
+                <div class="req-price">💰 ${req.price} د.ج</div>
+                <div class="req-actions">
+                    <button class="req-btn accept-btn" onclick="handleAccept('${req.id}')">✅ قبول (30ث)</button>
+                    <button class="req-btn decline-btn" onclick="handleDecline('${req.id}')">❌ تخطي</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.handleAccept = async function(requestId) {
+        if (!currentDriver?.id) return;
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = '🔄 جاري...';
+        
+        if (useFirebase && db) {
+            // Clear timeout if exists
+            if (requestTimeouts[requestId]) {
+                clearTimeout(requestTimeouts[requestId]);
+                delete requestTimeouts[requestId];
+            }
+            
+            // Update request status
+            await db.collection('rideRequests').doc(requestId).update({
+                status: 'accepted',
+                acceptedBy: currentDriver.id,
+                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // Update driver availability
+            await db.collection('drivers').doc(currentDriver.id).update({ available: false });
+            
+            showToast('✅ قبلت الرحلة! جاري التواصل مع الراكب...', 'success');
+            setTimeout(() => {
+                alert(`🚗 رحلة مقبولة!\n📍 انتقل إلى موقع الراكب للبدء`);
+            }, 500);
+        } else {
+            // Local fallback
+            const requests = JSON.parse(localStorage.getItem('yasserRequests') || '[]');
+            const idx = requests.findIndex(r => r.id === requestId);
+            if (idx !== -1) {
+                requests[idx].status = 'accepted';
+                requests[idx].acceptedBy = currentDriver.id;
+                localStorage.setItem('yasserRequests', JSON.stringify(requests));
+                showToast('✅ قبلت الرحلة!', 'success');
+            }
+        }
+        loadRequests();
+    };
+
+    window.handleDecline = async function(requestId) {
+        showToast('⏭️ تم تخطي هذا الطلب', 'warning');
+        // In Firebase mode, the timeout will automatically move to next driver
+        // In local mode, we just remove it from view
+        loadRequests();
+    };
+
+    // ==================== INITIALIZATION ====================
+    window.onload = function() {
+        // Try to init Firebase
+        if (typeof firebase !== 'undefined') { 
+            initFirebase(); 
+        } else { 
+            console.warn('⚠️ Firebase SDK not loaded'); 
+            enableFallbackMode(); 
+        }
+        
+        // Check for saved driver
+        loadLocalDriver();
+    };
+</script>
 </body>
 </html>
