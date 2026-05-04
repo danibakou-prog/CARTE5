@@ -661,6 +661,15 @@
         const startTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted') 
             ? `<button class="start-trip-btn" onclick="startTripNavigation('${rideData.destination?.lat}', '${rideData.destination?.lng}', '${rideData.destination?.name || 'الوجهة'}')">🚀 بدء الرحلة</button>` : '';
         
+        // ✅ إظهار أزرار الرسائل السريعة للسائق فقط (وليس للراكب)
+        const quickMsgButtons = myRole === 'driver' ? `
+            <div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:8px;padding:0 5px">
+                <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا قريب')">🚗 أنا قريب</button>
+                <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','طريق مزدحمة')">🚦 طريق مزدحمة</button>
+                <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا في المكان المحدد')">📍 وصلت</button>
+                <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أين أنت؟')">❓ أين أنت؟</button>
+            </div>` : '';
+        
         const chatContainer = document.createElement('div');
         chatContainer.id = 'chatOverlay'; chatContainer.className = 'chat-overlay';
         chatContainer.innerHTML = `
@@ -675,13 +684,7 @@
                 </div>
                 <div id="chatMessages" class="chat-messages"></div>
                 <div class="chat-input-area">
-                    <!-- أزرار الرسائل السريعة -->
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:8px;padding:0 5px">
-                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا قريب')">🚗 أنا قريب</button>
-                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','طريق مزدحمة')">🚦 طريق مزدحمة</button>
-                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا في المكان المحدد')">📍 وصلت</button>
-                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أين أنت؟')">❓ أين أنت؟</button>
-                    </div>
+                    ${quickMsgButtons}
                     <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}')">
                     <button class="chat-send-btn" onclick="sendChatMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}')">➤</button>
                 </div>
@@ -810,10 +813,29 @@
                 rideState='matched'; dispatchTimeoutId && clearTimeout(dispatchTimeoutId);
                 document.getElementById('statusBar').innerHTML='✅ تم قبول طلبك! السائق في الطريق';
                 db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{
-                    if(ds.exists){const dr=ds.data(); document.getElementById('dName').textContent=dr.email?.split('@')[0]||'سائق'; document.getElementById('dMeta').textContent=dr.carType; const eta=Math.max(2,Math.round(data.distance/3)); document.getElementById('dEta').textContent=`🚗 في الطريق • ~${eta} دقائق`; createChat(currentRideId, currentUser.uid, data.acceptedBy).then(chatId=>showChatButton(currentRideId,chatId,'passenger',document.getElementById('dName').textContent,data)); showToast(`✅ قبل السائق! اضغط 💬 للمراسلة`,'success');}
+                    if(ds.exists){
+                        const dr=ds.data(); 
+                        document.getElementById('dName').textContent=dr.email?.split('@')[0]||'سائق'; 
+                        document.getElementById('dMeta').textContent=dr.carType; 
+                        const eta=Math.max(2,Math.round(data.distance/3)); 
+                        document.getElementById('dEta').textContent=`🚗 في الطريق • ~${eta} دقائق`; 
+                        
+                        createChat(currentRideId, currentUser.uid, data.acceptedBy).then(chatId=>{
+                            showChatButton(currentRideId,chatId,'passenger',document.getElementById('dName').textContent,data);
+                            // ✅ فتح المحادثة تلقائياً للراكب عند قبول السائق
+                            showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', document.getElementById('dName').textContent, data);
+                        });
+                        showToast(`✅ قبل السائق! تم فتح المحادثة 💬`,'success');
+                    }
                 });
                 unsub();
-            } else if(data.status==='expired'||data.status==='cancelled'){ rideState='idle'; document.getElementById('driverCard').classList.remove('show'); document.getElementById('bookBtn').disabled=false; document.getElementById('statusBar').classList.remove('show'); unsub(); }
+            } else if(data.status==='expired'||data.status==='cancelled'){ 
+                rideState='idle'; 
+                document.getElementById('driverCard').classList.remove('show'); 
+                document.getElementById('bookBtn').disabled=false; 
+                document.getElementById('statusBar').classList.remove('show'); 
+                unsub(); 
+            }
         });
     }
 
