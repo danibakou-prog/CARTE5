@@ -72,7 +72,10 @@
         .loc-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
         .loc-btn.gps-btn { background: #3498db; }
         .loc-btn.gps-btn:hover { background: #2980b9; }
-        .loc-coords { font-size: 0.7em; color: #888; margin-top: 2px; }
+        .loc-coords { font-size: 0.7em; color: #888; margin-top: 2px; min-height: 24px; }
+        .coords-badge { background:#e8f5e9;padding:4px 10px;border-radius:6px;font-family:monospace;font-size:0.8em;font-weight:600;color:#2e7d32;display:inline-flex;align-items:center;gap:6px; }
+        .coords-copy-btn { margin-right:8px;padding:2px 8px;background:#3498db;color:#fff;border:none;border-radius:4px;font-size:0.75em;cursor:pointer;transition:0.2s; }
+        .coords-copy-btn:hover { background:#2980b9; }
         .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
         .info-card { background: #e8f5e9; padding: 8px; border-radius: 10px; text-align: center; }
         .info-card .val { font-weight: bold; font-size: 1em; color: #2e7d32; }
@@ -125,12 +128,7 @@
         .driver-status { font-size: 0.8em; opacity: 0.9; }
         .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; }
         .status-toggle.active { background: #2ecc71; }
-        
-        /* 🆕 خريطة السائق الجديدة */
-        #driverMap { height: 220px; width: 100%; background: #e8f4fd; border-radius: 12px; margin: 10px 12px; border: 2px solid #b3e5fc; display: none; }
-        #navStatus { padding: 10px 12px; background: #fff3cd; color: #856404; border-radius: 10px; margin: 0 12px 10px; font-size: 0.85em; display: none; text-align: center; border: 1px solid #ffeeba; }
-        
-        .requests-list { padding: 12px; max-height: 50vh; overflow-y: auto; }
+        .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
         .request-card { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-right: 4px solid var(--primary); transition: 0.2s; }
         .request-card:hover { transform: translateX(-3px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
         .request-card.urgent { border-right-color: var(--danger); background: #fff5f5; }
@@ -177,6 +175,10 @@
         
         #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: var(--card); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #loadingOverlay.hidden { display: none; }
+        
+        .nav-btn { width:100%;padding:10px;background:linear-gradient(135deg,#4CAF50,#45a049);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.9em;transition:0.2s; }
+        .nav-btn:hover { transform:translateY(-2px);box-shadow:0 4px 12px rgba(76,175,80,0.4); }
+        .nav-btn:disabled { background:#ccc;cursor:not-allowed; }
     </style>
 </head>
 <body>
@@ -239,7 +241,9 @@
                         </div>
                         <div class="autocomplete-results" id="pickupResults"></div>
                     </div>
-                    <div class="loc-coords" id="pickupCoords">جاري تحديد موقعك...</div>
+                    <div class="loc-coords" id="pickupCoords">
+                        <span class="coords-badge">📍 جاري التحديد...</span>
+                    </div>
                 </div>
                 
                 <div class="loc-row">
@@ -369,10 +373,6 @@
             <span id="requestsCount" style="background: var(--primary); color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: bold;">0</span>
         </div>
         
-        <!-- 🆕 خريطة توجيه السائق -->
-        <div id="driverMap"></div>
-        <div id="navStatus">🧭 جاري تحميل خريطة التوجيه...</div>
-        
         <div class="requests-list" id="requestsList">
             <div class="empty-state">
                 <div class="icon">🔍</div>
@@ -401,7 +401,6 @@
     let activeRequestListener = null;
     let activeChatListener = null;
     let map, pickupMarker, destMarker, routeControl;
-    let driverMap, driverRouteControl, driverNavMarker, currentRoutePoints = null;
     let pickupPos = null, destPos = null;
     let selectedRate = 15, baseFare = 80, distKm = 0, timeMin = 0;
     let rideState = 'idle';
@@ -443,7 +442,6 @@
                         document.getElementById('dashDriverArea').textContent = `🚗 ${doc.data().carType}`;
                         switchView('view-dashboard');
                         startLocationUpdates(user.uid);
-                        initDriverMap();
                     } else {
                         switchView('view-main');
                     }
@@ -536,7 +534,6 @@
                             location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
                             lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                        if(currentDriver) currentDriver.location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                     } catch(e) { console.warn('⚠️ Location update failed'); }
                 }, null, { enableHighAccuracy: true, timeout: 5000 });
             }
@@ -621,7 +618,7 @@
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
         if (viewId === 'view-request' && !map) setTimeout(initMap, 100);
-        if (viewId === 'view-dashboard' && currentDriver) { loadRequests(); initDriverMap(); }
+        if (viewId === 'view-dashboard' && currentDriver) loadRequests();
         const chatBtn = document.getElementById('floatingChatBtn'); if (chatBtn) chatBtn.remove();
     }
 
@@ -637,7 +634,11 @@
 
         setupAutocomplete('pickupInput', 'pickupResults', (lat, lng, name) => {
             pickupPos = [lat, lng];
-            document.getElementById('pickupCoords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            const coordsDisplay = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('pickupCoords').innerHTML = `
+                <span class="coords-badge">📍 ${coordsDisplay}</span>
+                <button class="coords-copy-btn" onclick="copyCoords('${coordsDisplay}')">📋 نسخ</button>
+            `;
             document.getElementById('pickupInput').value = name;
             if (pickupMarker) map.removeLayer(pickupMarker);
             pickupMarker = L.marker(pickupPos, { icon: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30,30] }) }).addTo(map);
@@ -661,7 +662,14 @@
         const btn = document.getElementById('gpsBtn'); btn.disabled = true; btn.textContent = '🔄 جاري...';
         navigator.geolocation.getCurrentPosition(pos => {
             pickupPos = [pos.coords.latitude, pos.coords.longitude];
-            document.getElementById('pickupCoords').textContent = `${pickupPos[0].toFixed(4)}, ${pickupPos[1].toFixed(4)}`;
+            
+            // ✅ عرض الإحداثيات بشكل واضح ومميز
+            const coordsDisplay = `${pickupPos[0].toFixed(6)}, ${pickupPos[1].toFixed(6)}`;
+            document.getElementById('pickupCoords').innerHTML = `
+                <span class="coords-badge">📍 ${coordsDisplay}</span>
+                <button class="coords-copy-btn" onclick="copyCoords('${coordsDisplay}')">📋 نسخ</button>
+            `;
+            
             document.getElementById('pickupInput').value = 'موقعي الحالي';
             if (pickupMarker) map.removeLayer(pickupMarker);
             pickupMarker = L.marker(pickupPos, { icon: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30,30] }) }).addTo(map);
@@ -669,9 +677,24 @@
         }, () => { fallbackLocation(); btn.textContent = '❌ خطأ'; setTimeout(() => { btn.textContent = '🛰️ GPS'; btn.disabled = false; }, 2000); }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
+    function copyCoords(coords) {
+        navigator.clipboard.writeText(coords).then(() => {
+            showToast('📋 تم نسخ الإحداثيات', 'success');
+        }).catch(() => {
+            showToast('⚠️ فشل نسخ الإحداثيات', 'warning');
+        });
+    }
+
     function fallbackLocation() {
-        pickupPos = [36.753, 3.058]; document.getElementById('pickupCoords').textContent = 'موقع افتراضي: الجزائر العاصمة';
-        document.getElementById('pickupInput').value = 'الجزائر العاصمة'; pickupMarker = L.marker(pickupPos).addTo(map); if (destPos) drawRoute();
+        pickupPos = [36.753, 3.058]; 
+        const coordsDisplay = `${pickupPos[0].toFixed(6)}, ${pickupPos[1].toFixed(6)}`;
+        document.getElementById('pickupCoords').innerHTML = `
+            <span class="coords-badge">📍 ${coordsDisplay}</span>
+            <button class="coords-copy-btn" onclick="copyCoords('${coordsDisplay}')">📋 نسخ</button>
+        `;
+        document.getElementById('pickupInput').value = 'الجزائر العاصمة'; 
+        pickupMarker = L.marker(pickupPos).addTo(map); 
+        if (destPos) drawRoute();
     }
 
     function enableMapClick() {
@@ -726,65 +749,6 @@
     function updatePrice() { document.getElementById('priceBox').innerHTML = `💰 السعر التقريبي: <span style="font-size:1.2em">${baseFare + Math.round(distKm * selectedRate)}</span> د.ج`; }
     function selectCar(el, name, rate) { document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); selectedRate = rate; if(distKm>0) updatePrice(); }
 
-    // 🆕 تهيئة خريطة السائق
-    function initDriverMap() {
-        if (driverMap || !currentDriver) return;
-        setTimeout(() => {
-            driverMap = L.map('driverMap').setView([currentDriver.location?.lat || 36.753, currentDriver.location?.lng || 3.058], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(driverMap);
-            driverMap.invalidateSize();
-        }, 200);
-    }
-
-    // 🆕 رسم مسار التوجيه للسائق
-    async function drawDriverRoute(requestData, isNavigation = false) {
-        if (!driverMap) return;
-        if (driverRouteControl) driverMap.removeControl(driverRouteControl);
-        if (driverNavMarker) driverMap.removeLayer(driverNavMarker);
-        document.getElementById('driverMap').style.display = 'block';
-        
-        const navStatus = document.getElementById('navStatus');
-        navStatus.style.display = 'block';
-        
-        const driverPos = await new Promise(res => 
-            navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), 
-            () => res([currentDriver.location?.lat || 36.753, currentDriver.location?.lng || 3.058]))
-        );
-
-        const waypoints = [
-            L.latLng(driverPos),
-            L.latLng(requestData.pickup.lat, requestData.pickup.lng),
-            L.latLng(requestData.destination.lat, requestData.destination.lng)
-        ];
-        currentRoutePoints = waypoints.map(w => [w.lat, w.lng]);
-
-        driverRouteControl = L.Routing.control({
-            waypoints: waypoints,
-            routeWhileDragging: false, addWaypoints: false, show: false, createMarker: () => null,
-            lineOptions: { styles: [{ color: isNavigation ? '#00b894' : '#f39c12', weight: 6, opacity: 0.9 }] }
-        }).addTo(driverMap);
-
-        // 🆕 سهم الملاحة المتحرك
-        driverNavMarker = L.marker(driverPos, {
-            icon: L.divIcon({
-                className: '',
-                html: `<div style="font-size: 22px; animation: spin 2s linear infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🧭</div>`,
-                iconSize: [30, 30], iconAnchor: [15, 15]
-            })
-        }).addTo(driverMap);
-
-        driverRouteControl.on('routesfound', () => {
-            driverMap.fitBounds(driverRouteControl.getPlan().getWaypoints(), { padding: [40, 40] });
-            if (isNavigation) {
-                navStatus.innerHTML = `🚗 <b>وضع التوجيه نشط:</b> اتبع الخط الأخضر نحو الراكب ثم الوجهة`;
-                navStatus.style.background = '#d4edda'; navStatus.style.color = '#155724'; navStatus.style.borderColor = '#c3e6cb';
-            } else {
-                navStatus.innerHTML = `📍 اضغط "قبول" لبدء التوجيه المباشر إلى هذا الطلب`;
-                navStatus.style.background = '#fff3cd'; navStatus.style.color = '#856404'; navStatus.style.borderColor = '#ffeeba';
-            }
-        });
-    }
-
     // ==================== BOOK RIDE (Passenger) ====================
     async function bookRide() {
         if (!pickupPos || !destPos) return showToast('⚠️ حدد موقع الانطلاق والوجهة', 'error');
@@ -832,20 +796,8 @@
                         document.getElementById('dName').textContent = dr.email?.split('@')[0]||'سائق'; document.getElementById('dMeta').textContent = dr.carType;
                         const eta = Math.max(2, Math.round(data.distance/3));
                         document.getElementById('dEta').textContent = `🚗 في الطريق • ~${eta} دقائق`;
-                        createChat(currentRideId, passengerId, data.acceptedBy);
-                        showToast(`✅ قبل السائق طلبك! ستفتح المحادثة تلقائياً`, 'success');
-                        
-                        // 🆕 فتح المحادثة تلقائياً عند وصول أول رسالة
-                        let chatAutoOpened = false;
-                        const chatListener = db.collection('chats').doc(`chat_${currentRideId}`).collection('messages')
-                            .orderBy('timestamp', 'asc').limit(1)
-                            .onSnapshot(msgSnap => {
-                                if (!chatAutoOpened && !msgSnap.empty) {
-                                    chatAutoOpened = true;
-                                    showChatInterface(currentRideId, passengerId, data.acceptedBy, 'passenger', document.getElementById('dName').textContent);
-                                    setTimeout(() => chatListener(), 3000);
-                                }
-                            });
+                        createChat(currentRideId, passengerId, data.acceptedBy).then(chatId => showChatButton(currentRideId, chatId, 'passenger', document.getElementById('dName').textContent));
+                        showToast(`✅ قبل السائق طلبك! اضغط 💬 للمراسلة`, 'success');
                     }
                 });
                 if(unsub) unsub();
@@ -861,7 +813,10 @@
                 if(docSnap.exists && docSnap.data().status === 'pending') {
                     await db.collection('rideRequests').doc(currentRideId).update({ status: 'expired' });
                     showToast('⏰ انتهت مدة الانتظار (دقيقتين). لم يقبل أي سائق.', 'warning');
-                    rideState = 'idle'; document.getElementById('driverCard').classList.remove('show'); document.getElementById('bookBtn').disabled = false; document.getElementById('statusBar').classList.remove('show');
+                    rideState = 'idle';
+                    document.getElementById('driverCard').classList.remove('show');
+                    document.getElementById('bookBtn').disabled = false;
+                    document.getElementById('statusBar').classList.remove('show');
                     if(unsub) unsub();
                 }
             } catch(e) { console.warn('Timeout update failed:', e); }
@@ -886,8 +841,7 @@
         if (currentDriver?.uid) { db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); }
         const t = document.getElementById('statusToggle');
         if(driverAvailable){ t.textContent='🟢 متاح'; t.classList.add('active'); showToast('✅ أنت متاح الآن','success'); loadRequests(); }
-        else { t.textContent='🔴 غير متاح'; t.classList.remove('active'); showToast('🔕 إيقاف الاستقبال','warning'); 
-               document.getElementById('driverMap').style.display = 'none'; document.getElementById('navStatus').style.display = 'none'; }
+        else { t.textContent='🔴 غير متاح'; t.classList.remove('active'); showToast('🔕 إيقاف الاستقبال','warning'); }
     }
 
     function loadRequests() {
@@ -907,16 +861,11 @@
                     }
                 });
                 reqs.sort((a,b) => (b.createdAt?.toDate?.().getTime() || 0) - (a.createdAt?.toDate?.().getTime() || 0));
-                
-                // 🆕 عرض مسار أول طلب تلقائياً على خريطة السائق
-                if(reqs.length > 0) drawDriverRoute(reqs[0], false);
-                else { document.getElementById('driverMap').style.display = 'none'; document.getElementById('navStatus').style.display = 'none'; }
-                
                 renderRequests(reqs.slice(0, 10), list, countEl);
             }, err => {
                 console.error('Firestore listener error:', err.code, err.message);
-                if(err.code === 'permission-denied') showToast('⚠️ صلاحيات غير كافية', 'error');
-                else if(err.code === 'unavailable' || err.code === 'network-request-failed') showToast('⚠️ تحقق من الإنترنت', 'error');
+                if(err.code === 'permission-denied') showToast('⚠️ صلاحيات غير كافية، تحقق من قواعد Firestore', 'error');
+                else if(err.code === 'unavailable' || err.code === 'network-request-failed') showToast('⚠️ فشل في الاتصال، تحقق من الإنترنت', 'error');
                 else showToast('⚠️ خطأ في تحميل الطلبات', 'error');
             });
     }
@@ -942,38 +891,70 @@
         }).join('');
     }
 
-    // ✅ قبول الطلب + تفعيل وضع التوجيه
+    // ✅ دالة قبول الرحلة مع فتح الملاحة تلقائياً
     window.handleAccept = async function(rideId) {
         if(!currentDriver?.uid) return showToast('⚠️ يرجى تسجيل الدخول أولاً', 'warning');
-        const btn = event.target; btn.disabled = true; btn.textContent = '🔄 جاري المعالجة...';
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = '🔄 جاري المعالجة...';
+        
         try {
             const snap = await db.collection('rideRequests').doc(rideId).get();
             if(!snap.exists) { showToast('⚠️ الطلب غير موجود أو منتهي', 'error'); return; }
             if(snap.data().status !== 'pending') { showToast('⚠️ تم معالجة هذا الطلب بالفعل', 'warning'); return; }
 
             const req = snap.data();
+            
+            // تحديث حالة الطلب في قاعدة البيانات
             await db.collection('rideRequests').doc(rideId).update({
-                status: 'accepted', acceptedBy: currentDriver.uid, acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+                status: 'accepted', 
+                acceptedBy: currentDriver.uid, 
+                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            
+            // تحديث حالة السائق
             await db.collection('drivers').doc(currentDriver.uid).update({
                 available: false, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
             });
+            
+            // إنشاء محادثة
             const chatId = await createChat(rideId, req.passengerId, currentDriver.uid);
             await sendMessage(chatId, currentDriver.uid, 'driver', `👋 أهلاً! أنا في الطريق إليك. الوصول خلال ~${Math.max(2, Math.round(req.distance/3))} دقيقة.`);
             
-            // 🆕 تفعيل وضع التوجيه المباشر
-            drawDriverRoute(req, true);
-            showToast('✅ قبلت الرحلة! اتبع الخريطة للتوجيه', 'success');
+            showToast('✅ قبلت الرحلة بنجاح! 🗺️ جاري فتح الملاحة...', 'success');
             showChatButton(rideId, chatId, 'driver', currentDriver.email?.split('@')[0]);
+            
+            // ✅ فتح خرائط جوجل للملاحة إلى موقع الراكب
+            setTimeout(() => {
+                const pickupLat = req.pickup?.lat;
+                const pickupLng = req.pickup?.lng;
+                if(pickupLat && pickupLng) {
+                    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${pickupLat},${pickupLng}&travelmode=driving`;
+                    const wazeUrl = `https://waze.com/ul?ll=${pickupLat},${pickupLng}&navigate=yes`;
+                    
+                    // محاولة فتح جوجل ماب أولاً
+                    window.open(googleMapsUrl, '_blank');
+                    
+                    // عرض رسالة توجيهية
+                    setTimeout(() => {
+                        if(confirm('🗺️ هل تريد تجربة تطبيق واز للملاحة بدلاً من خرائط جوجل؟\n(اضغط إلغاء للبقاء على خرائط جوجل)')) {
+                            window.open(wazeUrl, '_blank');
+                        }
+                    }, 1500);
+                }
+            }, 1000);
+            
         } catch(e) {
             console.error('Accept error:', e.code, e.message);
-            showToast(`⚠️ خطأ: ${e.message || 'غير معروف'}`, 'error');
+            if(e.code === 'permission-denied') showToast('⚠️ فشل في الاتصال: صلاحيات قاعدة البيانات غير مفعلة', 'error');
+            else if(e.code === 'unavailable' || e.code === 'network-request-failed') showToast('⚠️ فشل في الاتصال بالإنترنت', 'error');
+            else showToast(`⚠️ خطأ: ${e.message || 'غير معروف'}`, 'error');
         } finally {
             btn.disabled = false; btn.textContent = '✅ قبول';
             loadRequests();
         }
     };
 
+    // ✅ دالة رفض/تخطي الطلب
     window.handleDecline = async function(rideId) {
         try {
             if(currentDriver?.uid && rideId) {
@@ -982,7 +963,9 @@
                 });
             }
             showToast('⏭️ تم رفض/تخطي الطلب', 'warning');
-        } catch(e) { showToast('⚠️ خطأ أثناء التخطي', 'warning'); }
+        } catch(e) {
+            showToast('⚠️ خطأ أثناء التخطي، حاول مرة أخرى', 'warning');
+        }
         loadRequests();
     };
 
