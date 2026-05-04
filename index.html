@@ -121,7 +121,7 @@
         .register-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
         .form-note { font-size: 0.8em; color: #777; margin-top: 15px; text-align: center; }
         
-        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; }
+        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; animation: none; }
         .driver-info { display: flex; align-items: center; gap: 10px; }
         .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; }
         .driver-name { font-weight: 600; font-size: 0.95em; }
@@ -154,11 +154,11 @@
         
         .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; }
         .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 70vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease; }
-        .chat-header { padding: 15px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: space-between; border-radius: 20px 20px 0 0; }
+        .chat-header { padding: 15px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: space-between; border-radius: 20px 20px 0 0; flex-wrap: wrap; gap: 8px; }
         .chat-close { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.2em; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; min-height: 200px; max-height: 40vh; }
-        .chat-input-area { padding: 12px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
-        .chat-input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 0.95em; }
+        .chat-input-area { padding: 12px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .chat-input { flex: 1; min-width: 150px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 0.95em; }
         .chat-send-btn { background: var(--primary); color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2em; }
         .message { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.9em; line-height: 1.4; }
         .message.me { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; margin-right: auto; }
@@ -179,6 +179,68 @@
         .nav-btn { width:100%;padding:10px;background:linear-gradient(135deg,#4CAF50,#45a049);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.9em;transition:0.2s; }
         .nav-btn:hover { transform:translateY(-2px);box-shadow:0 4px 12px rgba(76,175,80,0.4); }
         .nav-btn:disabled { background:#ccc;cursor:not-allowed; }
+        
+        /* 🔔 أنيميشن التنبيه البصري */
+        @keyframes pulse-header {
+            0% { box-shadow: 0 0 0 0 rgba(52,152,219,0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(52,152,219,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
+        }
+        .dashboard-header.pulse {
+            animation: pulse-header 0.6s ease;
+        }
+        
+        /* 🚀 زر بدء الرحلة في المحادثة */
+        .start-trip-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            box-shadow: 0 3px 10px rgba(46, 204, 113, 0.4);
+        }
+        .start-trip-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.6);
+        }
+        .start-trip-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 📍 معلومات الطلب في بطاقة السائق */
+        .req-distance-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .req-destination-info {
+            background: #e8f4fd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            margin-top: 6px;
+            border-right: 3px solid var(--secondary);
+        }
+        .req-destination-info strong {
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
@@ -393,6 +455,12 @@
 <!-- Toast Notification -->
 <div class="toast" id="toast"></div>
 
+<!-- 🔔 صوت تنبيه الطلبات الجديد -->
+<audio id="requestSound" preload="auto">
+    <source src="https://bigsoundbank.com/UPLOAD/ogg/0001.ogg" type="audio/ogg">
+    <source src="https://bigsoundbank.com/UPLOAD/mp3/0001.mp3" type="audio/mpeg">
+</audio>
+
 <script>
     // ==================== GLOBAL VARIABLES ====================
     let db, auth, app;
@@ -411,6 +479,8 @@
     let currentRideId = null;
     let currentChatId = null;
     let rideTimeoutId = null;
+    let previousRequestsCount = 0;
+    let currentActiveRide = null; // ✅ لتخزين بيانات الرحلة النشطة
 
     // ==================== FIREBASE INITIALIZATION ====================
     function initFirebase() {
@@ -560,9 +630,14 @@
         });
     }
 
-    function showChatInterface(rideId, passengerId, driverId, myRole, driverName) {
+    function showChatInterface(rideId, passengerId, driverId, myRole, driverName, rideData = null) {
         const chatId = `chat_${rideId}`; currentChatId = chatId;
         const existing = document.getElementById('chatOverlay'); if (existing) existing.remove();
+        
+        // ✅ زر بدء الرحلة يظهر فقط للسائق وعندما تكون الرحلة مقبولة
+        const startTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted') 
+            ? `<button class="start-trip-btn" onclick="startTripNavigation('${rideData.destination?.lat}', '${rideData.destination?.lng}', '${rideData.destination?.name || 'الوجهة'}')">🚀 بدء الرحلة</button>` 
+            : '';
         
         const chatContainer = document.createElement('div');
         chatContainer.id = 'chatOverlay'; chatContainer.className = 'chat-overlay';
@@ -574,7 +649,10 @@
                         <span style="font-weight:600">${myRole==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>
                         ${driverName?`<span style="font-size:0.85em;opacity:0.9">• ${driverName}</span>`:''}
                     </div>
-                    <button class="chat-close" onclick="closeChat()">×</button>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        ${startTripBtn}
+                        <button class="chat-close" onclick="closeChat()">×</button>
+                    </div>
                 </div>
                 <div id="chatMessages" class="chat-messages"></div>
                 <div class="chat-input-area">
@@ -604,12 +682,43 @@
         const input = document.getElementById('chatInput'); const text = input.value.trim(); if(!text) return;
         await sendMessage(chatId, senderId, senderType, text); input.value = '';
     }
+    
+    // ✅ دالة بدء الرحلة وفتح الخرائط للوجهة
+    window.startTripNavigation = function(destLat, destLng, destName) {
+        if(!destLat || !destLng) {
+            showToast('⚠️ بيانات الوجهة غير متاحة', 'warning');
+            return;
+        }
+        
+        showToast('🗺️ جاري فتح الخرائط للوجهة...', 'success');
+        
+        const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}&travelmode=driving`;
+        const wazeUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
+        
+        // فتح جوجل ماب
+        window.open(googleMapsUrl, '_blank');
+        
+        // عرض خيار واز بعد ثانية
+        setTimeout(() => {
+            if(confirm(`🗺️ الوجهة: ${destName}\n\nهل تريد تجربة تطبيق واز للملاحة بدلاً من خرائط جوجل؟\n(اضغط إلغاء للبقاء على خرائط جوجل)`)) {
+                window.open(wazeUrl, '_blank');
+            }
+        }, 1500);
+        
+        // تحديث حالة الرحلة في قاعدة البيانات
+        if(currentActiveRide?.id) {
+            db.collection('rideRequests').doc(currentActiveRide.id).update({
+                tripStarted: true,
+                tripStartedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(e => console.warn('Trip start update failed:', e));
+        }
+    }
 
-    function showChatButton(rideId, chatId, myRole, name) {
+    function showChatButton(rideId, chatId, myRole, name, rideData = null) {
         const existing = document.getElementById('floatingChatBtn'); if(existing) existing.remove();
         const btn = document.createElement('button');
         btn.id = 'floatingChatBtn'; btn.innerHTML = '💬 محادثة';
-        btn.onclick = () => showChatInterface(rideId, null, currentDriver?.uid, myRole, name);
+        btn.onclick = () => showChatInterface(rideId, null, currentDriver?.uid, myRole, name, rideData);
         document.body.appendChild(btn);
     }
 
@@ -663,7 +772,6 @@
         navigator.geolocation.getCurrentPosition(pos => {
             pickupPos = [pos.coords.latitude, pos.coords.longitude];
             
-            // ✅ عرض الإحداثيات بشكل واضح ومميز
             const coordsDisplay = `${pickupPos[0].toFixed(6)}, ${pickupPos[1].toFixed(6)}`;
             document.getElementById('pickupCoords').innerHTML = `
                 <span class="coords-badge">📍 ${coordsDisplay}</span>
@@ -796,7 +904,7 @@
                         document.getElementById('dName').textContent = dr.email?.split('@')[0]||'سائق'; document.getElementById('dMeta').textContent = dr.carType;
                         const eta = Math.max(2, Math.round(data.distance/3));
                         document.getElementById('dEta').textContent = `🚗 في الطريق • ~${eta} دقائق`;
-                        createChat(currentRideId, passengerId, data.acceptedBy).then(chatId => showChatButton(currentRideId, chatId, 'passenger', document.getElementById('dName').textContent));
+                        createChat(currentRideId, passengerId, data.acceptedBy).then(chatId => showChatButton(currentRideId, chatId, 'passenger', document.getElementById('dName').textContent, data));
                         showToast(`✅ قبل السائق طلبك! اضغط 💬 للمراسلة`, 'success');
                     }
                 });
@@ -844,9 +952,31 @@
         else { t.textContent='🔴 غير متاح'; t.classList.remove('active'); showToast('🔕 إيقاف الاستقبال','warning'); }
     }
 
+    // 🔊 دالة تشغيل صوت التنبيه مع معالجة سياسات المتصفح
+    function playRequestSound() {
+        const audio = document.getElementById('requestSound');
+        if(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                console.log('🔇 Auto-play prevented, sound will play on next user interaction');
+                const playOnInteraction = () => {
+                    audio.currentTime = 0;
+                    audio.play().catch(() => {});
+                    document.removeEventListener('click', playOnInteraction);
+                    document.removeEventListener('touchstart', playOnInteraction);
+                };
+                document.addEventListener('click', playOnInteraction, { once: true });
+                document.addEventListener('touchstart', playOnInteraction, { once: true });
+            });
+        }
+    }
+
     function loadRequests() {
         const list = document.getElementById('requestsList'), countEl = document.getElementById('requestsCount');
-        if(!currentDriver||!driverAvailable){ list.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; return; }
+        if(!currentDriver||!driverAvailable){ 
+            list.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; 
+            return; 
+        }
         list.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
         
         if(activeRequestListener) activeRequestListener();
@@ -861,6 +991,20 @@
                     }
                 });
                 reqs.sort((a,b) => (b.createdAt?.toDate?.().getTime() || 0) - (a.createdAt?.toDate?.().getTime() || 0));
+                
+                // ✅ تشغيل الصوت عند ظهور طلبات جديدة
+                const newCount = reqs.length;
+                if(newCount > previousRequestsCount && newCount > 0) {
+                    playRequestSound();
+                    const header = document.querySelector('.dashboard-header');
+                    if(header) {
+                        header.classList.remove('pulse');
+                        void header.offsetWidth;
+                        header.classList.add('pulse');
+                    }
+                }
+                previousRequestsCount = newCount;
+                
                 renderRequests(reqs.slice(0, 10), list, countEl);
             }, err => {
                 console.error('Firestore listener error:', err.code, err.message);
@@ -873,17 +1017,43 @@
     function renderRequests(reqs, list, countEl) {
         countEl.textContent = reqs.length;
         if(reqs.length===0){ list.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>'; return; }
+        
         list.innerHTML = reqs.map(r => {
             const isUrg = r.time <= 15;
             const cr = r.createdAt?.toDate?.() || new Date(r.createdAt); const mins = Math.floor((Date.now()-cr)/60000);
+            
+            // ✅ حساب مسافة السائق عن الراكب
+            let driverToPassengerDist = '---';
+            if(currentDriver?.location && r.pickup?.lat) {
+                const dist = calculateDistance(
+                    currentDriver.location.lat, currentDriver.location.lng,
+                    r.pickup.lat, r.pickup.lng
+                );
+                driverToPassengerDist = dist.toFixed(1);
+            }
+            
             return `<div class="request-card ${isUrg?'urgent':''}">
                 <div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div>
+                
+                <!-- ✅ مسافة السائق عن الراكب -->
+                <div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${driverToPassengerDist} كم</div>
+                
                 <div class="req-route">
                     <div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div>
                     <div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div>
                 </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>📏 ${r.distance} كم • ⏱️ ${r.time} د</span></div>
-                <div class="req-price">💰 ${r.price} د.ج</div>
+                
+                <!-- ✅ معلومات الوجهة والمسافة -->
+                <div class="req-destination-info">
+                    <strong>🎯 الوجهة:</strong> ${r.destination?.name || 'غير محدد'}<br>
+                    <strong>📏 مسافة الرحلة:</strong> ${r.distance || '---'} كم • <strong>⏱️ الوقت:</strong> ${r.time || '---'} د
+                </div>
+                
+                <div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666">
+                    <span>🚗 ${r.carType}</span>
+                    <span>💰 ${r.price} د.ج</span>
+                </div>
+                
                 <div class="req-actions">
                     <button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button>
                     <button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button>
@@ -891,7 +1061,7 @@
         }).join('');
     }
 
-    // ✅ دالة قبول الرحلة مع فتح الملاحة تلقائياً
+    // ✅ دالة قبول الرحلة - تفتح المحادثة أولاً بدون خرائط
     window.handleAccept = async function(rideId) {
         if(!currentDriver?.uid) return showToast('⚠️ يرجى تسجيل الدخول أولاً', 'warning');
         const btn = event.target;
@@ -904,7 +1074,7 @@
 
             const req = snap.data();
             
-            // تحديث حالة الطلب في قاعدة البيانات
+            // تحديث حالة الطلب
             await db.collection('rideRequests').doc(rideId).update({
                 status: 'accepted', 
                 acceptedBy: currentDriver.uid, 
@@ -920,28 +1090,16 @@
             const chatId = await createChat(rideId, req.passengerId, currentDriver.uid);
             await sendMessage(chatId, currentDriver.uid, 'driver', `👋 أهلاً! أنا في الطريق إليك. الوصول خلال ~${Math.max(2, Math.round(req.distance/3))} دقيقة.`);
             
-            showToast('✅ قبلت الرحلة بنجاح! 🗺️ جاري فتح الملاحة...', 'success');
-            showChatButton(rideId, chatId, 'driver', currentDriver.email?.split('@')[0]);
+            // ✅ تخزين بيانات الرحلة النشطة
+            currentActiveRide = { id: rideId, ...req, status: 'accepted' };
             
-            // ✅ فتح خرائط جوجل للملاحة إلى موقع الراكب
-            setTimeout(() => {
-                const pickupLat = req.pickup?.lat;
-                const pickupLng = req.pickup?.lng;
-                if(pickupLat && pickupLng) {
-                    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${pickupLat},${pickupLng}&travelmode=driving`;
-                    const wazeUrl = `https://waze.com/ul?ll=${pickupLat},${pickupLng}&navigate=yes`;
-                    
-                    // محاولة فتح جوجل ماب أولاً
-                    window.open(googleMapsUrl, '_blank');
-                    
-                    // عرض رسالة توجيهية
-                    setTimeout(() => {
-                        if(confirm('🗺️ هل تريد تجربة تطبيق واز للملاحة بدلاً من خرائط جوجل؟\n(اضغط إلغاء للبقاء على خرائط جوجل)')) {
-                            window.open(wazeUrl, '_blank');
-                        }
-                    }, 1500);
-                }
-            }, 1000);
+            showToast('✅ قبلت الرحلة! 💬 افتح المحادثة للبدء', 'success');
+            
+            // ✅ فتح المحادثة مباشرة مع زر بدء الرحلة
+            showChatInterface(rideId, req.passengerId, currentDriver.uid, 'driver', currentDriver.email?.split('@')[0], currentActiveRide);
+            showChatButton(rideId, chatId, 'driver', currentDriver.email?.split('@')[0], currentActiveRide);
+            
+            // ❌ لا نفتح الخرائط هنا - السائق يضغط "بدء الرحلة" داخل المحادثة
             
         } catch(e) {
             console.error('Accept error:', e.code, e.message);
