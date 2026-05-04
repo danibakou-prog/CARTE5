@@ -269,6 +269,19 @@
         .quick-msg-btn:active {
             transform: scale(0.98);
         }
+        
+        /* 🔄 مؤشر إعادة الإرسال */
+        .resend-indicator {
+            font-size: 0.75em;
+            color: #f39c12;
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-right: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
     </style>
 </head>
 <body>
@@ -751,7 +764,7 @@
         document.getElementById('driverCard').classList.add('show'); document.getElementById('dName').textContent='جاري البحث...'; document.getElementById('dMeta').textContent='نبحث عن أقرب سائق';
 
         try {
-            const ref=await db.collection('rideRequests').add({ passengerId: currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType:document.querySelector('.car-opt.selected .name').textContent, price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp() });
+            const ref=await db.collection('rideRequests').add({ passengerId: currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType:document.querySelector('.car-opt.selected .name').textContent, price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy: [] });
             currentRideId=ref.id;
         } catch(e){ showToast('❌ فشل الإنشاء','error'); rideState='idle'; btn.disabled=false; bar.classList.remove('show'); return; }
 
@@ -837,6 +850,9 @@
             const reqs=[];
             snap.forEach(d=>{
                 const r=d.data();
+                // ✅ إخفاء الطلب إذا كنت في قائمة الرافضين مسبقاً
+                if (r.skippedBy?.includes(currentDriver.uid)) return;
+                
                 if(r.assignedDriverId===currentDriver.uid && r.status==='pending')reqs.push({id:d.id,...r});
             }); 
             const newCount=reqs.length;
@@ -869,7 +885,8 @@
                 const d=calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng);
                 dist=d.toFixed(1);
             }
-            return `<div class="request-card ${isUrg?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${dist} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div><div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;
+            const rejectCount = r.skippedBy?.length || 0;
+            return `<div class="request-card ${isUrg?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${dist} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rejectCount > 0 ? `<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rejectCount} مرة</span></div>` : ''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;
         }).join(''); 
     }
     
@@ -913,17 +930,85 @@
         } 
     };
     
-    window.handleDecline=async function(rideId){ 
+    // 🔥 دالة رفض الطلب ونقله للسائق التالي
+    window.handleDecline = async function(rideId) { 
         // 🔇 إيقاف صوت التنبيه عند الرفض
         stopRequestSound();
         
-        try{
-            if(currentDriver?.uid)db.collection('rideRequests').doc(rideId).update({
-                skippedBy:firebase.firestore.FieldValue.arrayUnion(currentDriver.uid)
-            }); 
-            showToast('⏭️ تم التخطي','warning'); 
-        }catch(e){} 
-        loadRequests(); 
+        const btn = event?.target;
+        if(btn) { btn.disabled = true; btn.textContent = '🔄 جاري...'; }
+        
+        try {
+            // 1️⃣ جلب بيانات الطلب الحالية
+            const rideRef = db.collection('rideRequests').doc(rideId);
+            const rideSnap = await rideRef.get();
+            
+            if (!rideSnap.exists) {
+                showToast('⚠️ الطلب غير موجود', 'warning');
+                return;
+            }
+            
+            const rideData = rideSnap.data();
+            const myDriverId = currentDriver?.uid;
+            
+            // 2️⃣ إضافة نفسي لقائمة الرافضين
+            const skippedBy = rideData.skippedBy || [];
+            if (!skippedBy.includes(myDriverId)) {
+                skippedBy.push(myDriverId);
+            }
+            
+            // 3️⃣ جلب جميع السائقين المتاحين ضمن 15 كم
+            const driversSnap = await db.collection('drivers')
+                .where('available', '==', true)
+                .get();
+                
+            const nearbyDrivers = [];
+            for (const doc of driversSnap.docs) {
+                const d = doc.data();
+                if (d.location && rideData.pickup?.lat) {
+                    const dist = calculateDistance(
+                        rideData.pickup.lat, rideData.pickup.lng,
+                        d.location.lat, d.location.lng
+                    );
+                    if (dist <= 15 && d.uid !== myDriverId && !skippedBy.includes(d.uid)) {
+                        nearbyDrivers.push({ id: doc.id, ...d, distance: dist });
+                    }
+                }
+            }
+            
+            // 4️⃣ ترتيب السائقين حسب الأقرب
+            nearbyDrivers.sort((a, b) => a.distance - b.distance);
+            
+            // 5️⃣ إذا وجد سائق جديد، أرسل له الطلب
+            if (nearbyDrivers.length > 0) {
+                const nextDriver = nearbyDrivers[0];
+                await rideRef.update({
+                    status: 'pending',
+                    assignedDriverId: nextDriver.id,
+                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    skippedBy: skippedBy,
+                    dispatchStage: firebase.firestore.FieldValue.increment(1)
+                });
+                showToast('⏭️ تم نقل الطلب للسائق التالي', 'success');
+            } else {
+                // لا يوجد سائقين متاحين
+                await rideRef.update({
+                    status: 'expired',
+                    skippedBy: skippedBy
+                });
+                showToast('⚠️ لا يوجد سائقين متاحين حالياً', 'warning');
+            }
+            
+        } catch (e) {
+            console.error('❌ خطأ في رفض الطلب:', e);
+            showToast('⚠️ حدث خطأ: ' + e.message, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '❌ رفض';
+            }
+            loadRequests(); // تحديث القائمة وإخفاء الطلب
+        } 
     };
 
     // ==================== UTILS & INIT ====================
