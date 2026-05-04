@@ -249,6 +249,26 @@
         .req-destination-info strong {
             color: var(--secondary);
         }
+        
+        /* 💬 أزرار الرسائل السريعة في المحادثة */
+        .quick-msg-btn {
+            background: #e8f4fd;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .quick-msg-btn:hover {
+            background: var(--secondary);
+            color: #fff;
+        }
+        .quick-msg-btn:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -607,6 +627,21 @@
         });
     }
 
+    // 💬 دالة إرسال رسالة سريعة من الأزرار
+    window.sendQuickMessage = async function(chatId, senderId, senderType, text) {
+        await sendMessage(chatId, senderId, senderType, text);
+        showToast('✅ تم الإرسال', 'success');
+    }
+
+    // 🔇 دالة إيقاف صوت التنبيه
+    function stopRequestSound() {
+        const audio = document.getElementById('requestSound');
+        if(audio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+    }
+
     function showChatInterface(rideId, passengerId, driverId, myRole, driverName, rideData = null) {
         const chatId = `chat_${rideId}`; currentChatId = chatId;
         const existing = document.getElementById('chatOverlay'); if (existing) existing.remove();
@@ -627,6 +662,13 @@
                 </div>
                 <div id="chatMessages" class="chat-messages"></div>
                 <div class="chat-input-area">
+                    <!-- أزرار الرسائل السريعة -->
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:8px;padding:0 5px">
+                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا قريب')">🚗 أنا قريب</button>
+                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','طريق مزدحمة')">🚦 طريق مزدحمة</button>
+                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا في المكان المحدد')">📍 وصلت</button>
+                        <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أين أنت؟')">❓ أين أنت؟</button>
+                    </div>
                     <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}')">
                     <button class="chat-send-btn" onclick="sendChatMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}')">➤</button>
                 </div>
@@ -766,15 +808,150 @@
 
     // ==================== DRIVER DASHBOARD ====================
     function toggleDriverStatus() { driverAvailable=!driverAvailable; if(currentDriver?.uid)db.collection('drivers').doc(currentDriver.uid).update({available:driverAvailable,lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const t=document.getElementById('statusToggle'); if(driverAvailable){t.textContent='🟢 متاح';t.classList.add('active');showToast('✅ أنت متاح','success');loadRequests();} else {t.textContent='🔴 غير متاح';t.classList.remove('active');showToast('🔕 إيقاف','warning');} }
-    function playRequestSound() { const a=document.getElementById('requestSound'); if(a){a.currentTime=0; a.play().catch(()=>{const h=()=>{a.play().catch(()=>{});document.removeEventListener('click',h);document.removeEventListener('touchstart',h);};document.addEventListener('click',h,{once:true});document.addEventListener('touchstart',h,{once:true});});} }
-    function loadRequests() { const list=document.getElementById('requestsList'), countEl=document.getElementById('requestsCount'); if(!currentDriver||!driverAvailable){list.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>';return;} list.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; if(activeRequestListener)activeRequestListener(); activeRequestListener=db.collection('rideRequests').where('status','==','pending').limit(20).onSnapshot(snap=>{const reqs=[];snap.forEach(d=>{const r=d.data();if(r.assignedDriverId===currentDriver.uid && r.status==='pending')reqs.push({id:d.id,...r});}); const newCount=reqs.length;if(newCount>previousRequestsCount&&newCount>0){playRequestSound();const h=document.querySelector('.dashboard-header');if(h){h.classList.remove('pulse');void h.offsetWidth;h.classList.add('pulse');}} previousRequestsCount=newCount; renderRequests(reqs,list,countEl);},err=>{console.error(err);}); }
-    function renderRequests(reqs,list,countEl){ countEl.textContent=reqs.length; if(reqs.length===0){list.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';return;} list.innerHTML=reqs.map(r=>{const isUrg=r.time<=15;const cr=r.createdAt?.toDate?.()||new Date();const mins=Math.floor((Date.now()-cr)/60000); let dist='---'; if(currentDriver?.location&&r.pickup?.lat){const d=calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng);dist=d.toFixed(1);} return `<div class="request-card ${isUrg?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${dist} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div><div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;}).join(''); }
-    window.handleAccept=async function(rideId){ if(!currentDriver?.uid)return showToast('⚠️ سجل الدخول أولاً','warning'); const btn=event.target; btn.disabled=true; btn.textContent='🔄 جاري...'; try{const snap=await db.collection('rideRequests').doc(rideId).get(); if(!snap.exists||snap.data().status!=='pending'||snap.data().assignedDriverId!==currentDriver.uid){showToast('⚠️ الطلب موجه لسائق آخر أو منتهي','warning');return;} const req=snap.data(); await db.collection('rideRequests').doc(rideId).update({status:'accepted',acceptedBy:currentDriver.uid,acceptedAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('drivers').doc(currentDriver.uid).update({available:false,lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const chatId=await createChat(rideId,req.passengerId,currentDriver.uid); await sendMessage(chatId,currentDriver.uid,'driver',`👋 أهلاً! في الطريق. الوصول ~${Math.max(2,Math.round(req.distance/3))} دقيقة.`); currentActiveRide={id:rideId,...req,status:'accepted'}; showToast('✅ قبلت الرحلة! 💬 افتح المحادثة','success'); showChatInterface(rideId,req.passengerId,currentDriver.uid,'driver',currentDriver.email?.split('@')[0],currentActiveRide); showChatButton(rideId,chatId,'driver',currentDriver.email?.split('@')[0],currentActiveRide); }catch(e){showToast('⚠️ خطأ: '+e.message,'error');}finally{btn.disabled=false;btn.textContent='✅ قبول';loadRequests();} };
-    window.handleDecline=async function(rideId){ try{if(currentDriver?.uid)db.collection('rideRequests').doc(rideId).update({skippedBy:firebase.firestore.FieldValue.arrayUnion(currentDriver.uid)}); showToast('⏭️ تم التخطي','warning'); }catch(e){} loadRequests(); };
+    
+    function playRequestSound() { 
+        const a=document.getElementById('requestSound'); 
+        if(a){
+            a.currentTime=0; 
+            a.play().catch(()=>{
+                const h=()=>{
+                    a.play().catch(()=>{});
+                    document.removeEventListener('click',h);
+                    document.removeEventListener('touchstart',h);
+                };
+                document.addEventListener('click',h,{once:true});
+                document.addEventListener('touchstart',h,{once:true});
+            });
+        } 
+    }
+    
+    function loadRequests() { 
+        const list=document.getElementById('requestsList'), countEl=document.getElementById('requestsCount'); 
+        if(!currentDriver||!driverAvailable){
+            list.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>';
+            return;
+        } 
+        list.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; 
+        if(activeRequestListener)activeRequestListener(); 
+        activeRequestListener=db.collection('rideRequests').where('status','==','pending').limit(20).onSnapshot(snap=>{
+            const reqs=[];
+            snap.forEach(d=>{
+                const r=d.data();
+                if(r.assignedDriverId===currentDriver.uid && r.status==='pending')reqs.push({id:d.id,...r});
+            }); 
+            const newCount=reqs.length;
+            if(newCount>previousRequestsCount&&newCount>0){
+                playRequestSound();
+                const h=document.querySelector('.dashboard-header');
+                if(h){
+                    h.classList.remove('pulse');
+                    void h.offsetWidth;
+                    h.classList.add('pulse');
+                }
+            } 
+            previousRequestsCount=newCount; 
+            renderRequests(reqs,list,countEl);
+        },err=>{console.error(err);}); 
+    }
+    
+    function renderRequests(reqs,list,countEl){ 
+        countEl.textContent=reqs.length; 
+        if(reqs.length===0){
+            list.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';
+            return;
+        } 
+        list.innerHTML=reqs.map(r=>{
+            const isUrg=r.time<=15;
+            const cr=r.createdAt?.toDate?.()||new Date();
+            const mins=Math.floor((Date.now()-cr)/60000); 
+            let dist='---'; 
+            if(currentDriver?.location&&r.pickup?.lat){
+                const d=calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng);
+                dist=d.toFixed(1);
+            }
+            return `<div class="request-card ${isUrg?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${dist} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div><div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;
+        }).join(''); 
+    }
+    
+    window.handleAccept=async function(rideId){ 
+        if(!currentDriver?.uid)return showToast('⚠️ سجل الدخول أولاً','warning'); 
+        const btn=event.target; 
+        btn.disabled=true; 
+        btn.textContent='🔄 جاري...'; 
+        
+        // 🔇 إيقاف صوت التنبيه عند القبول
+        stopRequestSound();
+        
+        try{
+            const snap=await db.collection('rideRequests').doc(rideId).get(); 
+            if(!snap.exists||snap.data().status!=='pending'||snap.data().assignedDriverId!==currentDriver.uid){
+                showToast('⚠️ الطلب موجه لسائق آخر أو منتهي','warning');
+                return;
+            } 
+            const req=snap.data(); 
+            await db.collection('rideRequests').doc(rideId).update({
+                status:'accepted',
+                acceptedBy:currentDriver.uid,
+                acceptedAt:firebase.firestore.FieldValue.serverTimestamp()
+            }); 
+            await db.collection('drivers').doc(currentDriver.uid).update({
+                available:false,
+                lastUpdate:firebase.firestore.FieldValue.serverTimestamp()
+            }); 
+            const chatId=await createChat(rideId,req.passengerId,currentDriver.uid); 
+            await sendMessage(chatId,currentDriver.uid,'driver',`👋 أهلاً! في الطريق. الوصول ~${Math.max(2,Math.round(req.distance/3))} دقيقة.`); 
+            currentActiveRide={id:rideId,...req,status:'accepted'}; 
+            showToast('✅ قبلت الرحلة! 💬 افتح المحادثة','success'); 
+            showChatInterface(rideId,req.passengerId,currentDriver.uid,'driver',currentDriver.email?.split('@')[0],currentActiveRide); 
+            showChatButton(rideId,chatId,'driver',currentDriver.email?.split('@')[0],currentActiveRide); 
+        }catch(e){
+            showToast('⚠️ خطأ: '+e.message,'error');
+        }finally{
+            btn.disabled=false;
+            btn.textContent='✅ قبول';
+            loadRequests();
+        } 
+    };
+    
+    window.handleDecline=async function(rideId){ 
+        // 🔇 إيقاف صوت التنبيه عند الرفض
+        stopRequestSound();
+        
+        try{
+            if(currentDriver?.uid)db.collection('rideRequests').doc(rideId).update({
+                skippedBy:firebase.firestore.FieldValue.arrayUnion(currentDriver.uid)
+            }); 
+            showToast('⏭️ تم التخطي','warning'); 
+        }catch(e){} 
+        loadRequests(); 
+    };
 
     // ==================== UTILS & INIT ====================
-    function calculateDistance(lat1,lng1,lat2,lng2){const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-    function cancelRide(){if(confirm('إلغاء الرحلة؟')&&currentRideId){updateRideStatus('cancelled');rideState='idle';document.getElementById('driverCard').classList.remove('show');document.getElementById('bookBtn').disabled=false;document.getElementById('statusBar').classList.remove('show');document.getElementById('statusVal').textContent='ملغي';setTimeout(()=>document.getElementById('statusVal').textContent='جاهز',1000);showToast('❌ تم الإلغاء','warning');currentRideId=null;clearTimeout(dispatchTimeoutId);const c=document.getElementById('floatingChatBtn');if(c)c.remove();}}
+    function calculateDistance(lat1,lng1,lat2,lng2){
+        const R=6371;
+        const dLat=(lat2-lat1)*Math.PI/180;
+        const dLng=(lng2-lng1)*Math.PI/180;
+        const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+    
+    function cancelRide(){
+        if(confirm('إلغاء الرحلة؟')&&currentRideId){
+            updateRideStatus('cancelled');
+            rideState='idle';
+            document.getElementById('driverCard').classList.remove('show');
+            document.getElementById('bookBtn').disabled=false;
+            document.getElementById('statusBar').classList.remove('show');
+            document.getElementById('statusVal').textContent='ملغي';
+            setTimeout(()=>document.getElementById('statusVal').textContent='جاهز',1000);
+            showToast('❌ تم الإلغاء','warning');
+            currentRideId=null;
+            clearTimeout(dispatchTimeoutId);
+            const c=document.getElementById('floatingChatBtn');
+            if(c)c.remove();
+        }
+    }
+    
     window.onload=initFirebase;
 </script>
 </body>
