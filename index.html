@@ -42,6 +42,20 @@
         .back-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
         .back-btn:hover { background: rgba(255,255,255,0.3); }
         
+        /* ✅ زر السائق الثانوي في الأعلى */
+        .top-secondary-btn {
+            background: rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.6);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .top-secondary-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+        
         .main-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 20px; text-align: center; }
         .main-logo { font-size: 4em; margin-bottom: 15px; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -255,22 +269,20 @@
 <div class="app" id="mainApp" style="display: none;">
     <!-- ========== VIEW 1: MAIN MENU ========== -->
     <div id="view-main" class="view active">
-        <div class="header" style="justify-content: center;">
-            <h1>🚗 ياسر تاكسي</h1>
+        <div class="header" style="justify-content: center; position: relative;">
+            <h1 style="flex: 1; text-align: center;">🚗 ياسر تاكسي</h1>
+            <!-- ✅ زر السائق الثانوي في الأعلى -->
+            <button class="top-secondary-btn" onclick="switchView('view-register')">🚙 تسجيل سائق</button>
         </div>
         <div class="main-view">
             <div class="main-logo">🚖</div>
             <h2 class="main-title">ياسر تاكسي</h2>
             <p class="main-subtitle">حلّك السريع والآمن للتنقل في المدينة • خدمة 24/7</p>
             
+            <!-- ✅ زر طلب السيارة الأساسي -->
             <button class="main-btn btn-passenger" onclick="switchView('view-request')">
                 <span class="btn-icon">👤</span>
                 طلب سيارة الآن
-            </button>
-            
-            <button class="main-btn btn-driver" onclick="switchView('view-register')">
-                <span class="btn-icon">🚙</span>
-                تسجيل سيارتي (سائق)
             </button>
             
             <div class="main-footer">
@@ -480,7 +492,17 @@
     let currentChatId = null;
     let rideTimeoutId = null;
     let previousRequestsCount = 0;
-    let currentActiveRide = null; // ✅ لتخزين بيانات الرحلة النشطة
+    let currentActiveRide = null;
+
+    // ✅ دالة لإنشاء/استرجاع معرف الضيف للركاب (بدون تسجيل دخول)
+    function getGuestPassengerId() {
+        let id = localStorage.getItem('yasserTaxi_guestId');
+        if (!id) {
+            id = 'guest_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            localStorage.setItem('yasserTaxi_guestId', id);
+        }
+        return id;
+    }
 
     // ==================== FIREBASE INITIALIZATION ====================
     function initFirebase() {
@@ -634,7 +656,6 @@
         const chatId = `chat_${rideId}`; currentChatId = chatId;
         const existing = document.getElementById('chatOverlay'); if (existing) existing.remove();
         
-        // ✅ زر بدء الرحلة يظهر فقط للسائق وعندما تكون الرحلة مقبولة
         const startTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted') 
             ? `<button class="start-trip-btn" onclick="startTripNavigation('${rideData.destination?.lat}', '${rideData.destination?.lng}', '${rideData.destination?.name || 'الوجهة'}')">🚀 بدء الرحلة</button>` 
             : '';
@@ -656,8 +677,8 @@
                 </div>
                 <div id="chatMessages" class="chat-messages"></div>
                 <div class="chat-input-area">
-                    <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${chatId}','${currentDriver?.uid||'guest'}','${myRole}')">
-                    <button class="chat-send-btn" onclick="sendChatMessage('${chatId}','${currentDriver?.uid||'guest'}','${myRole}')">➤</button>
+                    <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${chatId}','${currentDriver?.uid||getGuestPassengerId()}','${myRole}')">
+                    <button class="chat-send-btn" onclick="sendChatMessage('${chatId}','${currentDriver?.uid||getGuestPassengerId()}','${myRole}')">➤</button>
                 </div>
             </div>`;
         document.body.appendChild(chatContainer);
@@ -683,7 +704,6 @@
         await sendMessage(chatId, senderId, senderType, text); input.value = '';
     }
     
-    // ✅ دالة بدء الرحلة وفتح الخرائط للوجهة
     window.startTripNavigation = function(destLat, destLng, destName) {
         if(!destLat || !destLng) {
             showToast('⚠️ بيانات الوجهة غير متاحة', 'warning');
@@ -695,17 +715,14 @@
         const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}&travelmode=driving`;
         const wazeUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
         
-        // فتح جوجل ماب
         window.open(googleMapsUrl, '_blank');
         
-        // عرض خيار واز بعد ثانية
         setTimeout(() => {
             if(confirm(`🗺️ الوجهة: ${destName}\n\nهل تريد تجربة تطبيق واز للملاحة بدلاً من خرائط جوجل؟\n(اضغط إلغاء للبقاء على خرائط جوجل)`)) {
                 window.open(wazeUrl, '_blank');
             }
         }, 1500);
         
-        // تحديث حالة الرحلة في قاعدة البيانات
         if(currentActiveRide?.id) {
             db.collection('rideRequests').doc(currentActiveRide.id).update({
                 tripStarted: true,
@@ -864,7 +881,8 @@
         const btn = document.getElementById('bookBtn'), bar = document.getElementById('statusBar');
         btn.disabled = true; bar.classList.add('show'); bar.innerHTML = '🔍 جاري البحث عن أقرب سائق... <span class="spinner"></span>';
 
-        const passengerId = auth.currentUser?.uid || 'guest_' + Date.now();
+        // ✅ يعمل بدون تسجيل دخول (ضيف أو مستخدم مسجل)
+        const passengerId = auth.currentUser?.uid || getGuestPassengerId();
         const rideData = {
             passengerId, pickup: { lat: pickupPos[0], lng: pickupPos[1], name: document.getElementById('pickupInput').value },
             destination: { lat: destPos[0], lng: destPos[1], name: document.getElementById('destInput').value },
@@ -992,7 +1010,6 @@
                 });
                 reqs.sort((a,b) => (b.createdAt?.toDate?.().getTime() || 0) - (a.createdAt?.toDate?.().getTime() || 0));
                 
-                // ✅ تشغيل الصوت عند ظهور طلبات جديدة
                 const newCount = reqs.length;
                 if(newCount > previousRequestsCount && newCount > 0) {
                     playRequestSound();
@@ -1022,7 +1039,6 @@
             const isUrg = r.time <= 15;
             const cr = r.createdAt?.toDate?.() || new Date(r.createdAt); const mins = Math.floor((Date.now()-cr)/60000);
             
-            // ✅ حساب مسافة السائق عن الراكب
             let driverToPassengerDist = '---';
             if(currentDriver?.location && r.pickup?.lat) {
                 const dist = calculateDistance(
@@ -1035,7 +1051,6 @@
             return `<div class="request-card ${isUrg?'urgent':''}">
                 <div class="req-header"><span class="req-time">🕐 منذ ${mins} د</span>${isUrg?'<span class="req-urgent">⚡ عاجل</span>':''}</div>
                 
-                <!-- ✅ مسافة السائق عن الراكب -->
                 <div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${driverToPassengerDist} كم</div>
                 
                 <div class="req-route">
@@ -1043,7 +1058,6 @@
                     <div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div>
                 </div>
                 
-                <!-- ✅ معلومات الوجهة والمسافة -->
                 <div class="req-destination-info">
                     <strong>🎯 الوجهة:</strong> ${r.destination?.name || 'غير محدد'}<br>
                     <strong>📏 مسافة الرحلة:</strong> ${r.distance || '---'} كم • <strong>⏱️ الوقت:</strong> ${r.time || '---'} د
@@ -1061,7 +1075,6 @@
         }).join('');
     }
 
-    // ✅ دالة قبول الرحلة - تفتح المحادثة أولاً بدون خرائط
     window.handleAccept = async function(rideId) {
         if(!currentDriver?.uid) return showToast('⚠️ يرجى تسجيل الدخول أولاً', 'warning');
         const btn = event.target;
@@ -1074,32 +1087,25 @@
 
             const req = snap.data();
             
-            // تحديث حالة الطلب
             await db.collection('rideRequests').doc(rideId).update({
                 status: 'accepted', 
                 acceptedBy: currentDriver.uid, 
                 acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            // تحديث حالة السائق
             await db.collection('drivers').doc(currentDriver.uid).update({
                 available: false, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            // إنشاء محادثة
             const chatId = await createChat(rideId, req.passengerId, currentDriver.uid);
             await sendMessage(chatId, currentDriver.uid, 'driver', `👋 أهلاً! أنا في الطريق إليك. الوصول خلال ~${Math.max(2, Math.round(req.distance/3))} دقيقة.`);
             
-            // ✅ تخزين بيانات الرحلة النشطة
             currentActiveRide = { id: rideId, ...req, status: 'accepted' };
             
             showToast('✅ قبلت الرحلة! 💬 افتح المحادثة للبدء', 'success');
             
-            // ✅ فتح المحادثة مباشرة مع زر بدء الرحلة
             showChatInterface(rideId, req.passengerId, currentDriver.uid, 'driver', currentDriver.email?.split('@')[0], currentActiveRide);
             showChatButton(rideId, chatId, 'driver', currentDriver.email?.split('@')[0], currentActiveRide);
-            
-            // ❌ لا نفتح الخرائط هنا - السائق يضغط "بدء الرحلة" داخل المحادثة
             
         } catch(e) {
             console.error('Accept error:', e.code, e.message);
@@ -1112,7 +1118,6 @@
         }
     };
 
-    // ✅ دالة رفض/تخطي الطلب
     window.handleDecline = async function(rideId) {
         try {
             if(currentDriver?.uid && rideId) {
