@@ -125,7 +125,12 @@
         .driver-status { font-size: 0.8em; opacity: 0.9; }
         .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; }
         .status-toggle.active { background: #2ecc71; }
-        .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
+        
+        /* 🆕 خريطة السائق الجديدة */
+        #driverMap { height: 220px; width: 100%; background: #e8f4fd; border-radius: 12px; margin: 10px 12px; border: 2px solid #b3e5fc; display: none; }
+        #navStatus { padding: 10px 12px; background: #fff3cd; color: #856404; border-radius: 10px; margin: 0 12px 10px; font-size: 0.85em; display: none; text-align: center; border: 1px solid #ffeeba; }
+        
+        .requests-list { padding: 12px; max-height: 50vh; overflow-y: auto; }
         .request-card { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-right: 4px solid var(--primary); transition: 0.2s; }
         .request-card:hover { transform: translateX(-3px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
         .request-card.urgent { border-right-color: var(--danger); background: #fff5f5; }
@@ -364,6 +369,10 @@
             <span id="requestsCount" style="background: var(--primary); color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: bold;">0</span>
         </div>
         
+        <!-- 🆕 خريطة توجيه السائق -->
+        <div id="driverMap"></div>
+        <div id="navStatus">🧭 جاري تحميل خريطة التوجيه...</div>
+        
         <div class="requests-list" id="requestsList">
             <div class="empty-state">
                 <div class="icon">🔍</div>
@@ -392,6 +401,7 @@
     let activeRequestListener = null;
     let activeChatListener = null;
     let map, pickupMarker, destMarker, routeControl;
+    let driverMap, driverRouteControl, driverNavMarker, currentRoutePoints = null;
     let pickupPos = null, destPos = null;
     let selectedRate = 15, baseFare = 80, distKm = 0, timeMin = 0;
     let rideState = 'idle';
@@ -433,6 +443,7 @@
                         document.getElementById('dashDriverArea').textContent = `🚗 ${doc.data().carType}`;
                         switchView('view-dashboard');
                         startLocationUpdates(user.uid);
+                        initDriverMap();
                     } else {
                         switchView('view-main');
                     }
@@ -525,6 +536,7 @@
                             location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
                             lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                         });
+                        if(currentDriver) currentDriver.location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                     } catch(e) { console.warn('⚠️ Location update failed'); }
                 }, null, { enableHighAccuracy: true, timeout: 5000 });
             }
@@ -609,7 +621,7 @@
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
         if (viewId === 'view-request' && !map) setTimeout(initMap, 100);
-        if (viewId === 'view-dashboard' && currentDriver) loadRequests();
+        if (viewId === 'view-dashboard' && currentDriver) { loadRequests(); initDriverMap(); }
         const chatBtn = document.getElementById('floatingChatBtn'); if (chatBtn) chatBtn.remove();
     }
 
@@ -714,6 +726,65 @@
     function updatePrice() { document.getElementById('priceBox').innerHTML = `💰 السعر التقريبي: <span style="font-size:1.2em">${baseFare + Math.round(distKm * selectedRate)}</span> د.ج`; }
     function selectCar(el, name, rate) { document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); selectedRate = rate; if(distKm>0) updatePrice(); }
 
+    // 🆕 تهيئة خريطة السائق
+    function initDriverMap() {
+        if (driverMap || !currentDriver) return;
+        setTimeout(() => {
+            driverMap = L.map('driverMap').setView([currentDriver.location?.lat || 36.753, currentDriver.location?.lng || 3.058], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(driverMap);
+            driverMap.invalidateSize();
+        }, 200);
+    }
+
+    // 🆕 رسم مسار التوجيه للسائق
+    async function drawDriverRoute(requestData, isNavigation = false) {
+        if (!driverMap) return;
+        if (driverRouteControl) driverMap.removeControl(driverRouteControl);
+        if (driverNavMarker) driverMap.removeLayer(driverNavMarker);
+        document.getElementById('driverMap').style.display = 'block';
+        
+        const navStatus = document.getElementById('navStatus');
+        navStatus.style.display = 'block';
+        
+        const driverPos = await new Promise(res => 
+            navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), 
+            () => res([currentDriver.location?.lat || 36.753, currentDriver.location?.lng || 3.058]))
+        );
+
+        const waypoints = [
+            L.latLng(driverPos),
+            L.latLng(requestData.pickup.lat, requestData.pickup.lng),
+            L.latLng(requestData.destination.lat, requestData.destination.lng)
+        ];
+        currentRoutePoints = waypoints.map(w => [w.lat, w.lng]);
+
+        driverRouteControl = L.Routing.control({
+            waypoints: waypoints,
+            routeWhileDragging: false, addWaypoints: false, show: false, createMarker: () => null,
+            lineOptions: { styles: [{ color: isNavigation ? '#00b894' : '#f39c12', weight: 6, opacity: 0.9 }] }
+        }).addTo(driverMap);
+
+        // 🆕 سهم الملاحة المتحرك
+        driverNavMarker = L.marker(driverPos, {
+            icon: L.divIcon({
+                className: '',
+                html: `<div style="font-size: 22px; animation: spin 2s linear infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🧭</div>`,
+                iconSize: [30, 30], iconAnchor: [15, 15]
+            })
+        }).addTo(driverMap);
+
+        driverRouteControl.on('routesfound', () => {
+            driverMap.fitBounds(driverRouteControl.getPlan().getWaypoints(), { padding: [40, 40] });
+            if (isNavigation) {
+                navStatus.innerHTML = `🚗 <b>وضع التوجيه نشط:</b> اتبع الخط الأخضر نحو الراكب ثم الوجهة`;
+                navStatus.style.background = '#d4edda'; navStatus.style.color = '#155724'; navStatus.style.borderColor = '#c3e6cb';
+            } else {
+                navStatus.innerHTML = `📍 اضغط "قبول" لبدء التوجيه المباشر إلى هذا الطلب`;
+                navStatus.style.background = '#fff3cd'; navStatus.style.color = '#856404'; navStatus.style.borderColor = '#ffeeba';
+            }
+        });
+    }
+
     // ==================== BOOK RIDE (Passenger) ====================
     async function bookRide() {
         if (!pickupPos || !destPos) return showToast('⚠️ حدد موقع الانطلاق والوجهة', 'error');
@@ -761,8 +832,20 @@
                         document.getElementById('dName').textContent = dr.email?.split('@')[0]||'سائق'; document.getElementById('dMeta').textContent = dr.carType;
                         const eta = Math.max(2, Math.round(data.distance/3));
                         document.getElementById('dEta').textContent = `🚗 في الطريق • ~${eta} دقائق`;
-                        createChat(currentRideId, passengerId, data.acceptedBy).then(chatId => showChatButton(currentRideId, chatId, 'passenger', document.getElementById('dName').textContent));
-                        showToast(`✅ قبل السائق طلبك! اضغط 💬 للمراسلة`, 'success');
+                        createChat(currentRideId, passengerId, data.acceptedBy);
+                        showToast(`✅ قبل السائق طلبك! ستفتح المحادثة تلقائياً`, 'success');
+                        
+                        // 🆕 فتح المحادثة تلقائياً عند وصول أول رسالة
+                        let chatAutoOpened = false;
+                        const chatListener = db.collection('chats').doc(`chat_${currentRideId}`).collection('messages')
+                            .orderBy('timestamp', 'asc').limit(1)
+                            .onSnapshot(msgSnap => {
+                                if (!chatAutoOpened && !msgSnap.empty) {
+                                    chatAutoOpened = true;
+                                    showChatInterface(currentRideId, passengerId, data.acceptedBy, 'passenger', document.getElementById('dName').textContent);
+                                    setTimeout(() => chatListener(), 3000);
+                                }
+                            });
                     }
                 });
                 if(unsub) unsub();
@@ -772,17 +855,13 @@
             }
         });
 
-        // مؤقت دقيقتين (120 ثانية)
         rideTimeoutId = setTimeout(async () => {
             try {
                 const docSnap = await db.collection('rideRequests').doc(currentRideId).get();
                 if(docSnap.exists && docSnap.data().status === 'pending') {
                     await db.collection('rideRequests').doc(currentRideId).update({ status: 'expired' });
                     showToast('⏰ انتهت مدة الانتظار (دقيقتين). لم يقبل أي سائق.', 'warning');
-                    rideState = 'idle';
-                    document.getElementById('driverCard').classList.remove('show');
-                    document.getElementById('bookBtn').disabled = false;
-                    document.getElementById('statusBar').classList.remove('show');
+                    rideState = 'idle'; document.getElementById('driverCard').classList.remove('show'); document.getElementById('bookBtn').disabled = false; document.getElementById('statusBar').classList.remove('show');
                     if(unsub) unsub();
                 }
             } catch(e) { console.warn('Timeout update failed:', e); }
@@ -807,7 +886,8 @@
         if (currentDriver?.uid) { db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); }
         const t = document.getElementById('statusToggle');
         if(driverAvailable){ t.textContent='🟢 متاح'; t.classList.add('active'); showToast('✅ أنت متاح الآن','success'); loadRequests(); }
-        else { t.textContent='🔴 غير متاح'; t.classList.remove('active'); showToast('🔕 إيقاف الاستقبال','warning'); }
+        else { t.textContent='🔴 غير متاح'; t.classList.remove('active'); showToast('🔕 إيقاف الاستقبال','warning'); 
+               document.getElementById('driverMap').style.display = 'none'; document.getElementById('navStatus').style.display = 'none'; }
     }
 
     function loadRequests() {
@@ -817,24 +897,26 @@
         
         if(activeRequestListener) activeRequestListener();
         
-        // 🔍 تم تعديل الاستعلام لتجنب خطأ الفهرس المركب
         activeRequestListener = db.collection('rideRequests').where('status','==','pending').limit(20)
             .onSnapshot(snap => {
                 const reqs = []; 
                 snap.forEach(d => { 
                     const r = d.data(); 
-                    // استبعاد الطلبات المخصصة أو المرفوضة سابقاً لهذا السائق
                     if(!r.assignedDrivers?.includes(currentDriver.uid) && !r.skippedBy?.includes(currentDriver.uid)) {
                         reqs.push({id:d.id, ...r});
                     }
                 });
-                // ترتيب يدوي حسب الوقت لتجنب أخطاء الفهرس
                 reqs.sort((a,b) => (b.createdAt?.toDate?.().getTime() || 0) - (a.createdAt?.toDate?.().getTime() || 0));
+                
+                // 🆕 عرض مسار أول طلب تلقائياً على خريطة السائق
+                if(reqs.length > 0) drawDriverRoute(reqs[0], false);
+                else { document.getElementById('driverMap').style.display = 'none'; document.getElementById('navStatus').style.display = 'none'; }
+                
                 renderRequests(reqs.slice(0, 10), list, countEl);
             }, err => {
                 console.error('Firestore listener error:', err.code, err.message);
-                if(err.code === 'permission-denied') showToast('⚠️ صلاحيات غير كافية، تحقق من قواعد Firestore', 'error');
-                else if(err.code === 'unavailable' || err.code === 'network-request-failed') showToast('⚠️ فشل في الاتصال، تحقق من الإنترنت', 'error');
+                if(err.code === 'permission-denied') showToast('⚠️ صلاحيات غير كافية', 'error');
+                else if(err.code === 'unavailable' || err.code === 'network-request-failed') showToast('⚠️ تحقق من الإنترنت', 'error');
                 else showToast('⚠️ خطأ في تحميل الطلبات', 'error');
             });
     }
@@ -860,11 +942,10 @@
         }).join('');
     }
 
-    // ✅ إصلاح كامل لزر القبول مع معالجة أخطاء الاتصال بوضوح
+    // ✅ قبول الطلب + تفعيل وضع التوجيه
     window.handleAccept = async function(rideId) {
         if(!currentDriver?.uid) return showToast('⚠️ يرجى تسجيل الدخول أولاً', 'warning');
-        const btn = event.target;
-        btn.disabled = true; btn.textContent = '🔄 جاري المعالجة...';
+        const btn = event.target; btn.disabled = true; btn.textContent = '🔄 جاري المعالجة...';
         try {
             const snap = await db.collection('rideRequests').doc(rideId).get();
             if(!snap.exists) { showToast('⚠️ الطلب غير موجود أو منتهي', 'error'); return; }
@@ -879,20 +960,20 @@
             });
             const chatId = await createChat(rideId, req.passengerId, currentDriver.uid);
             await sendMessage(chatId, currentDriver.uid, 'driver', `👋 أهلاً! أنا في الطريق إليك. الوصول خلال ~${Math.max(2, Math.round(req.distance/3))} دقيقة.`);
-            showToast('✅ قبلت الرحلة بنجاح! اضغط 💬 للمراسلة', 'success');
+            
+            // 🆕 تفعيل وضع التوجيه المباشر
+            drawDriverRoute(req, true);
+            showToast('✅ قبلت الرحلة! اتبع الخريطة للتوجيه', 'success');
             showChatButton(rideId, chatId, 'driver', currentDriver.email?.split('@')[0]);
         } catch(e) {
             console.error('Accept error:', e.code, e.message);
-            if(e.code === 'permission-denied') showToast('⚠️ فشل في الاتصال: صلاحيات قاعدة البيانات غير مفعلة', 'error');
-            else if(e.code === 'unavailable' || e.code === 'network-request-failed') showToast('⚠️ فشل في الاتصال بالإنترنت', 'error');
-            else showToast(`⚠️ خطأ: ${e.message || 'غير معروف'}`, 'error');
+            showToast(`⚠️ خطأ: ${e.message || 'غير معروف'}`, 'error');
         } finally {
             btn.disabled = false; btn.textContent = '✅ قبول';
             loadRequests();
         }
     };
 
-    // ✅ إصلاح كامل لزر الرفض/التخطي
     window.handleDecline = async function(rideId) {
         try {
             if(currentDriver?.uid && rideId) {
@@ -901,9 +982,7 @@
                 });
             }
             showToast('⏭️ تم رفض/تخطي الطلب', 'warning');
-        } catch(e) {
-            showToast('⚠️ خطأ أثناء التخطي، حاول مرة أخرى', 'warning');
-        }
+        } catch(e) { showToast('⚠️ خطأ أثناء التخطي', 'warning'); }
         loadRequests();
     };
 
