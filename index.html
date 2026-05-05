@@ -138,8 +138,9 @@
         .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; }
         .driver-name { font-weight: 600; font-size: 0.95em; }
         .driver-status { font-size: 0.8em; opacity: 0.9; }
-        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; }
+        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; transition: 0.2s; }
         .status-toggle.active { background: #2ecc71; }
+        .status-toggle.unavailable { background: #f39c12; }
         .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
         .request-card { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-right: 4px solid var(--primary); transition: 0.2s; }
         .request-card:hover { transform: translateX(-3px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
@@ -992,7 +993,26 @@
     function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
 
     // ==================== DRIVER DASHBOARD ====================
-    function toggleDriverStatus() { driverAvailable=!driverAvailable; if(currentDriver?.uid)db.collection('drivers').doc(currentDriver.uid).update({available:driverAvailable,lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const t=document.getElementById('statusToggle'); if(driverAvailable){t.textContent='🟢 متاح';t.classList.add('active');showToast('✅ أنت متاح','success');loadRequests();} else {t.textContent='🔴 غير متاح';t.classList.remove('active');showToast('🔕 إيقاف','warning');} }
+    function toggleDriverStatus() { 
+        driverAvailable = !driverAvailable; 
+        if(currentDriver?.uid) db.collection('drivers').doc(currentDriver.uid).update({
+            available: driverAvailable,
+            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+        }); 
+        const t = document.getElementById('statusToggle'); 
+        if(driverAvailable) {
+            t.textContent = '🟢 متاح';
+            t.classList.add('active');
+            t.classList.remove('unavailable');
+            showToast('✅ أنت متاح','success');
+            loadRequests();
+        } else { 
+            t.textContent = '🔴 غير متاح';
+            t.classList.remove('active');
+            t.classList.add('unavailable');
+            showToast('🔕 إيقاف','warning');
+        } 
+    }
     
     function playRequestSound() { 
         const a=document.getElementById('requestSound'); 
@@ -1087,6 +1107,16 @@
                 available:false,
                 lastUpdate:firebase.firestore.FieldValue.serverTimestamp()
             }); 
+            
+            // ✅ تحديث واجهة زر الحالة: تحويله إلى برتقالي (غير متاح)
+            const statusToggle = document.getElementById('statusToggle');
+            if(statusToggle) {
+                statusToggle.textContent = '🔴 غير متاح';
+                statusToggle.classList.remove('active');
+                statusToggle.classList.add('unavailable');
+                driverAvailable = false;
+            }
+            
             const chatId=await createChat(rideId,req.passengerId,currentDriver.uid); 
             await sendMessage(chatId,currentDriver.uid,'driver',`👋 أهلاً! في الطريق. الوصول ~${Math.max(2,Math.round(req.distance/3))} دقيقة.`); 
             currentActiveRide={id:rideId,...req,status:'accepted'}; 
