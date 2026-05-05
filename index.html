@@ -188,7 +188,6 @@
         #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: var(--card); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #loadingOverlay.hidden { display: none; }
         
-        /* 🔔 أنيميشن التنبيه البصري */
         @keyframes pulse-header {
             0% { box-shadow: 0 0 0 0 rgba(52,152,219,0.4); }
             50% { box-shadow: 0 0 0 15px rgba(52,152,219,0); }
@@ -198,7 +197,6 @@
             animation: pulse-header 0.6s ease;
         }
         
-        /* 🚀 زر بدء الرحلة في المحادثة */
         .start-trip-btn {
             background: linear-gradient(135deg, #2ecc71, #27ae60);
             color: #fff;
@@ -225,7 +223,6 @@
             box-shadow: none;
         }
         
-        /* 📍 معلومات الطلب في بطاقة السائق */
         .req-distance-badge {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
@@ -250,7 +247,6 @@
             color: var(--secondary);
         }
         
-        /* 💬 أزرار الرسائل السريعة في المحادثة */
         .quick-msg-btn {
             background: #e8f4fd;
             color: var(--secondary);
@@ -270,7 +266,6 @@
             transform: scale(0.98);
         }
         
-        /* 🔄 مؤشر إعادة الإرسال */
         .resend-indicator {
             font-size: 0.75em;
             color: #f39c12;
@@ -282,6 +277,157 @@
             align-items: center;
             gap: 4px;
         }
+
+        /* ========== Modal Search Overlay ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease;
+            padding: 16px;
+        }
+        .modal-overlay.hidden { display: none !important; }
+
+        .modal-content {
+            background: var(--card);
+            padding: 28px 24px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 340px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            animation: slideUp 0.35s ease;
+            position: relative;
+        }
+
+        .modal-title {
+            color: var(--primary-dark);
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #e0e0e0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .modal-progress {
+            background: #f1f3f5;
+            border-radius: 10px;
+            height: 6px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .modal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .modal-driver-preview {
+            background: #e8f5e9;
+            border-radius: 14px;
+            padding: 12px;
+            margin: 15px 0;
+            display: none;
+        }
+        .modal-driver-preview.show { display: block; animation: fadeIn 0.3s; }
+
+        .modal-driver-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.9em; color: #333;
+        }
+        .modal-driver-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--primary); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em;
+        }
+
+        .modal-cancel-btn {
+            width: 100%; padding: 12px;
+            background: var(--danger); color: #fff;
+            border: none; border-radius: 12px;
+            font-weight: 600; cursor: pointer;
+            margin-top: 10px; transition: 0.2s;
+        }
+        .modal-cancel-btn:hover { background: #c0392b; }
+
+        /* ========== Driver Marker on Map ========== */
+        .driver-marker {
+            background: var(--secondary);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1em;
+            box-shadow: 0 3px 12px rgba(52,152,219,0.5);
+            animation: pulse 2s infinite;
+            position: relative;
+        }
+        .driver-marker::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--secondary);
+            animation: ripple 1.5s ease-out infinite;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .driver-route-line {
+            stroke: var(--secondary);
+            stroke-width: 4;
+            stroke-dasharray: 8, 4;
+            animation: dashMove 1s linear infinite;
+        }
+        @keyframes dashMove {
+            to { stroke-dashoffset: -24; }
+        }
+
+        .map-legend {
+            position: absolute; bottom: 15px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.95);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            z-index: 500;
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: 5px;
+        }
+        .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+        .legend-dot.pickup { background: var(--primary); }
+        .legend-dot.dest { background: var(--danger); }
+        .legend-dot.driver { background: var(--secondary); border: 2px solid #fff; }
     </style>
 </head>
 <body>
@@ -294,7 +440,7 @@
 </div>
 
 <div class="app" id="mainApp" style="display: none;">
-    <!-- ========== VIEW 1: AUTH (مطلوب أولاً) ========== -->
+    <!-- ========== VIEW 1: AUTH ========== -->
     <div id="view-auth" class="view active">
         <div class="header" style="justify-content:center;"><h1>🚗 ياسر تاكسي</h1></div>
         <div class="auth-view">
@@ -319,7 +465,7 @@
         </div>
     </div>
 
-    <!-- ========== VIEW 2: DRIVER SETUP (نوع السيارة) ========== -->
+    <!-- ========== VIEW 2: DRIVER SETUP ========== -->
     <div id="view-driver-setup" class="view">
         <div class="header">
             <button class="back-btn" onclick="logoutUser()">🚪 خروج</button>
@@ -459,6 +605,29 @@
     </div>
 </div>
 
+<!-- ========== Modal Search Overlay ========== -->
+<div id="searchModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-spinner"></div>
+        <h3 class="modal-title">🔍 جاري البحث عن سائق</h3>
+        <p class="modal-desc">نبحث عن أقرب سائق متاح لخدمتك...</p>
+        <div class="modal-progress">
+            <div class="modal-progress-bar" id="modalProgressBar"></div>
+        </div>
+        <div class="modal-driver-preview" id="modalDriverPreview">
+            <div class="modal-driver-row">
+                <div class="modal-driver-avatar">👨‍✈️</div>
+                <div style="text-align: right;">
+                    <div id="modalDriverName" style="font-weight:600">جاري البحث...</div>
+                    <div id="modalDriverCar" style="font-size:0.85em;color:#666"></div>
+                </div>
+            </div>
+        </div>
+        <p id="modalStatus" style="font-size:0.85em;color:#888;margin:10px 0">📡 إشعار السائق <span id="modalDriverIndex">1</span>/<span id="modalDriverTotal">0</span></p>
+        <button class="modal-cancel-btn" onclick="cancelSearchFromModal()">❌ إلغاء البحث</button>
+    </div>
+</div>
+
 <!-- Toast Notification -->
 <div class="toast" id="toast"></div>
 
@@ -475,7 +644,7 @@
     let driverLocationInterval = null;
     let activeRequestListener = null;
     let activeChatListener = null;
-    let map, pickupMarker, destMarker, routeControl;
+    let map, pickupMarker, destMarker, routeControl, driverMarker, driverRouteLine;
     let pickupPos = null, destPos = null;
     let selectedRate = 15, baseFare = 80, distKm = 0, timeMin = 0;
     let rideState = 'idle';
@@ -491,6 +660,7 @@
     let dispatchDrivers = [];
     let dispatchIndex = 0;
     let dispatchTimeoutId = null;
+    let driverListenerUnsub = null;
 
     // ==================== AUTH FUNCTIONS ====================
     function switchAuthTab(tab) {
@@ -547,6 +717,7 @@
     async function logoutUser() {
         if(driverLocationInterval) clearInterval(driverLocationInterval);
         if(activeChatListener) activeChatListener();
+        if(driverListenerUnsub) driverListenerUnsub();
         await auth.signOut();
         showToast('👋 تم تسجيل الخروج', 'success');
     }
@@ -640,13 +811,11 @@
         });
     }
 
-    // 💬 دالة إرسال رسالة سريعة من الأزرار
     window.sendQuickMessage = async function(chatId, senderId, senderType, text) {
         await sendMessage(chatId, senderId, senderType, text);
         showToast('✅ تم الإرسال', 'success');
     }
 
-    // 🔇 دالة إيقاف صوت التنبيه
     function stopRequestSound() {
         const audio = document.getElementById('requestSound');
         if(audio) {
@@ -661,7 +830,6 @@
         const startTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted') 
             ? `<button class="start-trip-btn" onclick="startTripNavigation('${rideData.destination?.lat}', '${rideData.destination?.lng}', '${rideData.destination?.name || 'الوجهة'}')">🚀 بدء الرحلة</button>` : '';
         
-        // ✅ إظهار أزرار الرسائل السريعة للسائق فقط (وليس للراكب)
         const quickMsgButtons = myRole === 'driver' ? `
             <div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:8px;padding:0 5px">
                 <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أنا قريب')">🚗 أنا قريب</button>
@@ -739,6 +907,19 @@
         setupAutocomplete('destInput', 'destResults', (lat, lng, name) => setLoc(destMarker, [lat,lng], 'destInput', 'destCoords', false));
         if ('geolocation' in navigator) useGPS(); else fallbackLocation();
         map.on('click', e => { if (mapClickEnabled && rideState === 'idle') selectDestinationFromMap(e.latlng.lat, e.latlng.lng); });
+        
+        // إضافة أسطورة الخريطة
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function() {
+            const div = L.DomUtil.create('div', 'map-legend');
+            div.innerHTML = `
+                <div class="legend-item"><div class="legend-dot pickup"></div> انطلاق</div>
+                <div class="legend-item"><div class="legend-dot dest"></div> وجهة</div>
+                <div class="legend-item"><div class="legend-dot driver"></div> السائق</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
     }
     function setLoc(marker, pos, inputId, coordsId, isPickup) {
         if(isPickup) pickupPos=pos; else destPos=pos;
@@ -758,24 +939,94 @@
     function updatePrice() { document.getElementById('priceBox').innerHTML=`💰 السعر التقريبي: <span style="font-size:1.2em">${baseFare+Math.round(distKm*selectedRate)}</span> د.ج`; }
     function selectCar(el,n,r){document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');selectedRate=r;if(distKm>0)updatePrice();}
 
-    // ==================== DISPATCH LOGIC (30 SECONDS PER DRIVER) ====================
+    // ==================== MODAL FUNCTIONS ====================
+    function showSearchModal(totalDrivers) {
+        const modal = document.getElementById('searchModal');
+        modal.classList.remove('hidden');
+        document.getElementById('modalDriverTotal').textContent = totalDrivers;
+        document.getElementById('modalDriverIndex').textContent = '1';
+        document.getElementById('modalProgressBar').style.width = '0%';
+        document.getElementById('modalDriverPreview').classList.remove('show');
+        document.getElementById('modalStatus').textContent = `📡 إشعار السائق 1/${totalDrivers}`;
+    }
+    function updateModalProgress(index, total) {
+        document.getElementById('modalDriverIndex').textContent = index;
+        document.getElementById('modalDriverTotal').textContent = total;
+        document.getElementById('modalStatus').textContent = `📡 إشعار السائق ${index}/${total}`;
+        const progress = Math.round((index / total) * 100);
+        document.getElementById('modalProgressBar').style.width = `${progress}%`;
+    }
+    function showDriverInModal(driver) {
+        const preview = document.getElementById('modalDriverPreview');
+        document.getElementById('modalDriverName').textContent = driver.email?.split('@')[0] || 'سائق';
+        document.getElementById('modalDriverCar').textContent = driver.carType || '---';
+        preview.classList.add('show');
+    }
+    function hideSearchModal() {
+        document.getElementById('searchModal').classList.add('hidden');
+    }
+    function cancelSearchFromModal() {
+        hideSearchModal();
+        cancelRide();
+    }
+
+    // ==================== DISPATCH LOGIC ====================
     async function bookRide() {
         if(!pickupPos||!destPos) return showToast('⚠️ حدد الانطلاق والوجهة','error');
         rideState='searching'; dispatchIndex=0; dispatchDrivers=[];
-        const btn=document.getElementById('bookBtn'), bar=document.getElementById('statusBar');
-        btn.disabled=true; bar.classList.add('show'); bar.innerHTML='📡 جاري البحث عن سائقين قريبين... <span class="spinner"></span>';
-        document.getElementById('driverCard').classList.add('show'); document.getElementById('dName').textContent='جاري البحث...'; document.getElementById('dMeta').textContent='نبحث عن أقرب سائق';
+        const btn=document.getElementById('bookBtn');
+        btn.disabled=true;
+        
+        // إظهار المودال بدلاً من الشريط السفلي
+        showSearchModal(0);
+        
+        document.getElementById('driverCard').classList.add('show'); 
+        document.getElementById('dName').textContent='جاري البحث...'; 
+        document.getElementById('dMeta').textContent='نبحث عن أقرب سائق';
 
         try {
-            const ref=await db.collection('rideRequests').add({ passengerId: currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType:document.querySelector('.car-opt.selected .name').textContent, price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy: [] });
+            const ref=await db.collection('rideRequests').add({ 
+                passengerId: currentUser.uid, 
+                pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, 
+                destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, 
+                distance:parseFloat(distKm), 
+                time:timeMin, 
+                carType:document.querySelector('.car-opt.selected .name').textContent, 
+                price:baseFare+Math.round(distKm*selectedRate), 
+                status:'pending', 
+                assignedDriverId:null, 
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(), 
+                skippedBy: [] 
+            });
             currentRideId=ref.id;
-        } catch(e){ showToast('❌ فشل الإنشاء','error'); rideState='idle'; btn.disabled=false; bar.classList.remove('show'); return; }
+        } catch(e){ 
+            showToast('❌ فشل الإنشاء','error'); 
+            rideState='idle'; 
+            btn.disabled=false; 
+            hideSearchModal();
+            return; 
+        }
 
         const driversSnap=await db.collection('drivers').where('available','==',true).get();
-        driversSnap.forEach(d=>{const dd=d.data(); if(dd.location){const dist=calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); if(dist<=15) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)});}});
+        driversSnap.forEach(d=>{
+            const dd=d.data(); 
+            if(dd.location){
+                const dist=calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); 
+                if(dist<=15) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)});
+            }
+        });
         dispatchDrivers.sort((a,b)=>a.distance-b.distance);
 
-        if(dispatchDrivers.length===0){ bar.innerHTML='⚠️ لا يوجد سائقين متاحين'; setTimeout(()=>{rideState='idle';btn.disabled=false;bar.classList.remove('show');},3000); return; }
+        const total = dispatchDrivers.length;
+        updateModalProgress(0, total);
+
+        if(dispatchDrivers.length===0){ 
+            hideSearchModal();
+            showToast('⚠️ لا يوجد سائقين متاحين','warning');
+            rideState='idle';
+            btn.disabled=false;
+            return; 
+        }
 
         dispatchNext();
         listenForRideUpdate();
@@ -783,20 +1034,27 @@
 
     function dispatchNext() {
         if(dispatchIndex >= dispatchDrivers.length) {
-            updateRideStatus('expired'); return;
+            hideSearchModal();
+            updateRideStatus('expired'); 
+            return;
         }
         const target = dispatchDrivers[dispatchIndex];
-        const remaining = dispatchDrivers.length - dispatchIndex;
-        document.getElementById('statusBar').innerHTML = `⏳ إشعار السائق ${dispatchIndex+1}/${dispatchDrivers.length} (ينتظر 30 ثانية)... <span class="spinner"></span>`;
+        updateModalProgress(dispatchIndex + 1, dispatchDrivers.length);
+        showDriverInModal(target);
         
         db.collection('rideRequests').doc(currentRideId).update({
-            status: 'pending', assignedDriverId: target.id, assignedAt: firebase.firestore.FieldValue.serverTimestamp(), dispatchStage: dispatchIndex
+            status: 'pending', 
+            assignedDriverId: target.id, 
+            assignedAt: firebase.firestore.FieldValue.serverTimestamp(), 
+            dispatchStage: dispatchIndex 
         });
 
         dispatchTimeoutId = setTimeout(() => {
             db.collection('rideRequests').doc(currentRideId).get().then(doc => {
                 if(doc.exists && doc.data().status === 'pending') {
-                    db.collection('rideRequests').doc(currentRideId).update({ skippedBy: firebase.firestore.FieldValue.arrayUnion(target.id) });
+                    db.collection('rideRequests').doc(currentRideId).update({ 
+                        skippedBy: firebase.firestore.FieldValue.arrayUnion(target.id) 
+                    });
                     dispatchIndex++;
                     dispatchNext();
                 }
@@ -810,7 +1068,9 @@
             if(!docSnap.exists) return;
             const data = docSnap.data();
             if(data.status === 'accepted') {
-                rideState='matched'; dispatchTimeoutId && clearTimeout(dispatchTimeoutId);
+                rideState='matched'; 
+                if(dispatchTimeoutId) clearTimeout(dispatchTimeoutId);
+                hideSearchModal();
                 document.getElementById('statusBar').innerHTML='✅ تم قبول طلبك! السائق في الطريق';
                 db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{
                     if(ds.exists){
@@ -822,9 +1082,12 @@
                         
                         createChat(currentRideId, currentUser.uid, data.acceptedBy).then(chatId=>{
                             showChatButton(currentRideId,chatId,'passenger',document.getElementById('dName').textContent,data);
-                            // ✅ فتح المحادثة تلقائياً للراكب عند قبول السائق
                             showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', document.getElementById('dName').textContent, data);
                         });
+                        
+                        // ✅ إظهار موقع السائق على الخريطة
+                        showDriverOnMap(data.acceptedBy);
+                        
                         showToast(`✅ قبل السائق! تم فتح المحادثة 💬`,'success');
                     }
                 });
@@ -833,16 +1096,79 @@
                 rideState='idle'; 
                 document.getElementById('driverCard').classList.remove('show'); 
                 document.getElementById('bookBtn').disabled=false; 
-                document.getElementById('statusBar').classList.remove('show'); 
+                hideSearchModal();
                 unsub(); 
             }
         });
     }
 
-    function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
+    // ✅ دالة إظهار موقع السائق على الخريطة
+    function showDriverOnMap(driverId) {
+        // إزالة الماركر القديم إذا وجد
+        if (driverMarker) map.removeLayer(driverMarker);
+        if (driverRouteLine) map.removeLayer(driverRouteLine);
+        
+        // الاستماع لتحديثات موقع السائق
+        driverListenerUnsub = db.collection('drivers').doc(driverId).onSnapshot(doc => {
+            if (!doc.exists) return;
+            const driverData = doc.data();
+            if (!driverData.location) return;
+            
+            const driverPos = [driverData.location.lat, driverData.location.lng];
+            
+            // إنشاء أو تحديث ماركر السائق
+            if (!driverMarker) {
+                const driverIcon = L.divIcon({
+                    className: 'driver-marker',
+                    html: '🚗',
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18]
+                });
+                driverMarker = L.marker(driverPos, { icon: driverIcon }).addTo(map);
+            } else {
+                driverMarker.setLatLng(driverPos);
+            }
+            
+            // رسم خط وهمي من السائق إلى الراكب
+            if (pickupPos) {
+                if (driverRouteLine) map.removeLayer(driverRouteLine);
+                driverRouteLine = L.polyline([driverPos, pickupPos], {
+                    color: '#3498db',
+                    weight: 3,
+                    dashArray: '5, 5',
+                    opacity: 0.7
+                }).addTo(map);
+            }
+            
+            // تحديث مسافة الوصول
+            if (pickupPos) {
+                const distToPickup = calculateDistance(driverPos[0], driverPos[1], pickupPos[0], pickupPos[1]);
+                const eta = Math.max(2, Math.round(distToPickup / 3));
+                document.getElementById('dEta').textContent = `🚗 على بعد ${distToPickup.toFixed(1)} كم • ~${eta} دقيقة`;
+            }
+        });
+    }
+
+    function updateRideStatus(s) { 
+        db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); 
+    }
 
     // ==================== DRIVER DASHBOARD ====================
-    function toggleDriverStatus() { driverAvailable=!driverAvailable; if(currentDriver?.uid)db.collection('drivers').doc(currentDriver.uid).update({available:driverAvailable,lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const t=document.getElementById('statusToggle'); if(driverAvailable){t.textContent='🟢 متاح';t.classList.add('active');showToast('✅ أنت متاح','success');loadRequests();} else {t.textContent='🔴 غير متاح';t.classList.remove('active');showToast('🔕 إيقاف','warning');} }
+    function toggleDriverStatus() { 
+        driverAvailable=!driverAvailable; 
+        if(currentDriver?.uid)db.collection('drivers').doc(currentDriver.uid).update({available:driverAvailable,lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); 
+        const t=document.getElementById('statusToggle'); 
+        if(driverAvailable){
+            t.textContent='🟢 متاح';
+            t.classList.add('active');
+            showToast('✅ أنت متاح','success');
+            loadRequests();
+        } else {
+            t.textContent='🔴 غير متاح';
+            t.classList.remove('active');
+            showToast('🔕 إيقاف','warning');
+        } 
+    }
     
     function playRequestSound() { 
         const a=document.getElementById('requestSound'); 
@@ -872,9 +1198,7 @@
             const reqs=[];
             snap.forEach(d=>{
                 const r=d.data();
-                // ✅ إخفاء الطلب إذا كنت في قائمة الرافضين مسبقاً
                 if (r.skippedBy?.includes(currentDriver.uid)) return;
-                
                 if(r.assignedDriverId===currentDriver.uid && r.status==='pending')reqs.push({id:d.id,...r});
             }); 
             const newCount=reqs.length;
@@ -917,10 +1241,7 @@
         const btn=event.target; 
         btn.disabled=true; 
         btn.textContent='🔄 جاري...'; 
-        
-        // 🔇 إيقاف صوت التنبيه عند القبول
         stopRequestSound();
-        
         try{
             const snap=await db.collection('rideRequests').doc(rideId).get(); 
             if(!snap.exists||snap.data().status!=='pending'||snap.data().assignedDriverId!==currentDriver.uid){
@@ -952,38 +1273,24 @@
         } 
     };
     
-    // 🔥 دالة رفض الطلب ونقله للسائق التالي
     window.handleDecline = async function(rideId) { 
-        // 🔇 إيقاف صوت التنبيه عند الرفض
         stopRequestSound();
-        
         const btn = event?.target;
         if(btn) { btn.disabled = true; btn.textContent = '🔄 جاري...'; }
-        
         try {
-            // 1️⃣ جلب بيانات الطلب الحالية
             const rideRef = db.collection('rideRequests').doc(rideId);
             const rideSnap = await rideRef.get();
-            
             if (!rideSnap.exists) {
                 showToast('⚠️ الطلب غير موجود', 'warning');
                 return;
             }
-            
             const rideData = rideSnap.data();
             const myDriverId = currentDriver?.uid;
-            
-            // 2️⃣ إضافة نفسي لقائمة الرافضين
             const skippedBy = rideData.skippedBy || [];
             if (!skippedBy.includes(myDriverId)) {
                 skippedBy.push(myDriverId);
             }
-            
-            // 3️⃣ جلب جميع السائقين المتاحين ضمن 15 كم
-            const driversSnap = await db.collection('drivers')
-                .where('available', '==', true)
-                .get();
-                
+            const driversSnap = await db.collection('drivers').where('available', '==', true).get();
             const nearbyDrivers = [];
             for (const doc of driversSnap.docs) {
                 const d = doc.data();
@@ -997,11 +1304,7 @@
                     }
                 }
             }
-            
-            // 4️⃣ ترتيب السائقين حسب الأقرب
             nearbyDrivers.sort((a, b) => a.distance - b.distance);
-            
-            // 5️⃣ إذا وجد سائق جديد، أرسل له الطلب
             if (nearbyDrivers.length > 0) {
                 const nextDriver = nearbyDrivers[0];
                 await rideRef.update({
@@ -1013,14 +1316,12 @@
                 });
                 showToast('⏭️ تم نقل الطلب للسائق التالي', 'success');
             } else {
-                // لا يوجد سائقين متاحين
                 await rideRef.update({
                     status: 'expired',
                     skippedBy: skippedBy
                 });
                 showToast('⚠️ لا يوجد سائقين متاحين حالياً', 'warning');
             }
-            
         } catch (e) {
             console.error('❌ خطأ في رفض الطلب:', e);
             showToast('⚠️ حدث خطأ: ' + e.message, 'error');
@@ -1029,7 +1330,7 @@
                 btn.disabled = false;
                 btn.textContent = '❌ رفض';
             }
-            loadRequests(); // تحديث القائمة وإخفاء الطلب
+            loadRequests();
         } 
     };
 
@@ -1054,6 +1355,10 @@
             showToast('❌ تم الإلغاء','warning');
             currentRideId=null;
             clearTimeout(dispatchTimeoutId);
+            hideSearchModal();
+            if(driverListenerUnsub) driverListenerUnsub();
+            if(driverMarker) { map.removeLayer(driverMarker); driverMarker = null; }
+            if(driverRouteLine) { map.removeLayer(driverRouteLine); driverRouteLine = null; }
             const c=document.getElementById('floatingChatBtn');
             if(c)c.remove();
         }
