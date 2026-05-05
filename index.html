@@ -504,6 +504,11 @@
     <source src="https://bigsoundbank.com/UPLOAD/mp3/0001.mp3" type="audio/mpeg">
 </audio>
 
+<!-- 🔔 صوت تنبيه الرسائل الجديدة في المحادثة -->
+<audio id="chatMessageSound" preload="auto">
+    <source src="https://bigsoundbank.com/UPLOAD/mp3/1111.mp3" type="audio/mpeg">
+</audio>
+
 <script>
     // ==================== GLOBAL VARIABLES ====================
     let db, auth, app;
@@ -532,6 +537,10 @@
     let searchMap = null;
     let searchMarkers = [];
     let searchUpdateInterval = null;
+    
+    // متغيرات تتبع الرسائل الجديدة في المحادثة
+    let lastKnownMessageCount = 0;
+    let currentChatMyId = null;
 
     // ==================== AUTH FUNCTIONS ====================
     function switchAuthTab(tab) {
@@ -674,9 +683,46 @@
         await db.collection('chats').doc(chatId).collection('messages').add({ senderId, senderType, text: text.trim(), timestamp: firebase.firestore.FieldValue.serverTimestamp(), read: false });
         await db.collection('chats').doc(chatId).update({ lastMessage: text.trim(), lastUpdate: firebase.firestore.FieldValue.serverTimestamp() });
     }
-    function listenToMessages(chatId, callback) {
+    
+    // 🔔 دالة تشغيل صوت الرسالة الجديدة مع معالجة سياسة التشغيل التلقائي
+    function playChatMessageSound() {
+        const audio = document.getElementById('chatMessageSound');
+        if(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                // إذا فشل التشغيل، نحاول مرة أخرى عند أول تفاعل مع المستخدم
+                const handler = () => {
+                    audio.play().catch(()=>{});
+                    document.removeEventListener('click', handler);
+                    document.removeEventListener('touchstart', handler);
+                };
+                document.addEventListener('click', handler, {once: true});
+                document.addEventListener('touchstart', handler, {once: true});
+            });
+        }
+    }
+    
+    function listenToMessages(chatId, callback, myUserId) {
+        // إعادة تعيين عداد الرسائل عند فتح محادثة جديدة
+        lastKnownMessageCount = 0;
+        currentChatMyId = myUserId;
+        
         return db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
-            const messages = []; snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+            const messages = []; 
+            snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+            
+            // 🔔 كشف الرسائل الجديدة وتشغيل الصوت
+            if (messages.length > 0 && lastKnownMessageCount > 0) {
+                const newMessages = messages.slice(lastKnownMessageCount);
+                newMessages.forEach(msg => {
+                    // تشغيل الصوت فقط إذا كانت الرسالة من الطرف الآخر وليست مني
+                    if (msg.senderId !== myUserId) {
+                        playChatMessageSound();
+                    }
+                });
+            }
+            lastKnownMessageCount = messages.length;
+            
             callback(messages);
         });
     }
@@ -732,11 +778,14 @@
             </div>`;
         document.body.appendChild(chatContainer);
         if (activeChatListener) activeChatListener();
+        
+        // تمرير معرف المستخدم الحالي لدالة الاستماع للرسائل
+        const myUserId = currentDriver?.uid || currentUser.uid;
         activeChatListener = listenToMessages(chatId, (messages) => {
             const container = document.getElementById('chatMessages'); if(!container) return;
             container.innerHTML = messages.map(msg => `<div class="message ${msg.senderType===myRole?'me':'other'}">${msg.text}</div>`).join('');
             container.scrollTop = container.scrollHeight;
-        });
+        }, myUserId);
     }
     window.closeChat = function() {
         const overlay = document.getElementById('chatOverlay'); if(overlay) overlay.remove();
