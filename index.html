@@ -271,9 +271,31 @@
         .cancel-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(239, 83, 80, 0.4); }
         .hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(27,27,27,0.85); color: #fff; padding: 8px 16px; border-radius: 24px; font-size: 0.8em; pointer-events: none; z-index: 1000; font-weight: 500; }
         .autocomplete { position: relative; }
-        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 1000; box-shadow: var(--shadow); display: none; }
+        .autocomplete-results { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: #fff; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            z-index: 2000; 
+            box-shadow: var(--shadow); 
+            display: none; 
+        }
         .autocomplete-results.show { display: block; }
-        .autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; }
+        .autocomplete-item { 
+            padding: 12px 14px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            border-bottom: 1px solid #f5f5f5; 
+            transition: 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
         .autocomplete-item:last-child { border-bottom: none; }
         
@@ -1433,8 +1455,9 @@
     
     function initMap() {
         map = MapUtils.initMap('map');
-        setupAutocomplete('pickupInput', 'pickupResults', (lat, lng, name) => setLocation(pickupMarker, [lat,lng], 'pickupInput', 'pickupCoords', true));
-        setupAutocomplete('destInput', 'destResults', (lat, lng, name) => setLocation(destMarker, [lat,lng], 'destInput', 'destCoords', false));
+        // ✅ تم تعديل الاستدعاءات لإضافة معامل countryOnly
+        setupAutocomplete('pickupInput', 'pickupResults', (lat, lng, name) => setLocation(pickupMarker, [lat,lng], 'pickupInput', 'pickupCoords', true), true);
+        setupAutocomplete('destInput', 'destResults', (lat, lng, name) => setLocation(destMarker, [lat,lng], 'destInput', 'destCoords', false), false);
         if ('geolocation' in navigator) useGPS(); else fallbackLocation();
         map.on('click', e => { if (mapClickEnabled && rideState === 'idle') selectDestinationFromMap(e.latlng.lat, e.latlng.lng); });
     }
@@ -1492,25 +1515,66 @@
         if(pickupPos)drawRoute(); 
     }
     
-    function setupAutocomplete(inputId, resultsId, callback) { 
-        const inp=document.getElementById(inputId), res=document.getElementById(resultsId); 
-        const debouncedSearch = Utils.debounce(async function() { 
-            const q=this.value.trim(); 
-            if(q.length<3){res.classList.remove('show');return;} 
+    // ✅ دالة setupAutocomplete المُحدثة بالكامل مع دعم البحث العالمي للوجهة
+    function setupAutocomplete(inputId, resultsId, callback, countryOnly = true) { 
+        const inp = document.getElementById(inputId);
+        const res = document.getElementById(resultsId);
+        
+        // دالة البحث مع مرجع صريح للعنصر بدلاً من الاعتماد على 'this'
+        const performSearch = async function() { 
+            const q = inp.value.trim(); 
+            if(q.length < 3) {
+                res.classList.remove('show');
+                return;
+            } 
             try { 
-                const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=dz&limit=5`); 
-                const data=await r.json(); 
-                if(data.length>0){
-                    res.innerHTML=data.map(i=>`<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">${i.display_name}</div>`).join(''); 
+                // ✅ إزالة قيد الدولة للوجهة، أو إبقاؤه للانطلاق حسب الحاجة
+                const countryParam = countryOnly ? '&countrycodes=dz' : '';
+                const limit = countryOnly ? 5 : 8; // زيادة النتائج للوجهة
+                const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${countryParam}&limit=${limit}`, {
+                    headers: { 'User-Agent': 'YasserRidePro/1.0' } // مطلوب من Nominatim
+                }); 
+                const data = await r.json(); 
+                if(data.length > 0) {
+                    res.innerHTML = data.map(i => 
+                        `<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">
+                            📍 ${i.display_name.length > 50 ? i.display_name.substring(0,50)+'...' : i.display_name}
+                        </div>`
+                    ).join(''); 
                     res.classList.add('show'); 
-                    res.querySelectorAll('.autocomplete-item').forEach(it=>{
-                        it.onclick=()=>{ res.classList.remove('show'); callback(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name); };
+                    res.querySelectorAll('.autocomplete-item').forEach(it => {
+                        it.onclick = () => { 
+                            res.classList.remove('show'); 
+                            callback(parseFloat(it.dataset.lat), parseFloat(it.dataset.lng), it.dataset.name); 
+                        };
                     });
-                } else { res.innerHTML='<div class="autocomplete-item">🔍 لم يتم العثور</div>'; res.classList.add('show'); } 
-            } catch(e){ res.innerHTML='<div class="autocomplete-item">⚠️ خطأ اتصال</div>'; res.classList.add('show'); } 
-        }, 400);
-        inp.addEventListener('input', debouncedSearch.bind(inp));
-        document.addEventListener('click',e=>{if(e.target!==inp&&!res.contains(e.target))res.classList.remove('show');}); 
+                } else { 
+                    res.innerHTML = '<div class="autocomplete-item">🔍 لم يتم العثور على نتائج</div>'; 
+                    res.classList.add('show'); 
+                } 
+            } catch(e) { 
+                console.error('Autocomplete error:', e);
+                res.innerHTML = '<div class="autocomplete-item">⚠️ خطأ في الاتصال، تأكد من الإنترنت</div>'; 
+                res.classList.add('show'); 
+            } 
+        };
+        
+        // ✅ تطبيق debounce على الدالة مع مرجع صريح
+        const debouncedSearch = Utils.debounce(performSearch, 400);
+        inp.addEventListener('input', debouncedSearch);
+        
+        // ✅ إغلاق النتائج عند النقر خارج الحقل
+        document.addEventListener('click', e => {
+            if(e.target !== inp && !res.contains(e.target)) {
+                res.classList.remove('show');
+            }
+        }, { passive: true });
+        
+        // ✅ إغلاق القائمة عند التمرير لمنع تداخل الواجهة
+        window.addEventListener('scroll', () => res.classList.remove('show'), { passive: true });
+        
+        // ✅ إغلاق عند تغيير حجم الشاشة (للهواتف)
+        window.addEventListener('resize', () => res.classList.remove('show'), { passive: true });
     }
     
     function drawRoute() { 
