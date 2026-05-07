@@ -135,12 +135,12 @@
         .register-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
         .form-note { font-size: 0.8em; color: #777; margin-top: 15px; text-align: center; }
         
-        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; animation: none; }
-        .driver-info { display: flex; align-items: center; gap: 10px; flex: 1; }
-        .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; cursor: pointer; position: relative; }
+        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; animation: none; position: relative; }
+        .driver-info { display: flex; align-items: center; gap: 10px; flex: 1; position: relative; }
+        .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; cursor: pointer; position: relative; z-index: 1002; }
         .driver-name { font-weight: 600; font-size: 0.95em; }
         .driver-status { font-size: 0.8em; opacity: 0.9; }
-        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; transition: 0.2s; }
+        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; transition: 0.2s; z-index: 1001; }
         .status-toggle.active { background: #2ecc71; }
         .status-toggle.unavailable { background: #f39c12; }
         .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
@@ -178,9 +178,9 @@
         .message.me { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; margin-right: auto; }
         .message.other { background: #e8f4fd; color: #333; border-bottom-left-radius: 4px; margin-left: auto; }
         
-        /* ✅ خريطة المحادثة المصغرة */
+        /* ✅ خريطة المحادثة المصغرة مع المسار */
         .chat-mini-map {
-            height: 120px; width: 100%;
+            height: 150px; width: 100%;
             border-bottom: 1px solid #eee;
             background: #f1f3f5;
             position: relative;
@@ -191,6 +191,14 @@
             padding: 4px 10px; border-radius: 15px;
             font-size: 0.75em; z-index: 1000;
         }
+        .chat-mini-map .distance-badge {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,184,148,0.9); color: #fff;
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.8em; font-weight: 600; z-index: 1000;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
         .pulse-marker-chat {
             animation: pulse-chat 1s infinite;
             filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.8));
@@ -198,6 +206,12 @@
         @keyframes pulse-chat {
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.3); opacity: 0.7; }
+        }
+        .marker-me { animation: pulse-me 1.5s infinite; }
+        @keyframes pulse-me {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52,152,219,0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(52,152,219,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
         }
         
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 0.9em; z-index: 2000; transition: transform 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
@@ -234,7 +248,6 @@
         .start-trip-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(46, 204, 113, 0.6); }
         .start-trip-btn:disabled { background: #95a5a6; cursor: not-allowed; transform: none; animation: none; box-shadow: none; }
         
-        /* ✅ زر إلغاء الرحلة - أحمر وميض */
         .cancel-trip-btn {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: #fff; border: none; padding: 10px 20px; border-radius: 25px;
@@ -300,14 +313,15 @@
         }
         .cancel-search-btn:hover { background: #ffcdd2; }
         
-        /* ✅ قائمة السائق المنسدلة */
+        /* ✅ قائمة السائق المنسدلة - إصلاح الزيندكس */
         .driver-dropdown {
             position: absolute; top: 100%; right: 0; left: 0;
             background: #fff; border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            padding: 10px; z-index: 1001;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            padding: 10px; z-index: 1003;
             display: none; flex-direction: column; gap: 8px;
             animation: slideDown 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.1);
         }
         .driver-dropdown.show { display: flex; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -460,7 +474,6 @@
 
             <div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
 
-            <!-- ✅ استبدال الاقتصادية بدراجة نارية -->
             <div class="car-selector">
                 <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)">
                     <div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div>
@@ -496,7 +509,7 @@
         <div class="dashboard-header">
             <div class="driver-info">
                 <!-- ✅ أيقونة السائق تفتح القائمة المنسدلة -->
-                <div class="driver-avatar" onclick="toggleDriverDropdown(event)">👨‍✈️</div>
+                <div class="driver-avatar" id="driverAvatarBtn" title="القائمة">👨‍✈️</div>
                 <div>
                     <div class="driver-name" id="dashDriverName">اسم السائق</div>
                     <div class="driver-status" id="dashDriverArea">منطقة العمل</div>
@@ -586,11 +599,12 @@
     let db, auth, app;
     let currentUser = null;
     let driverLocationInterval = null;
+    let passengerLocationInterval = null;
     let activeRequestListener = null;
     let activeChatListener = null;
     let map, pickupMarker, destMarker, routeControl, driverRoute, passengerRoute;
-    let pickupPos = null, destPos = null;
-    let selectedRate = 10, baseFare = 50, distKm = 0, timeMin = 0; // ✅ تحديث الأسعار للدراجة
+    let pickupPos = null, destPos = null, myCurrentPos = null;
+    let selectedRate = 10, baseFare = 50, distKm = 0, timeMin = 0;
     let rideState = 'idle';
     let mapClickEnabled = false;
     let pickupDebounce, destDebounce;
@@ -610,7 +624,8 @@
     let lastKnownMessageCount = 0;
     let currentChatMyId = null;
     let chatMiniMap = null;
-    let chatOtherMarker = null;
+    let chatOtherMarker = null, chatMyMarker = null;
+    let chatRouteControl = null;
     let chatLocationUpdate = null;
     let currentRecordsFilter = 'all';
     
@@ -621,13 +636,18 @@
             { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 },
             { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', attribution: '© Esri', maxZoom: 18 }
         ],
-        routeStyles: { driver: { color: '#f39c12', weight: 6, opacity: 0.9 }, passenger: { color: '#27ae60', weight: 6, opacity: 0.9 } },
+        routeStyles: { 
+            driver: { color: '#f39c12', weight: 4, opacity: 0.9 }, 
+            passenger: { color: '#27ae60', weight: 4, opacity: 0.9 },
+            chat: { color: '#3498db', weight: 3, opacity: 0.8, dashArray: '5, 5' }
+        },
         markerIcons: {
             pickup: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30, 30], iconAnchor: [15, 30] }),
             destination: L.divIcon({ className: '', html: '🏁', iconSize: [24, 24], iconAnchor: [12, 24] }),
             driver: L.divIcon({ className: '', html: '🚕', iconSize: [28, 28], iconAnchor: [14, 28] }),
             motorcycle: L.divIcon({ className: '', html: '🏍️', iconSize: [28, 28], iconAnchor: [14, 28] }),
-            chatPulse: L.divIcon({ className: 'pulse-marker-chat', html: '🔴', iconSize: [20, 20], iconAnchor: [10, 20] })
+            chatPulse: L.divIcon({ className: 'pulse-marker-chat', html: '🔴', iconSize: [20, 20], iconAnchor: [10, 20] }),
+            chatMe: L.divIcon({ className: 'marker-me', html: '🔵', iconSize: [20, 20], iconAnchor: [10, 20] })
         }
     };
 
@@ -646,6 +666,8 @@
             const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         },
+        formatDistance: (km) => km < 1 ? `${Math.round(km*1000)} م` : `${km.toFixed(1)} كم`,
+        formatTime: (min) => min < 1 ? 'أقل من دقيقة' : `${Math.round(min)} دقيقة`,
         copyToClipboard: (text) => navigator.clipboard.writeText(text).then(() => Utils.showToast('📋 تم النسخ', 'success')),
         formatCoords: (lat, lng) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
         debounce: (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; },
@@ -699,17 +721,48 @@
             const bounds = L.latLngBounds([driverPos, pickupPos, destPos]);
             map.fitBounds(bounds, { padding: [50, 50] });
         },
-        initChatMiniMap: (containerId, otherPos, myRole) => {
-            const cm = L.map(containerId, { zoomControl: false, attributionControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false }).setView(otherPos, 16);
+        initChatMiniMap: (containerId, myPos, otherPos, myRole) => {
+            const cm = L.map(containerId, { zoomControl: false, attributionControl: false, dragging: true, touchZoom: true, scrollWheelZoom: true }).setView(myPos || otherPos || MAP_CONFIG.defaultView, 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(cm);
-            const marker = L.marker(otherPos, { icon: MAP_CONFIG.markerIcons.chatPulse }).addTo(cm);
+            
+            // ✅ إضافة علامة موقعي (أزرق)
+            const myMarker = myPos ? L.marker(myPos, { icon: MAP_CONFIG.markerIcons.chatMe }).addTo(cm).bindPopup('📍 موقعي') : null;
+            // ✅ إضافة علامة الطرف الآخر (أحمر وميض)
+            const otherMarker = otherPos ? L.marker(otherPos, { icon: MAP_CONFIG.markerIcons.chatPulse }).addTo(cm).bindPopup(myRole === 'driver' ? '📍 الراكب' : '🚕 السائق') : null;
+            
+            // ✅ رسم المسار بينهما
+            let routeCtrl = null;
+            if(myPos && otherPos) {
+                routeCtrl = MapUtils.drawRoute(cm, [myPos, otherPos], MAP_CONFIG.routeStyles.chat);
+            }
+            
+            // ✅ تركيز الخريطة على النقطتين
+            if(myPos && otherPos) {
+                const bounds = L.latLngBounds([myPos, otherPos]);
+                cm.fitBounds(bounds, { padding: [30, 30] });
+            }
+            
             setTimeout(() => cm.invalidateSize(), 100);
-            return { map: cm, marker };
+            return { map: cm, myMarker, otherMarker, routeCtrl };
         },
-        updateChatMiniMap: (miniMap, marker, newPos) => {
-            if(!miniMap || !marker) return;
-            marker.setLatLng(newPos);
-            miniMap.setView(newPos, 16);
+        updateChatMiniMap: (miniMapData, myPos, otherPos) => {
+            if(!miniMapData?.map) return;
+            const { map, myMarker, otherMarker, routeCtrl } = miniMapData;
+            
+            if(myMarker && myPos) myMarker.setLatLng(myPos);
+            if(otherMarker && otherPos) otherMarker.setLatLng(otherPos);
+            
+            // ✅ تحديث المسار
+            if(routeCtrl && myPos && otherPos) {
+                map.removeControl(routeCtrl);
+                miniMapData.routeCtrl = MapUtils.drawRoute(map, [myPos, otherPos], MAP_CONFIG.routeStyles.chat);
+            }
+            
+            // ✅ تحديث العرض
+            if(myPos && otherPos) {
+                const bounds = L.latLngBounds([myPos, otherPos]);
+                map.fitBounds(bounds, { padding: [30, 30] });
+            }
         }
     };
 
@@ -761,6 +814,7 @@
 
     async function logoutUser() {
         if(driverLocationInterval) clearInterval(driverLocationInterval);
+        if(passengerLocationInterval) clearInterval(passengerLocationInterval);
         if(activeChatListener) activeChatListener();
         if(chatLocationUpdate) clearInterval(chatLocationUpdate);
         await auth.signOut();
@@ -802,12 +856,16 @@
                 switchView('view-dashboard');
                 startLocationUpdates(user.uid);
             } else { switchView('view-driver-setup'); }
-        } else { switchView('view-request'); }
+        } else { 
+            switchView('view-request');
+            // ✅ بدء تتبع موقع الراكب
+            startPassengerLocationTracking();
+        }
     }
 
     function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display = 'block'; }
 
-    // ==================== LOCATION UPDATES ====================
+    // ==================== LOCATION TRACKING ====================
     function startLocationUpdates(driverId) {
         if (driverLocationInterval) clearInterval(driverLocationInterval);
         driverLocationInterval = setInterval(async () => {
@@ -815,33 +873,108 @@
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     try {
+                        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                         await db.collection('drivers').doc(driverId).update({
-                            location: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-                            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                            location: loc, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                        // ✅ تحديث الخريطة في المحادثة إذا كانت مفتوحة
+                        myCurrentPos = [loc.lat, loc.lng];
+                        // ✅ تحديث الخريطة في المحادثة
                         if(chatMiniMap && currentActiveRide?.passengerId) {
-                            MapUtils.updateChatMiniMap(chatMiniMap, chatOtherMarker, [pos.coords.latitude, pos.coords.longitude]);
+                            const otherPos = await getPassengerLocation(currentActiveRide.passengerId);
+                            MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, otherPos);
+                            updateChatDistanceBadge(myCurrentPos, otherPos);
                         }
                     } catch(e) {}
                 }, null, { enableHighAccuracy: true, timeout: 5000 });
             }
-        }, 15000);
+        }, 10000);
     }
 
-    // ==================== DRIVER DROPDOWN ====================
+    function startPassengerLocationTracking() {
+        if (passengerLocationInterval) clearInterval(passengerLocationInterval);
+        passengerLocationInterval = setInterval(async () => {
+            if ('geolocation' in navigator && currentActiveRide) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    try {
+                        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        // حفظ موقع الراكب في المستخدمين
+                        await db.collection('users').doc(currentUser.uid).update({
+                            lastLocation: loc, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        myCurrentPos = [loc.lat, loc.lng];
+                        // ✅ تحديث الخريطة في المحادثة
+                        if(chatMiniMap && currentActiveRide?.assignedDriverId) {
+                            const otherPos = await getDriverLocation(currentActiveRide.assignedDriverId);
+                            MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, otherPos);
+                            updateChatDistanceBadge(myCurrentPos, otherPos);
+                        }
+                    } catch(e) {}
+                }, null, { enableHighAccuracy: true, timeout: 5000 });
+            }
+        }, 10000);
+    }
+
+    async function getDriverLocation(driverId) {
+        try {
+            const doc = await db.collection('drivers').doc(driverId).get();
+            if(doc.exists && doc.data().location) return [doc.data().location.lat, doc.data().location.lng];
+        } catch(e) {}
+        return null;
+    }
+
+    async function getPassengerLocation(passengerId) {
+        try {
+            const doc = await db.collection('users').doc(passengerId).get();
+            if(doc.exists && doc.data().lastLocation) return [doc.data().lastLocation.lat, doc.data().lastLocation.lng];
+        } catch(e) {}
+        return null;
+    }
+
+    function updateChatDistanceBadge(myPos, otherPos) {
+        const badge = document.querySelector('.chat-mini-map .distance-badge');
+        if(!badge || !myPos || !otherPos) return;
+        const dist = Utils.calculateDistance(myPos[0], myPos[1], otherPos[0], otherPos[1]);
+        const time = Math.max(1, Math.round(dist / 3)); // افتراض سرعة 3 كم/دقيقة في المدينة
+        badge.innerHTML = `📏 ${Utils.formatDistance(dist)} • ⏱️ ${Utils.formatTime(time)}`;
+    }
+
+    // ==================== DRIVER DROPDOWN - ✅ إصلاح الفتح ====================
     function toggleDriverDropdown(e) {
         e?.stopPropagation();
         const dropdown = document.getElementById('driverDropdown');
-        dropdown.classList.toggle('show');
-        // إغلاق القائمة عند النقر خارجها
-        document.addEventListener('click', function closeDropdown(ev) {
-            if(!dropdown.contains(ev.target) && !ev.target.closest('.driver-avatar')) {
+        const isShown = dropdown.classList.contains('show');
+        
+        // إغلاق أي قائمة مفتوحة أولاً
+        document.querySelectorAll('.driver-dropdown').forEach(d => d.classList.remove('show'));
+        
+        // فتح/إغلاق القائمة الحالية
+        if(!isShown) {
+            dropdown.classList.add('show');
+        }
+        
+        // إغلاق عند النقر خارج القائمة
+        const closeHandler = (ev) => {
+            const avatar = document.getElementById('driverAvatarBtn');
+            if(!dropdown.contains(ev.target) && ev.target !== avatar && !avatar?.contains(ev.target)) {
                 dropdown.classList.remove('show');
-                document.removeEventListener('click', closeDropdown);
+                document.removeEventListener('click', closeHandler);
+                document.removeEventListener('touchstart', closeHandler);
             }
-        }, { once: true });
+        };
+        setTimeout(() => {
+            document.addEventListener('click', closeHandler);
+            document.addEventListener('touchstart', closeHandler);
+        }, 100);
     }
+
+    // ✅ إضافة مستمع للنقر على الأيقونة
+    document.addEventListener('DOMContentLoaded', () => {
+        const avatarBtn = document.getElementById('driverAvatarBtn');
+        if(avatarBtn) {
+            avatarBtn.addEventListener('click', toggleDriverDropdown);
+            avatarBtn.addEventListener('touchstart', (e) => { e.preventDefault(); toggleDriverDropdown(e); });
+        }
+    });
 
     function updateServiceToggleUI() {
         const btn = document.getElementById('serviceToggleBtn');
@@ -953,14 +1086,13 @@
 
     function stopRequestSound() { Utils.stopSound('requestSound'); }
 
-    function showChatInterface(rideId, passengerId, driverId, myRole, driverName, rideData = null) {
+    async function showChatInterface(rideId, passengerId, driverId, myRole, driverName, rideData = null) {
         const chatId = `chat_${rideId}`; currentChatId = chatId;
         const existing = document.getElementById('chatOverlay'); if (existing) existing.remove();
         
         const startTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted') 
             ? `<button class="start-trip-btn" onclick="startTripNavigation('${rideData.destination?.lat}', '${rideData.destination?.lng}', '${rideData.destination?.name || 'الوجهة'}')">🚀 بدء الرحلة</button>` : '';
         
-        // ✅ زر إلغاء الرحلة بجانب بدء الرحلة
         const cancelTripBtn = (myRole === 'driver' && rideData && rideData.status === 'accepted')
             ? `<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rideId}')">❌ إلغاء الرحلة</button>` : '';
         
@@ -972,9 +1104,24 @@
                 <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أين أنت؟')">❓ أين أنت؟</button>
             </div>` : '';
         
-        // ✅ تحديد موقع الطرف الآخر للخريطة المصغرة
-        const otherPos = myRole === 'driver' ? (rideData?.pickup ? [rideData.pickup.lat, rideData.pickup.lng] : null) : (rideData?.driverLocation ? [rideData.driverLocation.lat, rideData.driverLocation.lng] : null);
-        const mapLabel = myRole === 'driver' ? '📍 موقع الراكب' : '🚕 موقع السائق';
+        // ✅ تحديد مواقع الطرفين للخريطة المصغرة
+        let myPos = null, otherPos = null, mapLabel = '';
+        
+        if(myRole === 'driver') {
+            mapLabel = '📍 موقع الراكب';
+            myPos = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
+            otherPos = rideData?.pickup ? [rideData.pickup.lat, rideData.pickup.lng] : null;
+        } else {
+            mapLabel = '🚕 موقع السائق';
+            otherPos = rideData?.driverLocation ? [rideData.driverLocation.lat, rideData.driverLocation.lng] : null;
+            // محاولة جلب موقع الراكب الحالي
+            if ('geolocation' in navigator) {
+                try {
+                    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
+                    myPos = pos;
+                } catch(e) { myPos = rideData?.pickup ? [rideData.pickup.lat, rideData.pickup.lng] : null; }
+            }
+        }
         
         const chatContainer = document.createElement('div');
         chatContainer.id = 'chatOverlay'; chatContainer.className = 'chat-overlay';
@@ -988,8 +1135,12 @@
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cancelTripBtn}${startTripBtn}<button class="chat-close" onclick="closeChat()">×</button></div>
                 </div>
-                <!-- ✅ خريطة مصغرة مع وميض -->
-                ${otherPos ? `<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${mapLabel}</div></div>` : ''}
+                <!-- ✅ خريطة مصغرة مع مسار ومسافة -->
+                ${myPos || otherPos ? `
+                <div class="chat-mini-map" id="chatMiniMap">
+                    <div class="map-label">${mapLabel}</div>
+                    <div class="distance-badge">📏 جاري الحساب...</div>
+                </div>` : ''}
                 <div id="chatMessages" class="chat-messages"></div>
                 <div class="chat-input-area">
                     ${quickMsgButtons}
@@ -1007,26 +1158,40 @@
             container.scrollTop = container.scrollHeight;
         }, myUserId);
         
-        // ✅ تهيئة الخريطة المصغرة
-        if(otherPos && document.getElementById('chatMiniMap')) {
-            const { map: cm, marker } = MapUtils.initChatMiniMap('chatMiniMap', otherPos, myRole);
-            chatMiniMap = cm; chatOtherMarker = marker;
+        // ✅ تهيئة الخريطة المصغرة مع المسار
+        if((myPos || otherPos) && document.getElementById('chatMiniMap')) {
+            chatMiniMap = MapUtils.initChatMiniMap('chatMiniMap', myPos, otherPos, myRole);
+            if(myPos && otherPos) updateChatDistanceBadge(myPos, otherPos);
             
-            // ✅ تحديث موقع الطرف الآخر كل 10 ثواني
+            // ✅ تحديث الموقع والمسار كل 10 ثواني
             if(chatLocationUpdate) clearInterval(chatLocationUpdate);
             chatLocationUpdate = setInterval(async () => {
                 try {
-                    let newPos = null;
-                    if(myRole === 'driver' && rideData?.passengerId) {
-                        // جلب موقع الراكب (يمكن تخزينه في rideRequests أو users)
-                        const pDoc = await db.collection('users').doc(rideData.passengerId).get();
-                        if(pDoc.exists && pDoc.data().lastLocation) newPos = [pDoc.data().lastLocation.lat, pDoc.data().lastLocation.lng];
-                    } else if(myRole === 'passenger' && rideData?.assignedDriverId) {
-                        const dDoc = await db.collection('drivers').doc(rideData.assignedDriverId).get();
-                        if(dDoc.exists && dDoc.data().location) newPos = [dDoc.data().location.lat, dDoc.data().location.lng];
+                    let newMyPos = myPos, newOtherPos = otherPos;
+                    
+                    if(myRole === 'driver') {
+                        // تحديث موقعي (السائق)
+                        if ('geolocation' in navigator) {
+                            const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
+                            newMyPos = pos;
+                        }
+                        // تحديث موقع الراكب
+                        newOtherPos = await getPassengerLocation(rideData?.passengerId);
+                    } else {
+                        // تحديث موقعي (الراكب)
+                        if ('geolocation' in navigator) {
+                            const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
+                            newMyPos = pos;
+                        }
+                        // تحديث موقع السائق
+                        newOtherPos = await getDriverLocation(rideData?.assignedDriverId);
                     }
-                    if(newPos) MapUtils.updateChatMiniMap(chatMiniMap, chatOtherMarker, newPos);
-                } catch(e) { console.log('Update mini-map:', e); }
+                    
+                    if(newMyPos || newOtherPos) {
+                        MapUtils.updateChatMiniMap(chatMiniMap, newMyPos || myPos, newOtherPos || otherPos);
+                        if(newMyPos && newOtherPos) updateChatDistanceBadge(newMyPos, newOtherPos);
+                    }
+                } catch(e) { console.log('Mini-map update:', e); }
             }, 10000);
         }
     }
@@ -1035,7 +1200,8 @@
         const overlay = document.getElementById('chatOverlay'); if(overlay) overlay.remove();
         if(activeChatListener){ activeChatListener(); activeChatListener=null; }
         if(chatLocationUpdate) { clearInterval(chatLocationUpdate); chatLocationUpdate = null; }
-        if(chatMiniMap) { chatMiniMap.remove(); chatMiniMap = null; chatOtherMarker = null; }
+        if(chatMiniMap?.map) { chatMiniMap.map.remove(); chatMiniMap = null; }
+        chatOtherMarker = null; chatMyMarker = null;
         currentChatId = null;
     }
     
@@ -1052,7 +1218,6 @@
         if(currentActiveRide?.id) db.collection('rideRequests').doc(currentActiveRide.id).update({ tripStarted: true, tripStartedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{});
     }
     
-    // ✅ دالة إلغاء الرحلة النشطة من المحادثة
     window.cancelActiveTrip = async function(rideId) {
         if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟')) return;
         try {
