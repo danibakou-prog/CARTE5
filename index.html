@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ياسر تاكسي 🚗</title>
+    <title>Yasser Ride Pro 🚖</title>
     
     <!-- Leaflet & Routing Machine -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -19,381 +19,560 @@
     
     <style>
         :root {
-            --primary: #00b894;
-            --primary-dark: #00a383;
-            --secondary: #3498db;
-            --bg: #f8f9fa;
-            --text: #2d3436;
-            --card: #ffffff;
-            --shadow: 0 4px 16px rgba(0,0,0,0.12);
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --route-driver: #f39c12;
-            --route-passenger: #27ae60;
+            /* ✅ الألوان الجديدة: أخضر مصفر مع أبيض نقي */
+            --primary: #9ACD32; /* Yellow-Green */
+            --primary-dark: #7CB342;
+            --primary-light: #C5E1A5;
+            --secondary: #FFD54F; /* Amber accent */
+            --bg: #FFFFFF; /* أبيض نقي */
+            --text: #1B1B1B;
+            --card: #FFFFFF;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.25);
+            --danger: #EF5350;
+            --warning: #FFA726;
+            --route-driver: #FF9800;
+            --route-passenger: #66BB6A;
+            --surface: #FAFAFA;
+            --border: #E8E8E8;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--bg); min-height: 100vh; padding: 8px; color: var(--text); }
-        .app { max-width: 440px; margin: 0 auto; background: var(--card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); position: relative; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background: linear-gradient(135deg, var(--bg) 0%, #F9F9F9 100%); 
+            min-height: 100vh; 
+            padding: 8px; 
+            color: var(--text); 
+        }
+        .app { 
+            max-width: 440px; 
+            margin: 0 auto; 
+            background: var(--card); 
+            border-radius: 28px; 
+            overflow: hidden; 
+            box-shadow: var(--shadow); 
+            position: relative; 
+            min-height: 100vh;
+            border: 1px solid var(--border);
+        }
         
-        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view { display: none; animation: fadeIn 0.35s ease; }
         .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .header { background: var(--primary); color: #fff; padding: 14px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
-        .header h1 { font-size: 1.2em; font-weight: 700; flex: 1; text-align: center; }
-        .back-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
-        .back-btn:hover { background: rgba(255,255,255,0.3); }
-        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; }
+        /* ✅ Header احترافي */
+        .header { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #1B1B1B; 
+            padding: 16px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(124, 179, 66, 0.2);
+        }
+        .header h1 { 
+            font-size: 1.3em; 
+            font-weight: 800; 
+            flex: 1; 
+            text-align: center; 
+            letter-spacing: -0.3px;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+        }
+        .back-btn { 
+            background: rgba(255,255,255,0.25); 
+            border: none; 
+            color: #1B1B1B; 
+            padding: 10px 14px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.02); }
+        .logout-btn { 
+            background: rgba(255,255,255,0.25); 
+            border: none; 
+            color: #1B1B1B; 
+            padding: 8px 16px; 
+            border-radius: 24px; 
+            font-size: 0.8em; 
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.4); }
         
-        .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #e8f5e9; padding: 5px; border-radius: 12px; width: 100%; max-width: 300px; }
-        .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .auth-tab.active { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--primary-dark); }
-        .auth-form { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 15px; }
-        .auth-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 0.95em; outline: none; transition: 0.2s; }
-        .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,184,148,0.2); }
-        .auth-btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 5px; }
-        .auth-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        .auth-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
+        .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; }
+        .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
+        .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
+        .auth-tab.active { background: var(--card); box-shadow: var(--shadow); color: var(--primary-dark); font-weight: 700; }
+        .auth-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 18px; }
+        .auth-input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid var(--border); 
+            border-radius: 14px; 
+            font-size: 0.95em; 
+            outline: none; 
+            transition: 0.25s;
+            background: var(--card);
+        }
+        .auth-input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 4px rgba(156, 205, 50, 0.15); 
+            background: #FFF;
+        }
+        .auth-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #1B1B1B; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 1.05em; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.25s; 
+            margin-top: 8px;
+            box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3);
+        }
+        .auth-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-hover);
+        }
+        .auth-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
         
-        .main-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 20px; text-align: center; }
-        .main-logo { font-size: 4em; margin-bottom: 15px; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .main-title { font-size: 1.6em; color: var(--primary-dark); margin-bottom: 8px; font-weight: 800; }
-        .main-subtitle { color: #666; font-size: 0.95em; margin-bottom: 35px; line-height: 1.4; }
-        .main-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; max-width: 320px; padding: 18px 24px; border: none; border-radius: 16px; font-size: 1.1em; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 16px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .main-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .main-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 24px; text-align: center; }
+        .main-logo { 
+            font-size: 4.5em; 
+            margin-bottom: 18px; 
+            animation: bounce 2.5s infinite;
+            filter: drop-shadow(0 4px 12px rgba(156, 205, 50, 0.3));
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .main-title { 
+            font-size: 1.8em; 
+            color: var(--primary-dark); 
+            margin-bottom: 10px; 
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .main-subtitle { color: #555; font-size: 1em; margin-bottom: 40px; line-height: 1.5; max-width: 280px; }
+        .main-btn { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 14px; 
+            width: 100%; 
+            max-width: 340px; 
+            padding: 20px 28px; 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 1.15em; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            margin-bottom: 18px; 
+            color: #1B1B1B; 
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .main-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+        .main-btn:hover::before { left: 100%; }
+        .main-btn:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
         .btn-passenger { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
-        .btn-driver { background: linear-gradient(135deg, var(--secondary), #2980b9); }
-        .btn-icon { font-size: 1.4em; }
-        .main-footer { margin-top: 20px; font-size: 0.8em; color: #999; }
+        .btn-driver { background: linear-gradient(135deg, var(--secondary), #FFB74D); }
+        .btn-icon { font-size: 1.5em; }
+        .main-footer { margin-top: 24px; font-size: 0.85em; color: #888; }
         
-        #map { height: 280px; width: 100%; position: relative; }
+        #map { height: 300px; width: 100%; position: relative; border-radius: 20px 20px 0 0; overflow: hidden; }
         .leaflet-routing-container { display: none !important; }
         .pulse-marker { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,184,148,0.7); } 70% { box-shadow: 0 0 0 15px rgba(0,184,148,0); } 100% { box-shadow: 0 0 0 0 rgba(0,184,148,0); } }
-        .panel { padding: 14px; background: var(--card); }
-        .location-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-        .loc-row { display: flex; flex-direction: column; gap: 6px; background: #f1f3f5; padding: 10px; border-radius: 10px; }
-        .loc-header { display: flex; align-items: center; gap: 8px; }
-        .loc-icon { font-size: 1.3em; }
-        .loc-label { font-size: 0.75em; color: #666; }
-        .loc-input-group { display: flex; gap: 6px; }
-        .loc-input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85em; outline: none; transition: 0.2s; }
-        .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0,184,148,0.2); }
-        .loc-btn { padding: 8px 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85em; transition: 0.2s; white-space: nowrap; }
-        .loc-btn:hover { background: var(--primary-dark); }
-        .loc-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
-        .loc-btn.gps-btn { background: #3498db; }
-        .loc-btn.gps-btn:hover { background: #2980b9; }
-        .loc-coords { font-size: 0.7em; color: #888; margin-top: 2px; min-height: 24px; }
-        .coords-badge { background:#e8f5e9;padding:4px 10px;border-radius:6px;font-family:monospace;font-size:0.8em;font-weight:600;color:#2e7d32;display:inline-flex;align-items:center;gap:6px; }
-        .coords-copy-btn { margin-right:8px;padding:2px 8px;background:#3498db;color:#fff;border:none;border-radius:4px;font-size:0.75em;cursor:pointer;transition:0.2s; }
-        .coords-copy-btn:hover { background:#2980b9; }
-        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-        .info-card { background: #e8f5e9; padding: 8px; border-radius: 10px; text-align: center; }
-        .info-card .val { font-weight: bold; font-size: 1em; color: #2e7d32; }
-        .info-card .label { font-size: 0.75em; color: #555; margin-top: 2px; }
-        .price-display { background: #fff3cd; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: #856404; margin-bottom: 10px; border: 1px solid #ffeeba; }
-        .car-selector { display: flex; gap: 8px; margin-bottom: 12px; }
-        .car-opt { flex: 1; background: #f8f9fa; border: 2px solid transparent; border-radius: 12px; padding: 10px 6px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .car-opt.selected { border-color: var(--primary); background: #e6f9f4; }
-        .car-opt .ico { font-size: 1.4em; }
-        .car-opt .name { font-weight: 600; font-size: 0.8em; margin-top: 4px; }
-        .car-opt .rate { color: var(--primary); font-size: 0.75em; }
-        .book-btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-size: 1em; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .book-btn:disabled { background: #b2dfdb; cursor: not-allowed; }
-        .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
-        .status-bar { padding: 10px; text-align: center; font-size: 0.85em; color: #555; background: #f8f9fa; border-radius: 8px; margin-top: 10px; display: none; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(156, 205, 50, 0.7); } 70% { box-shadow: 0 0 0 18px rgba(156, 205, 50, 0); } 100% { box-shadow: 0 0 0 0 rgba(156, 205, 50, 0); } }
+        .panel { padding: 18px 20px; background: var(--card); }
+        .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+        .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); }
+        .loc-header { display: flex; align-items: center; gap: 10px; }
+        .loc-icon { font-size: 1.4em; }
+        .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
+        .loc-input-group { display: flex; gap: 8px; }
+        .loc-input { flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.9em; outline: none; transition: 0.25s; background: #FFF; }
+        .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
+        .loc-btn { padding: 10px 14px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; cursor: pointer; font-size: 0.9em; transition: 0.25s; white-space: nowrap; font-weight: 600; }
+        .loc-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .loc-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
+        .loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); }
+        .loc-btn.gps-btn:hover { background: linear-gradient(135deg, #29B6F6, #039BE5); }
+        .loc-coords { font-size: 0.75em; color: #777; margin-top: 4px; min-height: 24px; }
+        .coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 5px 12px; border-radius: 8px; font-family: monospace; font-size: 0.85em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); }
+        .coords-copy-btn { margin-right: 8px; padding: 3px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; }
+        .coords-copy-btn:hover { background: #FFC107; }
+        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+        .info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 12px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
+        .info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); }
+        .info-card .label { font-size: 0.75em; color: #555; margin-top: 3px; font-weight: 500; }
+        .price-display { 
+            background: linear-gradient(135deg, #FFF9C4, #FFF59D); 
+            padding: 14px; 
+            border-radius: 14px; 
+            text-align: center; 
+            font-weight: 700; 
+            color: #5D4037; 
+            margin-bottom: 14px; 
+            border: 2px solid #FFECB3;
+            box-shadow: 0 2px 8px rgba(255, 213, 79, 0.2);
+        }
+        .car-selector { display: flex; gap: 10px; margin-bottom: 16px; }
+        .car-opt { flex: 1; background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.25s; }
+        .car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); }
+        .car-opt .ico { font-size: 1.6em; }
+        .car-opt .name { font-weight: 700; font-size: 0.85em; margin-top: 6px; }
+        .car-opt .rate { color: var(--primary-dark); font-size: 0.8em; font-weight: 600; }
+        .book-btn { 
+            width: 100%; 
+            padding: 16px; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #1B1B1B; 
+            border: none; 
+            border-radius: 16px; 
+            font-size: 1.05em; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.25s;
+            box-shadow: 0 4px 20px rgba(124, 179, 66, 0.3);
+        }
+        .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
+        .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .status-bar { padding: 12px; text-align: center; font-size: 0.9em; color: #444; background: var(--surface); border-radius: 12px; margin-top: 12px; display: none; border: 1px solid var(--border); }
         .status-bar.show { display: block; animation: fadeIn 0.3s; }
-        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #ccc; border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 6px; vertical-align: middle; }
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .driver-card { background: #e3f2fd; border-radius: 12px; padding: 14px; margin-top: 12px; display: none; }
+        .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; border: 1px solid #90CAF9; }
         .driver-card.show { display: block; animation: slideUp 0.4s; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .d-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .d-avatar { width: 50px; height: 50px; border-radius: 50%; background: #bbdefb; display: flex; align-items: center; justify-content: center; font-size: 1.6em; }
-        .d-name { font-weight: 700; font-size: 1em; }
-        .d-meta { font-size: 0.8em; color: #555; margin-top: 2px; }
-        .d-stars { color: #ffc107; margin-top: 4px; }
-        .d-eta { background: #fff; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600; color: var(--primary-dark); margin-top: 10px; }
-        .cancel-btn { width: 100%; padding: 12px; background: var(--danger); color: #fff; border: none; border-radius: 10px; margin-top: 10px; font-weight: 600; cursor: pointer; }
-        .hint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.75em; pointer-events: none; z-index: 1000; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .d-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        .d-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #BBDEFB, #90CAF9); display: flex; align-items: center; justify-content: center; font-size: 1.8em; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2); }
+        .d-name { font-weight: 800; font-size: 1.05em; color: #1565C0; }
+        .d-meta { font-size: 0.85em; color: #555; margin-top: 3px; font-weight: 500; }
+        .d-stars { color: #FFC107; margin-top: 5px; font-size: 0.9em; }
+        .d-eta { background: #FFF; padding: 10px; border-radius: 12px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 12px; border: 1px solid var(--border); }
+        .cancel-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 14px; margin-top: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); }
+        .cancel-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(239, 83, 80, 0.4); }
+        .hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(27,27,27,0.85); color: #fff; padding: 8px 16px; border-radius: 24px; font-size: 0.8em; pointer-events: none; z-index: 1000; font-weight: 500; }
         .autocomplete { position: relative; }
-        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; }
+        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 1000; box-shadow: var(--shadow); display: none; }
         .autocomplete-results.show { display: block; }
-        .autocomplete-item { padding: 10px 12px; cursor: pointer; font-size: 0.85em; border-bottom: 1px solid #f1f1f1; }
-        .autocomplete-item:hover { background: #e8f5e9; }
+        .autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; }
+        .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
         .autocomplete-item:last-child { border-bottom: none; }
         
-        .form-group { margin-bottom: 16px; text-align: right; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9em; color: #444; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 0.95em; outline: none; transition: 0.2s; }
-        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
-        .register-btn { width: 100%; padding: 14px; background: var(--secondary); color: #fff; border: none; border-radius: 12px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        .register-btn:hover { background: #2980b9; transform: translateY(-1px); }
-        .register-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
-        .form-note { font-size: 0.8em; color: #777; margin-top: 15px; text-align: center; }
+        .form-group { margin-bottom: 18px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); }
+        .register-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; margin-top: 12px; box-shadow: 0 4px 20px rgba(255, 193, 7, 0.3); }
+        .register-btn:hover { background: linear-gradient(135deg, #FFB74D, #FF9800); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255, 193, 7, 0.4); }
+        .register-btn:disabled { background: #E0E0E0; cursor: not-allowed; }
+        .form-note { font-size: 0.85em; color: #666; margin-top: 18px; text-align: center; }
         
-        .dashboard-header { padding: 12px 16px; background: linear-gradient(135deg, var(--secondary), #2980b9); color: #fff; display: flex; align-items: center; justify-content: space-between; animation: none; position: relative; }
-        .driver-info { display: flex; align-items: center; gap: 10px; flex: 1; position: relative; }
-        .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.3em; cursor: pointer; position: relative; z-index: 1002; }
-        .driver-name { font-weight: 600; font-size: 0.95em; }
-        .driver-status { font-size: 0.8em; opacity: 0.9; }
-        .status-toggle { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8em; cursor: pointer; transition: 0.2s; z-index: 1001; }
-        .status-toggle.active { background: #2ecc71; }
-        .status-toggle.unavailable { background: #f39c12; }
-        .requests-list { padding: 12px; max-height: 60vh; overflow-y: auto; }
-        .request-card { background: #f8f9fa; border-radius: 12px; padding: 14px; margin-bottom: 12px; border-right: 4px solid var(--primary); transition: 0.2s; }
-        .request-card:hover { transform: translateX(-3px); box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
-        .request-card.urgent { border-right-color: var(--danger); background: #fff5f5; }
-        .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .req-time { font-size: 0.8em; color: #666; background: #e8f4fd; padding: 4px 10px; border-radius: 15px; }
-        .req-urgent { font-size: 0.75em; color: var(--danger); font-weight: 600; }
-        .req-route { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-        .req-point { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9em; }
+        /* ✅ Dashboard Header احترافي */
+        .dashboard-header { 
+            padding: 14px 20px; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: #1B1B1B; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            animation: none; 
+            position: relative;
+            box-shadow: 0 4px 20px rgba(124, 179, 66, 0.25);
+        }
+        .driver-info { display: flex; align-items: center; gap: 12px; flex: 1; position: relative; }
+        .driver-avatar { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.35); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.4em; 
+            cursor: pointer; 
+            position: relative; 
+            z-index: 1002;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .driver-avatar:hover { transform: scale(1.05); background: rgba(255,255,255,0.5); }
+        .driver-name { font-weight: 800; font-size: 1em; color: #1B1B1B; }
+        .driver-status { font-size: 0.82em; opacity: 0.9; font-weight: 500; }
+        .status-toggle { 
+            background: rgba(255,255,255,0.3); 
+            border: none; 
+            color: #1B1B1B; 
+            padding: 8px 16px; 
+            border-radius: 24px; 
+            font-size: 0.82em; 
+            cursor: pointer; 
+            transition: 0.25s; 
+            z-index: 1001;
+            font-weight: 700;
+        }
+        .status-toggle.active { background: #4CAF50; color: #fff; }
+        .status-toggle.unavailable { background: #FF9800; color: #1B1B1B; }
+        .requests-list { padding: 14px 16px; max-height: 58vh; overflow-y: auto; }
+        .request-card { 
+            background: var(--surface); 
+            border-radius: 16px; 
+            padding: 16px; 
+            margin-bottom: 14px; 
+            border-right: 4px solid var(--primary); 
+            transition: 0.25s;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        .request-card:hover { transform: translateX(-4px); box-shadow: var(--shadow-hover); }
+        .request-card.urgent { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .req-time { font-size: 0.82em; color: #555; background: #E3F2FD; padding: 5px 12px; border-radius: 18px; font-weight: 600; }
+        .req-urgent { font-size: 0.78em; color: var(--danger); font-weight: 700; }
+        .req-route { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+        .req-point { display: flex; align-items: flex-start; gap: 10px; font-size: 0.92em; }
         .req-point.pickup .dot { background: var(--primary); }
         .req-point.dest .dot { background: var(--danger); }
-        .req-price { font-weight: 700; color: var(--primary-dark); font-size: 1.1em; margin-bottom: 10px; }
-        .req-actions { display: flex; gap: 8px; }
-        .req-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: 0.2s; }
-        .accept-btn { background: var(--primary); color: #fff; }
-        .accept-btn:hover { background: var(--primary-dark); }
-        .decline-btn { background: #ecf0f1; color: #555; }
-        .decline-btn:hover { background: #bdc3c7; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #888; }
-        .empty-state .icon { font-size: 3em; margin-bottom: 15px; opacity: 0.5; }
-        .refresh-btn { width: 100%; padding: 12px; background: #ecf0f1; color: #333; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; margin-top: 10px; }
-        .refresh-btn:hover { background: #bdc3c7; }
+        .req-price { font-weight: 800; color: var(--primary-dark); font-size: 1.15em; margin-bottom: 12px; }
+        .req-actions { display: flex; gap: 10px; }
+        .req-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.92em; cursor: pointer; transition: 0.25s; }
+        .accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .accept-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .decline-btn { background: #ECEFF1; color: #455A64; }
+        .decline-btn:hover { background: #CFD8DC; }
+        .empty-state { text-align: center; padding: 45px 24px; color: #666; }
+        .empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
+        .refresh-btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: #ECEFF1; 
+            color: #37474F; 
+            border: none; 
+            border-radius: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+        .refresh-btn:hover { background: #CFD8DC; }
         
-        .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; }
-        .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 85vh; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s ease; }
-        .chat-header { padding: 15px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: space-between; border-radius: 20px 20px 0 0; flex-wrap: wrap; gap: 8px; }
-        .chat-close { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.2em; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #f8f9fa; min-height: 200px; }
-        .chat-input-area { padding: 12px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .chat-input { flex: 1; min-width: 150px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 0.95em; }
-        .chat-send-btn { background: var(--primary); color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2em; }
-        .message { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 0.9em; line-height: 1.4; }
-        .message.me { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; margin-right: auto; }
-        .message.other { background: #e8f4fd; color: #333; border-bottom-left-radius: 4px; margin-left: auto; }
+        /* ✅ Chat System */
+        .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+        .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 88vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
+        .chat-header { padding: 18px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; border-radius: 24px 24px 0 0; flex-wrap: wrap; gap: 10px; }
+        .chat-close { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; transition: 0.2s; }
+        .chat-close:hover { background: rgba(255,255,255,0.5); transform: scale(1.1); }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #FAFAFA; min-height: 220px; }
+        .chat-input-area { padding: 14px 18px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .chat-input { flex: 1; min-width: 150px; padding: 14px 18px; border: 2px solid var(--border); border-radius: 28px; outline: none; font-size: 0.95em; transition: 0.25s; }
+        .chat-input:focus { border-color: var(--primary); }
+        .chat-send-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; transition: 0.25s; }
+        .chat-send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(124, 179, 66, 0.4); }
+        .message { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.92em; line-height: 1.45; }
+        .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; font-weight: 500; }
+        .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; font-weight: 500; }
         
-        /* ✅ خريطة المحادثة المصغرة مع المسار */
-        .chat-mini-map {
-            height: 150px; width: 100%;
-            border-bottom: 1px solid #eee;
-            background: #f1f3f5;
-            position: relative;
-        }
-        .chat-mini-map .map-label {
-            position: absolute; top: 8px; right: 10px;
-            background: rgba(0,0,0,0.7); color: #fff;
-            padding: 4px 10px; border-radius: 15px;
-            font-size: 0.75em; z-index: 1000;
-        }
-        .chat-mini-map .distance-badge {
-            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,184,148,0.9); color: #fff;
-            padding: 6px 14px; border-radius: 20px;
-            font-size: 0.8em; font-weight: 600; z-index: 1000;
-            display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        .pulse-marker-chat {
-            animation: pulse-chat 1s infinite;
-            filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.8));
-        }
-        @keyframes pulse-chat {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-        }
+        .chat-mini-map { height: 160px; width: 100%; border-bottom: 1px solid var(--border); background: #F5F5F5; position: relative; }
+        .chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; font-weight: 500; }
+        .chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
+        .pulse-marker-chat { animation: pulse-chat 1.2s infinite; filter: drop-shadow(0 0 6px rgba(239, 83, 80, 0.9)); }
+        @keyframes pulse-chat { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.75; } }
         .marker-me { animation: pulse-me 1.5s infinite; }
-        @keyframes pulse-me {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(52,152,219,0.7); }
-            70% { box-shadow: 0 0 0 12px rgba(52,152,219,0); }
-            100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
-        }
+        @keyframes pulse-me { 0%, 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0.7); } 70% { box-shadow: 0 0 0 14px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
         
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 0.9em; z-index: 2000; transition: transform 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1B1B1B; color: #fff; padding: 14px 28px; border-radius: 16px; font-size: 0.92em; z-index: 2000; transition: transform 0.35s ease; box-shadow: 0 6px 28px rgba(0,0,0,0.35); font-weight: 500; }
         .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast.success { background: var(--primary); }
-        .toast.error { background: var(--danger); }
-        .toast.warning { background: var(--warning); color: #333; }
+        .toast.success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .toast.error { background: linear-gradient(135deg, var(--danger), #C62828); }
+        .toast.warning { background: linear-gradient(135deg, var(--warning), #F57C00); color: #1B1B1B; }
         
-        #floatingChatBtn { position: fixed; bottom: 80px; right: 20px; background: var(--secondary); color: #fff; border: none; padding: 12px 20px; border-radius: 30px; font-weight: 600; cursor: pointer; z-index: 2500; box-shadow: 0 4px 15px rgba(52,152,219,0.4); display: flex; align-items: center; gap: 8px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { box-shadow: 0 4px 15px rgba(52,152,219,0.4); } 50% { box-shadow: 0 4px 25px rgba(52,152,219,0.8); } }
+        #floatingChatBtn { position: fixed; bottom: 85px; right: 22px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 34px; font-weight: 700; cursor: pointer; z-index: 2500; box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); display: flex; align-items: center; gap: 10px; animation: pulse-btn 2.5s infinite; font-size: 0.95em; }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); } 50% { box-shadow: 0 6px 36px rgba(255, 213, 79, 0.8); } }
         
-        #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: var(--card); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: linear-gradient(135deg, #FFF, #F9F9F9); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #loadingOverlay.hidden { display: none; }
         
-        @keyframes pulse-header {
-            0% { box-shadow: 0 0 0 0 rgba(52,152,219,0.4); }
-            50% { box-shadow: 0 0 0 15px rgba(52,152,219,0); }
-            100% { box-shadow: 0 0 0 0 rgba(52,152,219,0); }
-        }
-        .dashboard-header.pulse { animation: pulse-header 0.6s ease; }
+        @keyframes pulse-header { 0% { box-shadow: 0 0 0 0 rgba(124, 179, 66, 0.5); } 50% { box-shadow: 0 0 0 18px rgba(124, 179, 66, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 179, 66, 0); } }
+        .dashboard-header.pulse { animation: pulse-header 0.7s ease; }
         
         .start-trip-btn {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: #fff; border: none; padding: 10px 20px; border-radius: 25px;
-            font-weight: 600; font-size: 0.9em; cursor: pointer;
-            display: flex; align-items: center; gap: 6px;
-            transition: 0.2s; box-shadow: 0 3px 10px rgba(46, 204, 113, 0.4);
-            animation: pulse-btn-green 1.5s infinite;
+            background: linear-gradient(135deg, #66BB6A, #43A047);
+            color: #fff; border: none; padding: 12px 24px; border-radius: 28px;
+            font-weight: 700; font-size: 0.92em; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.25s; box-shadow: 0 4px 16px rgba(67, 160, 71, 0.4);
+            animation: pulse-btn-green 1.8s infinite;
         }
-        @keyframes pulse-btn-green {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6); }
-            50% { box-shadow: 0 0 0 12px rgba(46, 204, 113, 0); }
-        }
-        .start-trip-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(46, 204, 113, 0.6); }
-        .start-trip-btn:disabled { background: #95a5a6; cursor: not-allowed; transform: none; animation: none; box-shadow: none; }
+        @keyframes pulse-btn-green { 0%, 100% { box-shadow: 0 0 0 0 rgba(67, 160, 71, 0.7); } 50% { box-shadow: 0 0 0 14px rgba(67, 160, 71, 0); } }
+        .start-trip-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(67, 160, 71, 0.6); }
+        .start-trip-btn:disabled { background: #9E9E9E; cursor: not-allowed; transform: none; animation: none; box-shadow: none; }
         
         .cancel-trip-btn {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: #fff; border: none; padding: 10px 20px; border-radius: 25px;
-            font-weight: 600; font-size: 0.9em; cursor: pointer;
-            display: flex; align-items: center; gap: 6px;
-            transition: 0.2s; box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
-            animation: pulse-btn-red 1.5s infinite;
-            margin-right: 8px;
+            background: linear-gradient(135deg, var(--danger), #C62828);
+            color: #fff; border: none; padding: 12px 24px; border-radius: 28px;
+            font-weight: 700; font-size: 0.92em; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.25s; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.4);
+            animation: pulse-btn-red 1.8s infinite;
+            margin-right: 10px;
         }
-        @keyframes pulse-btn-red {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); }
-            50% { box-shadow: 0 0 0 12px rgba(231, 76, 60, 0); }
-        }
-        .cancel-trip-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(231, 76, 60, 0.6); }
-        .cancel-trip-btn:disabled { background: #95a5a6; cursor: not-allowed; transform: none; animation: none; box-shadow: none; }
+        @keyframes pulse-btn-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); } 50% { box-shadow: 0 0 0 14px rgba(239, 83, 80, 0); } }
+        .cancel-trip-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(239, 83, 80, 0.6); }
+        .cancel-trip-btn:disabled { background: #9E9E9E; cursor: not-allowed; transform: none; animation: none; box-shadow: none; }
         
         .req-distance-badge {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #fff; padding: 6px 12px; border-radius: 20px;
-            font-size: 0.8em; font-weight: 600;
-            display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px;
+            color: #1B1B1B; padding: 7px 14px; border-radius: 24px;
+            font-size: 0.82em; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px;
+            box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3);
         }
         .req-destination-info {
-            background: #e8f4fd; padding: 8px 12px; border-radius: 8px;
-            font-size: 0.85em; margin-top: 6px; border-right: 3px solid var(--secondary);
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB); padding: 10px 14px; border-radius: 12px;
+            font-size: 0.88em; margin-top: 8px; border-right: 4px solid var(--secondary);
+            font-weight: 500;
         }
-        .req-destination-info strong { color: var(--secondary); }
+        .req-destination-info strong { color: #1565C0; }
         
         .quick-msg-btn {
-            background: #e8f4fd; color: var(--secondary); border: 1px solid var(--secondary);
-            padding: 6px 12px; border-radius: 20px; font-size: 0.8em;
-            cursor: pointer; transition: 0.2s; white-space: nowrap;
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #1565C0; border: 2px solid #90CAF9;
+            padding: 8px 14px; border-radius: 24px; font-size: 0.85em;
+            cursor: pointer; transition: 0.25s; white-space: nowrap; font-weight: 600;
         }
-        .quick-msg-btn:hover { background: var(--secondary); color: #fff; }
-        .quick-msg-btn:active { transform: scale(0.98); }
+        .quick-msg-btn:hover { background: linear-gradient(135deg, #90CAF9, #64B5F6); color: #fff; border-color: #42A5F5; }
+        .quick-msg-btn:active { transform: scale(0.97); }
 
         .resend-indicator {
-            font-size: 0.75em; color: #f39c12; background: #fff3cd;
-            padding: 3px 8px; border-radius: 10px; margin-right: 5px;
-            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.78em; color: #5D4037; background: linear-gradient(135deg, #FFF9C4, #FFF59D);
+            padding: 4px 10px; border-radius: 12px; margin-right: 6px;
+            display: inline-flex; align-items: center; gap: 5px; font-weight: 600; border: 1px solid #FFECB3;
         }
 
         .search-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 4000;
+            background: rgba(0,0,0,0.65); z-index: 4000;
             display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(5px);
         }
         .search-modal.active { display: flex; }
         .search-content {
-            background: #fff; width: 90%; max-width: 380px; border-radius: 20px;
-            padding: 0; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fff; width: 92%; max-width: 400px; border-radius: 24px;
+            padding: 0; overflow: hidden; box-shadow: 0 16px 56px rgba(0,0,0,0.4);
+            animation: slideUp 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--border);
         }
-        .search-map-container { height: 250px; width: 100%; position: relative; background: #eee; }
-        .search-info { padding: 20px; text-align: center; }
-        .search-spinner { width: 40px; height: 40px; border: 4px solid #eee; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        .search-text { font-size: 1.1em; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-        .search-sub { font-size: 0.85em; color: #666; }
+        .search-map-container { height: 270px; width: 100%; position: relative; background: #F5F5F5; }
+        .search-info { padding: 24px; text-align: center; }
+        .search-spinner { width: 44px; height: 44px; border: 5px solid #ECEFF1; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 18px; }
+        .search-text { font-size: 1.2em; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .search-sub { font-size: 0.9em; color: #666; }
         .cancel-search-btn {
-            margin-top: 15px; background: #ffebee; color: var(--danger); border: none;
-            padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; width: 100%;
+            margin-top: 18px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none;
+            padding: 12px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; width: 100%;
+            transition: 0.25s; font-size: 0.95em;
         }
-        .cancel-search-btn:hover { background: #ffcdd2; }
+        .cancel-search-btn:hover { background: linear-gradient(135deg, #FFCDD2, #EF9A9A); }
         
-        /* ✅ قائمة السائق المنسدلة - إصلاح الزيندكس */
         .driver-dropdown {
             position: absolute; top: 100%; right: 0; left: 0;
-            background: #fff; border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-            padding: 10px; z-index: 1003;
-            display: none; flex-direction: column; gap: 8px;
-            animation: slideDown 0.2s ease;
-            border: 1px solid rgba(0,0,0,0.1);
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            padding: 12px; z-index: 1003;
+            display: none; flex-direction: column; gap: 10px;
+            animation: slideDown 0.25s ease;
+            border: 1px solid var(--border);
+            margin-top: 8px;
         }
         .driver-dropdown.show { display: flex; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-btn {
-            width: 100%; padding: 10px 15px; border: none; border-radius: 8px;
-            background: #f8f9fa; color: var(--text); font-size: 0.9em;
-            cursor: pointer; text-align: right; display: flex; align-items: center; gap: 8px;
-            transition: 0.2s;
+            width: 100%; padding: 12px 18px; border: none; border-radius: 12px;
+            background: var(--surface); color: var(--text); font-size: 0.92em;
+            cursor: pointer; text-align: right; display: flex; align-items: center; gap: 10px;
+            transition: 0.25s; font-weight: 600;
         }
-        .dropdown-btn:hover { background: #e8f4fd; color: var(--secondary); }
-        .dropdown-btn.primary { background: var(--primary); color: #fff; }
-        .dropdown-btn.primary:hover { background: var(--primary-dark); }
-        .dropdown-btn.danger { background: var(--danger); color: #fff; }
-        .dropdown-btn.danger:hover { background: #c0392b; }
+        .dropdown-btn:hover { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); color: var(--primary-dark); }
+        .dropdown-btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .dropdown-btn.primary:hover { background: linear-gradient(135deg, var(--primary-dark), #689F38); }
+        .dropdown-btn.danger { background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; }
+        .dropdown-btn.danger:hover { background: linear-gradient(135deg, #C62828, #B71C1C); }
         
-        /* ✅ صفحة سجل الرحلات */
-        .records-view { padding: 15px; }
-        .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .records-tabs { display: flex; gap: 5px; background: #e8f5e9; padding: 5px; border-radius: 10px; }
-        .record-tab { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 8px; font-size: 0.85em; cursor: pointer; transition: 0.2s; }
-        .record-tab.active { background: #fff; font-weight: 600; color: var(--primary-dark); }
-        .records-list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .record-card { background: #f8f9fa; border-radius: 10px; padding: 12px; border-right: 3px solid var(--primary); }
-        .record-card.accepted { border-right-color: var(--primary); background: #e8f9f4; }
-        .record-card.rejected { border-right-color: var(--danger); background: #fff5f5; }
-        .record-card .route { display: flex; flex-direction: column; gap: 4px; font-size: 0.85em; margin: 8px 0; }
-        .record-card .meta { display: flex; justify-content: space-between; font-size: 0.8em; color: #666; }
-        .record-card .status { font-weight: 600; padding: 3px 10px; border-radius: 12px; font-size: 0.75em; }
-        .record-card .status.accepted { background: #2ecc71; color: #fff; }
+        .records-view { padding: 18px; }
+        .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .records-tabs { display: flex; gap: 6px; background: var(--surface); padding: 6px; border-radius: 14px; border: 1px solid var(--border); }
+        .record-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-size: 0.88em; cursor: pointer; transition: 0.25s; font-weight: 500; }
+        .record-tab.active { background: var(--card); font-weight: 700; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .records-list { max-height: 62vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .record-card { background: var(--surface); border-radius: 14px; padding: 14px; border-right: 4px solid var(--primary); border: 1px solid var(--border); }
+        .record-card.accepted { border-right-color: var(--primary); background: linear-gradient(135deg, #E8F5E9, #F1F8E9); }
+        .record-card.rejected { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        .record-card .route { display: flex; flex-direction: column; gap: 5px; font-size: 0.88em; margin: 10px 0; }
+        .record-card .meta { display: flex; justify-content: space-between; font-size: 0.82em; color: #555; }
+        .record-card .status { font-weight: 700; padding: 4px 12px; border-radius: 16px; font-size: 0.78em; }
+        .record-card .status.accepted { background: #66BB6A; color: #fff; }
         .record-card .status.rejected { background: var(--danger); color: #fff; }
         
-        /* ✅ تحسينات الخريطة */
         .leaflet-container { font-family: inherit; }
-        .leaflet-control-zoom { border-radius: 8px; overflow: hidden; }
-        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 30px !important; height: 30px !important; line-height: 30px !important; font-weight: bold; }
-        .leaflet-control-zoom a:hover { background: #f1f3f5 !important; }
-        .custom-popup { text-align: center; font-size: 0.9em; }
-        .custom-popup .driver-name { font-weight: 600; color: var(--secondary); }
-        .custom-popup .driver-meta { color: #666; font-size: 0.85em; }
+        .leaflet-control-zoom { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 32px !important; height: 32px !important; line-height: 32px !important; font-weight: 700; }
+        .leaflet-control-zoom a:hover { background: var(--surface) !important; }
+        .custom-popup { text-align: center; font-size: 0.92em; }
+        .custom-popup .driver-name { font-weight: 700; color: var(--primary-dark); }
+        .custom-popup .driver-meta { color: #555; font-size: 0.88em; }
     </style>
 </head>
 <body>
 
 <div id="loadingOverlay">
-    <div style="font-size: 3em; margin-bottom: 15px;">🚗</div>
-    <h2 style="color: var(--primary-dark); margin-bottom: 10px;">ياسر تاكسي</h2>
-    <div class="spinner" style="width: 24px; height: 24px; border-width: 3px; margin-top: 10px;"></div>
-    <p style="color: #666; margin-top: 15px; font-size: 0.9em;">جاري التحقق من الجلسة...</p>
+    <div style="font-size: 3.5em; margin-bottom: 18px;">🚖</div>
+    <h2 style="color: var(--primary-dark); margin-bottom: 12px; font-weight: 800; letter-spacing: -0.5px;">Yasser Ride Pro</h2>
+    <div class="spinner" style="width: 28px; height: 28px; border-width: 4px; margin-top: 12px;"></div>
+    <p style="color: #555; margin-top: 18px; font-size: 0.95em; font-weight: 500;">جاري التحقق من الجلسة...</p>
 </div>
 
 <div class="app" id="mainApp" style="display: none;">
     <!-- ========== VIEW 1: AUTH ========== -->
     <div id="view-auth" class="view active">
-        <div class="header" style="justify-content:center;"><h1>🚗 ياسر تاكسي</h1></div>
+        <div class="header" style="justify-content:center;">
+            <h1>🚖 Yasser Ride Pro</h1>
+        </div>
         <div class="auth-view">
-            <div class="main-logo">🔐</div>
-            <h2 class="main-title">تسجيل الدخول / اشتراك</h2>
+            <div class="main-logo">✨</div>
+            <h2 class="main-title">مرحباً بك في ياسر رايد</h2>
+            <p class="main-subtitle">أسرع وأذكى طريقة للتنقل في مدينتك مع سائقين محترفين</p>
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
-                <button class="auth-tab" onclick="switchAuthTab('register')">إنشاء حساب</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">إنشاء حساب جديد</button>
             </div>
             
             <div id="loginForm" class="auth-form">
                 <input type="email" id="loginEmail" class="auth-input" placeholder="البريد الإلكتروني" required>
                 <input type="password" id="loginPassword" class="auth-input" placeholder="كلمة المرور" required>
-                <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">🔐 دخول</button>
+                <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">🔐 تسجيل الدخول</button>
             </div>
             
             <div id="registerForm" class="auth-form" style="display:none;">
                 <input type="email" id="regEmail" class="auth-input" placeholder="البريد الإلكتروني" required>
                 <input type="password" id="regPassword" class="auth-input" placeholder="كلمة المرور (6 أحرف على الأقل)" required minlength="6">
-                <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">✅ إنشاء حساب</button>
+                <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">✅ إنشاء الحساب</button>
             </div>
         </div>
     </div>
@@ -402,22 +581,27 @@
     <div id="view-driver-setup" class="view">
         <div class="header">
             <button class="back-btn" onclick="logoutUser()">🚪 خروج</button>
-            <h1>🚙 تسجيل سيارتي</h1>
+            <h1>🚙 تسجيل مركبتك</h1>
         </div>
-        <div class="panel" style="padding: 20px; text-align: center;">
-            <div style="font-size: 3em; margin-bottom: 10px;">🚕</div>
-            <h3 style="color: var(--secondary); margin-bottom: 15px;">اكمل بياناتك للبدء كسائق</h3>
-            <div class="form-group" style="max-width: 300px; margin: 0 auto;">
+        <div class="panel" style="padding: 24px; text-align: center;">
+            <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
+            <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;">
                 <label>🚗 نوع المركبة</label>
                 <select id="setupCarType" class="auth-input">
                     <option value="دراجة نارية">🏍️ دراجة نارية</option>
-                    <option value="مريحة">🚙 مريحة</option>
+                    <option value="مريحة" selected>🚙 مريحة</option>
                     <option value="عائلية">🚐 عائلية</option>
                     <option value="فاخرة">✨ فاخرة</option>
                 </select>
             </div>
-            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 300px; margin-top: 15px;">✅ تفعيل حساب السائق والبدء</button>
-            <button class="auth-btn" onclick="skipToPassenger()" style="background: #95a5a6; max-width: 300px; margin-top: 10px;">👤 المتابعة كراكب</button>
+            <!-- ✅ حقل اسم/لوحة السيارة الجديد -->
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;">
+                <label>🪪 اسم/لوحة السيارة</label>
+                <input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required>
+            </div>
+            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
+            <button class="auth-btn" onclick="skipToPassenger()" style="background: linear-gradient(135deg, #9E9E9E, #757575); max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
         </div>
     </div>
 
@@ -426,7 +610,7 @@
         <div class="header">
             <button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button>
             <h1>📍 طلب رحلة</h1>
-            <button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.75em;">🚙 تسجيل سيارتي</button>
+            <button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.8em;">🚙 تسجيل سيارتي</button>
         </div>
         <div id="map"></div>
         <div class="hint">📍 انقر على الخريطة أو اكتب العنوان لتحديد الموقع</div>
@@ -518,29 +702,31 @@
                 <div class="driver-dropdown" id="driverDropdown">
                     <button class="dropdown-btn primary" onclick="openRecordsPage()">📋 سجل الرحلات</button>
                     <button class="dropdown-btn" id="serviceToggleBtn" onclick="toggleServiceFromDropdown()">🟢 تفعيل الخدمة</button>
-                    <button class="dropdown-btn danger" onclick="logoutUser()">🚪 تسجيل الخروج</button>
+                    <!-- ✅ تغيير زر تسجيل الخروج إلى "المتابعة كراكب" -->
+                    <button class="dropdown-btn danger" onclick="switchToPassengerMode()">👤 المتابعة كراكب</button>
                 </div>
             </div>
             <button class="status-toggle active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
         </div>
         
-        <div style="padding: 12px; background: #e8f4fd; font-size: 0.85em; display: flex; justify-content: space-between; align-items: center;">
-            <span>📋 طلبات جديدة</span>
-            <span id="requestsCount" style="background: var(--primary); color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: bold;">0</span>
+        <div style="padding: 14px 18px; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+            <span style="font-weight: 600;">📋 طلبات جديدة</span>
+            <span id="requestsCount" style="background: var(--primary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
         </div>
         
         <div class="requests-list" id="requestsList">
             <div class="empty-state">
                 <div class="icon">🔍</div>
                 <p>لا توجد طلبات حالياً</p>
-                <p style="font-size: 0.85em; margin-top: 5px; color: #999;">تحقق مرة أخرى بعد قليل</p>
+                <p style="font-size: 0.88em; margin-top: 6px; color: #777;">تحقق مرة أخرى بعد قليل</p>
                 <button class="refresh-btn" onclick="loadRequests()">🔄 تحديث القائمة</button>
             </div>
         </div>
         
-        <div style="padding: 12px; border-top: 1px solid #eee;">
-            <button class="refresh-btn" onclick="loadRequests()" style="background: var(--primary); color: #fff;">🔄 تحديث الطلبات</button>
-            <button class="refresh-btn" onclick="logoutUser()" style="margin-top: 8px; background: var(--danger); color: #fff;">🚪 تسجيل الخروج</button>
+        <div style="padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface);">
+            <button class="refresh-btn" onclick="loadRequests()" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">🔄 تحديث الطلبات</button>
+            <!-- ✅ تغيير زر تسجيل الخروج في الأسفل أيضاً -->
+            <button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">👤 المتابعة كراكب</button>
         </div>
     </div>
 
@@ -637,9 +823,9 @@
             { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', attribution: '© Esri', maxZoom: 18 }
         ],
         routeStyles: { 
-            driver: { color: '#f39c12', weight: 4, opacity: 0.9 }, 
-            passenger: { color: '#27ae60', weight: 4, opacity: 0.9 },
-            chat: { color: '#3498db', weight: 3, opacity: 0.8, dashArray: '5, 5' }
+            driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, 
+            passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 },
+            chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' }
         },
         markerIcons: {
             pickup: L.divIcon({ className: 'pulse-marker', html: '📍', iconSize: [30, 30], iconAnchor: [15, 30] }),
@@ -725,18 +911,14 @@
             const cm = L.map(containerId, { zoomControl: false, attributionControl: false, dragging: true, touchZoom: true, scrollWheelZoom: true }).setView(myPos || otherPos || MAP_CONFIG.defaultView, 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '' }).addTo(cm);
             
-            // ✅ إضافة علامة موقعي (أزرق)
             const myMarker = myPos ? L.marker(myPos, { icon: MAP_CONFIG.markerIcons.chatMe }).addTo(cm).bindPopup('📍 موقعي') : null;
-            // ✅ إضافة علامة الطرف الآخر (أحمر وميض)
             const otherMarker = otherPos ? L.marker(otherPos, { icon: MAP_CONFIG.markerIcons.chatPulse }).addTo(cm).bindPopup(myRole === 'driver' ? '📍 الراكب' : '🚕 السائق') : null;
             
-            // ✅ رسم المسار بينهما
             let routeCtrl = null;
             if(myPos && otherPos) {
                 routeCtrl = MapUtils.drawRoute(cm, [myPos, otherPos], MAP_CONFIG.routeStyles.chat);
             }
             
-            // ✅ تركيز الخريطة على النقطتين
             if(myPos && otherPos) {
                 const bounds = L.latLngBounds([myPos, otherPos]);
                 cm.fitBounds(bounds, { padding: [30, 30] });
@@ -752,13 +934,11 @@
             if(myMarker && myPos) myMarker.setLatLng(myPos);
             if(otherMarker && otherPos) otherMarker.setLatLng(otherPos);
             
-            // ✅ تحديث المسار
             if(routeCtrl && myPos && otherPos) {
                 map.removeControl(routeCtrl);
                 miniMapData.routeCtrl = MapUtils.drawRoute(map, [myPos, otherPos], MAP_CONFIG.routeStyles.chat);
             }
             
-            // ✅ تحديث العرض
             if(myPos && otherPos) {
                 const bounds = L.latLngBounds([myPos, otherPos]);
                 map.fitBounds(bounds, { padding: [30, 30] });
@@ -793,13 +973,15 @@
     async function completeDriverSetup() {
         const btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = '🔄 حفظ...';
         const carType = document.getElementById('setupCarType').value;
+        // ✅ جلب اسم/لوحة السيارة
+        const carName = document.getElementById('setupCarName').value.trim() || 'سيارتي';
         let location = { lat: 36.753, lng: 3.058 };
         if ('geolocation' in navigator) {
             try { location = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lng: p.coords.longitude }), rej, { enableHighAccuracy: true, timeout: 5000 })); } catch(err) {}
         }
         await db.collection('users').doc(currentUser.uid).update({ role: 'driver' });
         await db.collection('drivers').doc(currentUser.uid).set({
-            uid: currentUser.uid, email: currentUser.email, carType, location, available: true, rating: 5.0, trips: 0,
+            uid: currentUser.uid, email: currentUser.email, carType, carName, location, available: true, rating: 5.0, trips: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(), lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
         });
         Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉', 'success');
@@ -810,6 +992,23 @@
         await db.collection('users').doc(currentUser.uid).update({ role: 'passenger' });
         Utils.showToast('👤 جاري التحويل كراكب...', 'success');
         switchView('view-request');
+    }
+
+    // ✅ دالة جديدة للتبديل إلى وضع الراكب من لوحة السائق
+    async function switchToPassengerMode() {
+        if(!currentUser) return;
+        try {
+            await db.collection('users').doc(currentUser.uid).update({ role: 'passenger' });
+            // إغلاق أي قوائم مفتوحة
+            document.getElementById('driverDropdown')?.classList.remove('show');
+            // تحديث الواجهة
+            Utils.showToast('👤 تم التبديل إلى وضع الراكب', 'success');
+            switchView('view-request');
+            // بدء تتبع موقع الراكب
+            startPassengerLocationTracking();
+        } catch(e) {
+            Utils.showToast('⚠️ خطأ في التبديل: ' + e.message, 'error');
+        }
     }
 
     async function logoutUser() {
@@ -850,15 +1049,16 @@
             const driverDoc = await db.collection('drivers').doc(user.uid).get();
             if (driverDoc.exists) {
                 currentDriver = driverDoc.data();
-                document.getElementById('dashDriverName').textContent = `${user.email.split('@')[0]} | ${driverDoc.data().carType}`;
-                document.getElementById('dashDriverArea').textContent = `🚗 ${driverDoc.data().carType}`;
+                // ✅ عرض اسم/لوحة السيارة بدلاً من البريد الإلكتروني
+                const displayName = currentDriver.carName || currentDriver.email?.split('@')[0] || 'سائق';
+                document.getElementById('dashDriverName').textContent = `${displayName} | ${currentDriver.carType}`;
+                document.getElementById('dashDriverArea').textContent = `🚗 ${currentDriver.carType}`;
                 updateServiceToggleUI();
                 switchView('view-dashboard');
                 startLocationUpdates(user.uid);
             } else { switchView('view-driver-setup'); }
         } else { 
             switchView('view-request');
-            // ✅ بدء تتبع موقع الراكب
             startPassengerLocationTracking();
         }
     }
@@ -878,7 +1078,6 @@
                             location: loc, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         myCurrentPos = [loc.lat, loc.lng];
-                        // ✅ تحديث الخريطة في المحادثة
                         if(chatMiniMap && currentActiveRide?.passengerId) {
                             const otherPos = await getPassengerLocation(currentActiveRide.passengerId);
                             MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, otherPos);
@@ -897,12 +1096,10 @@
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     try {
                         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                        // حفظ موقع الراكب في المستخدمين
                         await db.collection('users').doc(currentUser.uid).update({
                             lastLocation: loc, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         myCurrentPos = [loc.lat, loc.lng];
-                        // ✅ تحديث الخريطة في المحادثة
                         if(chatMiniMap && currentActiveRide?.assignedDriverId) {
                             const otherPos = await getDriverLocation(currentActiveRide.assignedDriverId);
                             MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, otherPos);
@@ -934,25 +1131,19 @@
         const badge = document.querySelector('.chat-mini-map .distance-badge');
         if(!badge || !myPos || !otherPos) return;
         const dist = Utils.calculateDistance(myPos[0], myPos[1], otherPos[0], otherPos[1]);
-        const time = Math.max(1, Math.round(dist / 3)); // افتراض سرعة 3 كم/دقيقة في المدينة
+        const time = Math.max(1, Math.round(dist / 3));
         badge.innerHTML = `📏 ${Utils.formatDistance(dist)} • ⏱️ ${Utils.formatTime(time)}`;
     }
 
-    // ==================== DRIVER DROPDOWN - ✅ إصلاح الفتح ====================
+    // ==================== DRIVER DROPDOWN ====================
     function toggleDriverDropdown(e) {
         e?.stopPropagation();
         const dropdown = document.getElementById('driverDropdown');
         const isShown = dropdown.classList.contains('show');
-        
-        // إغلاق أي قائمة مفتوحة أولاً
         document.querySelectorAll('.driver-dropdown').forEach(d => d.classList.remove('show'));
-        
-        // فتح/إغلاق القائمة الحالية
         if(!isShown) {
             dropdown.classList.add('show');
         }
-        
-        // إغلاق عند النقر خارج القائمة
         const closeHandler = (ev) => {
             const avatar = document.getElementById('driverAvatarBtn');
             if(!dropdown.contains(ev.target) && ev.target !== avatar && !avatar?.contains(ev.target)) {
@@ -967,7 +1158,6 @@
         }, 100);
     }
 
-    // ✅ إضافة مستمع للنقر على الأيقونة
     document.addEventListener('DOMContentLoaded', () => {
         const avatarBtn = document.getElementById('driverAvatarBtn');
         if(avatarBtn) {
@@ -1104,7 +1294,6 @@
                 <button class="quick-msg-btn" onclick="sendQuickMessage('${chatId}','${currentDriver?.uid||currentUser.uid}','${myRole}','أين أنت؟')">❓ أين أنت؟</button>
             </div>` : '';
         
-        // ✅ تحديد مواقع الطرفين للخريطة المصغرة
         let myPos = null, otherPos = null, mapLabel = '';
         
         if(myRole === 'driver') {
@@ -1114,7 +1303,6 @@
         } else {
             mapLabel = '🚕 موقع السائق';
             otherPos = rideData?.driverLocation ? [rideData.driverLocation.lat, rideData.driverLocation.lng] : null;
-            // محاولة جلب موقع الراكب الحالي
             if ('geolocation' in navigator) {
                 try {
                     const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
@@ -1135,7 +1323,6 @@
                     </div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cancelTripBtn}${startTripBtn}<button class="chat-close" onclick="closeChat()">×</button></div>
                 </div>
-                <!-- ✅ خريطة مصغرة مع مسار ومسافة -->
                 ${myPos || otherPos ? `
                 <div class="chat-mini-map" id="chatMiniMap">
                     <div class="map-label">${mapLabel}</div>
@@ -1158,32 +1345,26 @@
             container.scrollTop = container.scrollHeight;
         }, myUserId);
         
-        // ✅ تهيئة الخريطة المصغرة مع المسار
         if((myPos || otherPos) && document.getElementById('chatMiniMap')) {
             chatMiniMap = MapUtils.initChatMiniMap('chatMiniMap', myPos, otherPos, myRole);
             if(myPos && otherPos) updateChatDistanceBadge(myPos, otherPos);
             
-            // ✅ تحديث الموقع والمسار كل 10 ثواني
             if(chatLocationUpdate) clearInterval(chatLocationUpdate);
             chatLocationUpdate = setInterval(async () => {
                 try {
                     let newMyPos = myPos, newOtherPos = otherPos;
                     
                     if(myRole === 'driver') {
-                        // تحديث موقعي (السائق)
                         if ('geolocation' in navigator) {
                             const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
                             newMyPos = pos;
                         }
-                        // تحديث موقع الراكب
                         newOtherPos = await getPassengerLocation(rideData?.passengerId);
                     } else {
-                        // تحديث موقعي (الراكب)
                         if ('geolocation' in navigator) {
                             const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(p => res([p.coords.latitude, p.coords.longitude]), rej, { timeout: 3000 }));
                             newMyPos = pos;
                         }
-                        // تحديث موقع السائق
                         newOtherPos = await getDriverLocation(rideData?.assignedDriverId);
                     }
                     
@@ -1293,7 +1474,7 @@
     function enableMapClick() { 
         mapClickEnabled=true; 
         const b=document.getElementById('mapBtn'); 
-        b.textContent='✅ انقر';b.style.background='#27ae60'; 
+        b.textContent='✅ انقر';b.style.background='#66BB6A'; 
         setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); 
         Utils.showToast('📍 انقر على الخريطة لتحديد الوجهة (10 ثواني)','warning'); 
     }
@@ -1335,7 +1516,7 @@
     function drawRoute() { 
         if(!pickupPos||!destPos)return; 
         if(routeControl)map.removeControl(routeControl); 
-        routeControl=MapUtils.drawRoute(map, [pickupPos, destPos], {color:'#00b894',weight:5,opacity:0.85});
+        routeControl=MapUtils.drawRoute(map, [pickupPos, destPos], {color:'#9ACD32',weight:5,opacity:0.85});
         routeControl.on('routesfound',e=>{
             const r=e.routes[0];
             distKm=(r.summary.totalDistance/1000).toFixed(1);
@@ -1381,7 +1562,7 @@
                     if (dist <= 15) {
                         const iconType = d.carType === 'دراجة نارية' ? 'motorcycle' : 'driver';
                         const marker = MapUtils.createMarker([d.location.lat, d.location.lng], iconType, 
-                            `<div class="driver-name">${d.email?.split('@')[0]||'سائق'}</div><div class="driver-meta">${d.carType} • ⭐${d.rating}</div>`
+                            `<div class="driver-name">${d.carName||d.email?.split('@')[0]||'سائق'}</div><div class="driver-meta">${d.carType} • ⭐${d.rating}</div>`
                         ).addTo(searchMap);
                         searchMarkers.push(marker);
                     }
@@ -1457,13 +1638,15 @@
                 db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{
                     if(ds.exists){
                         const dr=ds.data(); 
-                        document.getElementById('dName').textContent=dr.email?.split('@')[0]||'سائق'; 
+                        // ✅ استخدام carName بدلاً من email
+                        const displayName = dr.carName || dr.email?.split('@')[0] || 'سائق';
+                        document.getElementById('dName').textContent = displayName; 
                         document.getElementById('dMeta').textContent=dr.carType; 
                         const eta=Math.max(2,Math.round(data.distance/3)); 
                         document.getElementById('dEta').textContent=`🚗 في الطريق • ~${eta} دقائق`; 
                         createChat(currentRideId, currentUser.uid, data.acceptedBy).then(chatId=>{
-                            showChatButton(currentRideId,chatId,'passenger',document.getElementById('dName').textContent,data);
-                            showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', document.getElementById('dName').textContent, data);
+                            showChatButton(currentRideId,chatId,'passenger',displayName,data);
+                            showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', displayName, data);
                         });
                         Utils.showToast(`✅ قبل السائق! تم فتح المحادثة 💬`,'success');
                         if(dr.location && pickupPos && destPos) MapUtils.drawDualRoute(map, [dr.location.lat, dr.location.lng], pickupPos, destPos);
@@ -1532,11 +1715,13 @@
             await db.collection('drivers').doc(currentDriver.uid).update({ available:false, lastUpdate:firebase.firestore.FieldValue.serverTimestamp() }); 
             const statusToggle = document.getElementById('statusToggle'); if(statusToggle) { statusToggle.textContent = '🔴 غير متاح'; statusToggle.classList.remove('active'); statusToggle.classList.add('unavailable'); driverAvailable = false; updateServiceToggleUI(); }
             const chatId=await createChat(rideId,req.passengerId,currentDriver.uid); 
-            await sendMessage(chatId,currentDriver.uid,'driver',`👋 أهلاً! في الطريق. الوصول ~${Math.max(2,Math.round(req.distance/3))} دقيقة.`); 
+            // ✅ استخدام carName في الرسالة
+            const myDisplayName = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
+            await sendMessage(chatId,currentDriver.uid,'driver',`👋 أهلاً! ${myDisplayName} في الطريق. الوصول ~${Math.max(2,Math.round(req.distance/3))} دقيقة.`); 
             currentActiveRide={id:rideId,...req,status:'accepted'}; 
             Utils.showToast('✅ قبلت الرحلة! 💬 افتح المحادثة','success'); 
-            showChatInterface(rideId,req.passengerId,currentDriver.uid,'driver',currentDriver.email?.split('@')[0],currentActiveRide); 
-            showChatButton(rideId,chatId,'driver',currentDriver.email?.split('@')[0],currentActiveRide); 
+            showChatInterface(rideId,req.passengerId,currentDriver.uid,'driver',myDisplayName,currentActiveRide); 
+            showChatButton(rideId,chatId,'driver',myDisplayName,currentActiveRide); 
             if(currentDriver?.location && req.pickup?.lat && req.destination?.lat) {
                 MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [req.pickup.lat, req.pickup.lng], [req.destination.lat, req.destination.lng]);
             }
