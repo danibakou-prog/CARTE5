@@ -314,6 +314,7 @@
     let searchMap = null, searchMarkers = [], searchUpdateInterval = null, searchMarkerMap = {};
     let lastKnownMessageCount = 0, currentChatMyId = null, chatMiniMap = null, chatLocationUpdate = null;
     let currentRecordsFilter = 'all', currentPulsingMarker = null;
+    let heartbeatInterval = null, offlineUpdateQueued = false, lastOnlineState = true;
     
     const MAP_CONFIG = {
         defaultView: [36.753, 3.058], defaultZoom: 14,
@@ -382,100 +383,211 @@
 
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
-    async function completeDriverSetup() { const btn=document.getElementById('setupBtn'); btn.disabled=true; btn.textContent='🔄 حفظ...'; const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; let loc={lat:36.753, lng:3.058}; if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} await db.collection('users').doc(currentUser.uid).update({role:'driver'}); await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); routeUserAfterAuth(currentUser); }
+    async function completeDriverSetup() { const btn=document.getElementById('setupBtn'); btn.disabled=true; btn.textContent='🔄 حفظ...'; const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; let loc={lat:36.753, lng:3.058}; if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} await db.collection('users').doc(currentUser.uid).update({role:'driver'}); await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}); Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); routeUserAfterAuth(currentUser); }
     async function skipToPassenger() { await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); Utils.showToast('👤 جاري التحويل كراكب...'); switchView('view-request'); }
     async function switchToPassengerMode() { if(!currentUser)return; try{ await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); document.getElementById('driverDropdown')?.classList.remove('show'); Utils.showToast('👤 تم التبديل إلى وضع الراكب'); switchView('view-request'); startPassengerLocationTracking(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} }
-    async function logoutUser() { clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); if(activeChatListener)activeChatListener(); if(chatLocationUpdate)clearInterval(chatLocationUpdate); await auth.signOut(); Utils.showToast('👋 تم تسجيل الخروج'); }
+    async function logoutUser() { clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); if(heartbeatInterval)clearInterval(heartbeatInterval); if(activeChatListener)activeChatListener(); if(chatLocationUpdate)clearInterval(chatLocationUpdate); await auth.signOut(); Utils.showToast('👋 تم تسجيل الخروج'); }
+
+    // 🔥 دالة فورية لتحديث حالة السائق في فايربيس عند انقطاع الإنترنت
+    async function setDriverOfflineImmediately(uid) {
+        if(!uid) return;
+        // تحديث الحالة المحلية فوراً
+        driverAvailable = false;
+        offlineUpdateQueued = true;
+        
+        // محاولة التحديث في فايربيس فوراً (حتى لو فشل سنفعلها عند العودة)
+        try {
+            await db.collection('drivers').doc(uid).update({
+                available: false,
+                isOnline: false,
+                connectionStatus: 'offline',
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            offlineUpdateQueued = false;
+        } catch(e) {
+            // إذا فشل (لعدم وجود اتصال)، نحتفظ بالطلب للقيام به عند العودة
+            console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة');
+        }
+        
+        // تحديث الواجهة فوراً
+        const t = document.getElementById('statusToggle');
+        if(t) { 
+            t.textContent = '🔴 غير متاح (غير متصل)'; 
+            t.classList.remove('active'); 
+            t.classList.add('unavailable'); 
+        }
+        updateServiceToggleUI();
+        Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
+        
+        // إيقاف تحديثات الموقع لتوفير البطارية
+        if(driverLocationInterval) {
+            clearInterval(driverLocationInterval);
+            driverLocationInterval = null;
+        }
+        if(heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
+    }
 
     function initFirebase() {
-        try { const config = { apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", authDomain:"birine-app.firebaseapp.com", projectId:"birine-app", storageBucket:"birine-app.firebasestorage.app", messagingSenderId:"359460161481", appId:"1:359460161481:web:5739dcc79ed79275928a18", measurementId:"G-GX972M18B4" }; app=firebase.initializeApp(config); db=firebase.firestore(app); auth=firebase.auth(app); auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); auth.onAuthStateChanged(async user => { if(user){ currentUser=user; routeUserAfterAuth(user); } else { currentUser=null; currentDriver=null; switchView('view-auth'); } document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }); } catch(e) { console.error(e); Utils.showToast('❌ فشل الاتصال','error'); setTimeout(()=>{document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block';}, 1500); }
-        
-        // 🔌 نظام كشف الاتصال بالإنترنت للسائقين
-        window.addEventListener('online', () => {
-            if(currentDriver?.uid && driverAvailable) {
-                db.collection('drivers').doc(currentDriver.uid).update({
-                    available: true,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                    isOnline: true
-                }).then(() => {
-                    const t = document.getElementById('statusToggle');
-                    if(t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
-                    Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
-                });
-            }
-        });
+        try { 
+            const config = { 
+                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
+                authDomain:"birine-app.firebaseapp.com", 
+                projectId:"birine-app", 
+                storageBucket:"birine-app.firebasestorage.app", 
+                messagingSenderId:"359460161481", 
+                appId:"1:359460161481:web:5739dcc79ed79275928a18", 
+                measurementId:"G-GX972M18B4" 
+            }; 
+            app=firebase.initializeApp(config); 
+            db=firebase.firestore(app); 
+            auth=firebase.auth(app); 
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); 
+            
+            auth.onAuthStateChanged(async user => { 
+                if(user){ 
+                    currentUser=user; 
+                    routeUserAfterAuth(user); 
+                } else { 
+                    currentUser=null; 
+                    currentDriver=null; 
+                    switchView('view-auth'); 
+                } 
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                document.getElementById('mainApp').style.display='block'; 
+            }); 
+            
+            // 🚨 نظام كشف فوري لانقطاع الإنترنت - يحدث فوراً عند فقدان الاتصال
+            window.addEventListener('offline', () => {
+                console.log('🔴 انترنت مقطوع - جاري تعيين available: false فوراً');
+                lastOnlineState = false;
+                if(currentDriver?.uid) {
+                    // تنفيذ فوري دون انتظار
+                    setDriverOfflineImmediately(currentDriver.uid);
+                }
+            }, { passive: true });
 
-        window.addEventListener('offline', () => {
-            if(currentDriver?.uid) {
-                db.collection('drivers').doc(currentDriver.uid).update({
-                    available: false,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                    isOnline: false
-                }).catch(() => {});
-                driverAvailable = false;
-                const t = document.getElementById('statusToggle');
-                if(t) { 
-                    t.textContent = '🔴 غير متاح (غير متصل)'; 
-                    t.classList.remove('active'); 
-                    t.classList.add('unavailable'); 
+            // ✅ عند عودة الاتصال، نعيد المزامنة
+            window.addEventListener('online', async () => {
+                console.log('🟢 عدنا للاتصال - جاري المزامنة');
+                lastOnlineState = true;
+                
+                if(currentDriver?.uid) {
+                    // إذا كان هناك تحديث معلق من فترة الانقطاع، نفذه الآن
+                    if(offlineUpdateQueued) {
+                        try {
+                            await db.collection('drivers').doc(currentDriver.uid).update({
+                                isOnline: true,
+                                connectionStatus: 'online',
+                                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                                lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            offlineUpdateQueued = false;
+                        } catch(e) { console.log('⚠️ مزامنة فايربيس:', e); }
+                    }
+                    
+                    // استعادة حالة التوفر السابقة (إذا كان السائق يريد أن يكون متاحاً)
+                    if(driverAvailable) {
+                        try {
+                            await db.collection('drivers').doc(currentDriver.uid).update({
+                                available: true,
+                                isOnline: true,
+                                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            const t = document.getElementById('statusToggle');
+                            if(t) { 
+                                t.textContent = '🟢 متاح'; 
+                                t.classList.add('active'); 
+                                t.classList.remove('unavailable'); 
+                            }
+                            Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
+                            startLocationUpdates(currentDriver.uid);
+                            loadRequests();
+                        } catch(e) { console.log('⚠️ استعادة التوفر:', e); }
+                    }
                 }
-                updateServiceToggleUI();
-                Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
-                if(driverLocationInterval) {
-                    clearInterval(driverLocationInterval);
-                    driverLocationInterval = null;
-                }
-            }
-        });
+            }, { passive: true });
 
-        // 🔍 فحص دوري للاتصال (احتياطي إضافي)
-        setInterval(() => {
-            if(currentDriver?.uid && driverAvailable && !navigator.onLine) {
-                driverAvailable = false;
-                db.collection('drivers').doc(currentDriver.uid).update({
-                    available: false,
-                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                    isOnline: false
-                }).catch(() => {});
-                updateServiceToggleUI();
-                const t = document.getElementById('statusToggle');
-                if(t) { 
-                    t.textContent = '🔴 غير متاح (غير متصل)'; 
-                    t.classList.remove('active'); 
-                    t.classList.add('unavailable'); 
+            // 🔍 فحص احتياطي كل 3 ثواني لاكتشاف أي تغيير في حالة الاتصال
+            setInterval(() => {
+                if(currentDriver?.uid && lastOnlineState !== navigator.onLine) {
+                    if(!navigator.onLine) {
+                        console.log('🔴 [فحص دوري] انقطاع مكتشف - تحديث فوري');
+                        setDriverOfflineImmediately(currentDriver.uid);
+                    }
+                    lastOnlineState = navigator.onLine;
                 }
-            }
-        }, 30000);
+            }, 3000);
+            
+        } catch(e) { 
+            console.error(e); 
+            Utils.showToast('❌ فشل الاتصال','error'); 
+            setTimeout(()=>{
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                document.getElementById('mainApp').style.display='block';
+            }, 1500); 
+        }
     }
     
-    async function routeUserAfterAuth(user) { const ud=await db.collection('users').doc(user.uid).get(); if(!ud.exists) return switchView('view-auth'); const d=ud.data(); if(d.role==='driver') { const dd=await db.collection('drivers').doc(user.uid).get(); if(dd.exists) { currentDriver=dd.data(); document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; updateServiceToggleUI(); switchView('view-dashboard'); startLocationUpdates(user.uid); } else switchView('view-driver-setup'); } else { switchView('view-request'); startPassengerLocationTracking(); } }
+    async function routeUserAfterAuth(user) { 
+        const ud=await db.collection('users').doc(user.uid).get(); 
+        if(!ud.exists) return switchView('view-auth'); 
+        const d=ud.data(); 
+        if(d.role==='driver') { 
+            const dd=await db.collection('drivers').doc(user.uid).get(); 
+            if(dd.exists) { 
+                currentDriver=dd.data(); 
+                document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
+                document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; 
+                updateServiceToggleUI(); 
+                switchView('view-dashboard'); 
+                startLocationUpdates(user.uid); 
+            } else switchView('view-driver-setup'); 
+        } else { 
+            switchView('view-request'); 
+            startPassengerLocationTracking(); 
+        } 
+    }
     
     function startLocationUpdates(uid) { 
         clearInterval(driverLocationInterval); 
-        driverLocationInterval = setInterval(async () => { 
-            // ✅ التحقق من الاتصال قبل تحديث الموقع
-            if(!navigator.onLine || !driverAvailable || !navigator.geolocation) {
-                if(navigator.onLine === false && driverAvailable) {
-                    driverAvailable = false;
-                    if(currentDriver?.uid) {
-                        db.collection('drivers').doc(currentDriver.uid).update({
-                            available: false,
-                            isOnline: false,
-                            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                        }).catch(() => {});
-                    }
-                    updateServiceToggleUI();
-                    Utils.showToast('🔴 انقطع الاتصال', 'error');
+        clearInterval(heartbeatInterval);
+        
+        // ❤️ نبضات القلب كل 5 ثواني للحفاظ على الاتصال النشط
+        heartbeatInterval = setInterval(async () => {
+            if(!currentDriver?.uid || !navigator.onLine) return;
+            try {
+                await db.collection('drivers').doc(uid).update({
+                    lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(),
+                    isOnline: true
+                });
+            } catch(e) {
+                // إذا فشلت النبضات، قد يكون الاتصال ضعيفاً
+                if(navigator.onLine) {
+                    console.log('⚠️ نبضة قلب فشلت:', e);
                 }
+            }
+        }, 5000);
+        
+        driverLocationInterval = setInterval(async () => { 
+            // ✅ التحقق الفوري من الاتصال قبل أي عملية
+            if(!navigator.onLine) {
+                setDriverOfflineImmediately(uid);
                 return; 
             }
+            if(!driverAvailable || !navigator.geolocation) return; 
+            
             navigator.geolocation.getCurrentPosition(async p => { 
                 try { 
                     const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
                     await db.collection('drivers').doc(uid).update({
                         location: l, 
                         lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                        isOnline: true
+                        isOnline: true,
+                        connectionStatus: 'online'
                     }); 
                     myCurrentPos = [l.lat, l.lng]; 
                     if(chatMiniMap && currentActiveRide?.passengerId) { 
@@ -483,7 +595,12 @@
                         MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
                         updateChatDistanceBadge(myCurrentPos, o); 
                     } 
-                } catch(e) {} 
+                } catch(e) {
+                    // إذا فشل تحديث الموقع، نتحقق مما إذا كان بسبب انقطاع الاتصال
+                    if(!navigator.onLine) {
+                        setDriverOfflineImmediately(uid);
+                    }
+                } 
             }, null, {enableHighAccuracy: true, timeout: 5000}); 
         }, 10000); 
     }
