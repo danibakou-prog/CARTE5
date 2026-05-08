@@ -83,7 +83,7 @@
         .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; } .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
         .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; border: 1px solid #90CAF9; } .driver-card.show { display: block; animation: slideUp 0.4s; }
+        .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; } .driver-card.show { display: block; animation: slideUp 0.4s; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .d-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
         .d-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #BBDEFB, #90CAF9); display: flex; align-items: center; justify-content: center; font-size: 1.8em; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2); }
@@ -184,7 +184,7 @@
         <div class="panel" style="padding: 24px; text-align: center;">
             <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
             <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
-            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="عائلية">🚐 عائلية</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
             <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
             <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
             <button class="auth-btn alt" onclick="skipToPassenger()" style="max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
@@ -231,7 +231,6 @@
             <div class="car-selector">
                 <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
                 <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
-                <div class="car-opt" onclick="selectCar(this, 'عائلية', 40)"><div class="ico">🚐</div><div class="name">عائلية</div><div class="rate">40 د.ج/كم</div></div>
                 <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل صغيرة</div><div class="rate">60 د.ج/كم</div></div>
             </div>
 
@@ -319,8 +318,7 @@
     const MAP_CONFIG = {
         defaultView: [36.753, 3.058], defaultZoom: 14,
         tileLayers: [
-            { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 },
-            { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', attribution: '© Esri', maxZoom: 18 }
+            { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }
         ],
         routeStyles: { driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } },
         markerIcons: {
@@ -391,9 +389,105 @@
 
     function initFirebase() {
         try { const config = { apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", authDomain:"birine-app.firebaseapp.com", projectId:"birine-app", storageBucket:"birine-app.firebasestorage.app", messagingSenderId:"359460161481", appId:"1:359460161481:web:5739dcc79ed79275928a18", measurementId:"G-GX972M18B4" }; app=firebase.initializeApp(config); db=firebase.firestore(app); auth=firebase.auth(app); auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); auth.onAuthStateChanged(async user => { if(user){ currentUser=user; routeUserAfterAuth(user); } else { currentUser=null; currentDriver=null; switchView('view-auth'); } document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }); } catch(e) { console.error(e); Utils.showToast('❌ فشل الاتصال','error'); setTimeout(()=>{document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block';}, 1500); }
+        
+        // 🔌 نظام كشف الاتصال بالإنترنت للسائقين
+        window.addEventListener('online', () => {
+            if(currentDriver?.uid && driverAvailable) {
+                db.collection('drivers').doc(currentDriver.uid).update({
+                    available: true,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                    isOnline: true
+                }).then(() => {
+                    const t = document.getElementById('statusToggle');
+                    if(t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
+                    Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
+                });
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            if(currentDriver?.uid) {
+                db.collection('drivers').doc(currentDriver.uid).update({
+                    available: false,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                    isOnline: false
+                }).catch(() => {});
+                driverAvailable = false;
+                const t = document.getElementById('statusToggle');
+                if(t) { 
+                    t.textContent = '🔴 غير متاح (غير متصل)'; 
+                    t.classList.remove('active'); 
+                    t.classList.add('unavailable'); 
+                }
+                updateServiceToggleUI();
+                Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
+                if(driverLocationInterval) {
+                    clearInterval(driverLocationInterval);
+                    driverLocationInterval = null;
+                }
+            }
+        });
+
+        // 🔍 فحص دوري للاتصال (احتياطي إضافي)
+        setInterval(() => {
+            if(currentDriver?.uid && driverAvailable && !navigator.onLine) {
+                driverAvailable = false;
+                db.collection('drivers').doc(currentDriver.uid).update({
+                    available: false,
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                    isOnline: false
+                }).catch(() => {});
+                updateServiceToggleUI();
+                const t = document.getElementById('statusToggle');
+                if(t) { 
+                    t.textContent = '🔴 غير متاح (غير متصل)'; 
+                    t.classList.remove('active'); 
+                    t.classList.add('unavailable'); 
+                }
+            }
+        }, 30000);
     }
+    
     async function routeUserAfterAuth(user) { const ud=await db.collection('users').doc(user.uid).get(); if(!ud.exists) return switchView('view-auth'); const d=ud.data(); if(d.role==='driver') { const dd=await db.collection('drivers').doc(user.uid).get(); if(dd.exists) { currentDriver=dd.data(); document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; updateServiceToggleUI(); switchView('view-dashboard'); startLocationUpdates(user.uid); } else switchView('view-driver-setup'); } else { switchView('view-request'); startPassengerLocationTracking(); } }
-    function startLocationUpdates(uid) { clearInterval(driverLocationInterval); driverLocationInterval=setInterval(async()=>{ if(!driverAvailable||!navigator.geolocation)return; navigator.geolocation.getCurrentPosition(async p=>{ try{ const l={lat:p.coords.latitude, lng:p.coords.longitude}; await db.collection('drivers').doc(uid).update({location:l, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); myCurrentPos=[l.lat, l.lng]; if(chatMiniMap&&currentActiveRide?.passengerId){ const o=await getPassengerLocation(currentActiveRide.passengerId); MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); updateChatDistanceBadge(myCurrentPos, o); } }catch(e){} },null,{enableHighAccuracy:true, timeout:5000}); },10000); }
+    
+    function startLocationUpdates(uid) { 
+        clearInterval(driverLocationInterval); 
+        driverLocationInterval = setInterval(async () => { 
+            // ✅ التحقق من الاتصال قبل تحديث الموقع
+            if(!navigator.onLine || !driverAvailable || !navigator.geolocation) {
+                if(navigator.onLine === false && driverAvailable) {
+                    driverAvailable = false;
+                    if(currentDriver?.uid) {
+                        db.collection('drivers').doc(currentDriver.uid).update({
+                            available: false,
+                            isOnline: false,
+                            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                        }).catch(() => {});
+                    }
+                    updateServiceToggleUI();
+                    Utils.showToast('🔴 انقطع الاتصال', 'error');
+                }
+                return; 
+            }
+            navigator.geolocation.getCurrentPosition(async p => { 
+                try { 
+                    const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
+                    await db.collection('drivers').doc(uid).update({
+                        location: l, 
+                        lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                        isOnline: true
+                    }); 
+                    myCurrentPos = [l.lat, l.lng]; 
+                    if(chatMiniMap && currentActiveRide?.passengerId) { 
+                        const o = await getPassengerLocation(currentActiveRide.passengerId); 
+                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
+                        updateChatDistanceBadge(myCurrentPos, o); 
+                    } 
+                } catch(e) {} 
+            }, null, {enableHighAccuracy: true, timeout: 5000}); 
+        }, 10000); 
+    }
+    
     function startPassengerLocationTracking() { clearInterval(passengerLocationInterval); passengerLocationInterval=setInterval(async()=>{ if(!navigator.geolocation||!currentActiveRide)return; navigator.geolocation.getCurrentPosition(async p=>{ try{ const l={lat:p.coords.latitude, lng:p.coords.longitude}; await db.collection('users').doc(currentUser.uid).update({lastLocation:l, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); myCurrentPos=[l.lat, l.lng]; if(chatMiniMap&&currentActiveRide?.assignedDriverId){ const o=await getDriverLocation(currentActiveRide.assignedDriverId); MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); updateChatDistanceBadge(myCurrentPos, o); } }catch(e){} },null,{enableHighAccuracy:true, timeout:5000}); },10000); }
     async function getDriverLocation(id) { try{ const d=await db.collection('drivers').doc(id).get(); if(d.exists&&d.data().location)return [d.data().location.lat, d.data().location.lng]; }catch(e){} return null; }
     async function getPassengerLocation(id) { try{ const u=await db.collection('users').doc(id).get(); if(u.exists&&u.data().lastLocation)return [u.data().lastLocation.lat, u.data().lastLocation.lng]; }catch(e){} return null; }
@@ -405,7 +499,35 @@
     function toggleServiceFromDropdown() { toggleDriverStatus(); updateServiceToggleUI(); document.getElementById('driverDropdown').classList.remove('show'); }
     function openRecordsPage() { document.getElementById('driverDropdown').classList.remove('show'); switchView('view-records'); loadRecords('all'); }
     function switchRecordsTab(f) { currentRecordsFilter=f; document.querySelectorAll('.record-tab').forEach(t=>t.classList.remove('active')); event.target.classList.add('active'); loadRecords(f); }
-    function toggleDriverStatus() { driverAvailable=!driverAvailable; if(currentDriver?.uid) db.collection('drivers').doc(currentDriver.uid).update({available:driverAvailable, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const t=document.getElementById('statusToggle'); if(driverAvailable){t.textContent='🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); Utils.showToast('✅ أنت متاح'); loadRequests();} else {t.textContent='🔴 غير متاح'; t.classList.remove('active'); t.classList.add('unavailable'); Utils.showToast('🔕 إيقاف');} }
+    
+    function toggleDriverStatus() { 
+        // ✅ لا يمكن التفعيل إذا كان الجهاز غير متصل
+        if(!navigator.onLine && !driverAvailable) {
+            Utils.showToast('⚠️ تحقق من اتصال الإنترنت أولاً', 'error');
+            return;
+        }
+        driverAvailable = !driverAvailable; 
+        if(currentDriver?.uid) {
+            db.collection('drivers').doc(currentDriver.uid).update({
+                available: driverAvailable, 
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                isOnline: navigator.onLine
+            });
+        }
+        const t = document.getElementById('statusToggle'); 
+        if(driverAvailable) {
+            t.textContent = '🟢 متاح'; 
+            t.classList.add('active'); 
+            t.classList.remove('unavailable'); 
+            Utils.showToast('✅ أنت متاح'); 
+            loadRequests();
+        } else { 
+            t.textContent = '🔴 غير متاح'; 
+            t.classList.remove('active'); 
+            t.classList.add('unavailable'); 
+            Utils.showToast('🔕 تم إيقاف الخدمة');
+        } 
+    }
     
     function loadRequests() { const l=document.getElementById('requestsList'), c=document.getElementById('requestsCount'); if(!currentDriver||!driverAvailable){ l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; return; } l.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; if(activeRequestListener)activeRequestListener(); activeRequestListener=db.collection('rideRequests').where('status','==','pending').where('carType','==',currentDriver.carType).limit(20).onSnapshot(s=>{ const r=[]; s.forEach(d=>{ const x=d.data(); if(x.skippedBy?.includes(currentDriver.uid))return; if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); }); const n=r.length; if(n>previousRequestsCount&&n>0){ Utils.playSound('requestSound'); const h=document.querySelector('.dashboard-header'); if(h){h.classList.remove('pulse'); void h.offsetWidth; h.classList.add('pulse');} } previousRequestsCount=n; renderRequests(r,l,c); },e=>console.error(e)); }
     function renderRequests(reqs,l,c){ c.textContent=reqs.length; if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';return;} l.innerHTML=reqs.map(r=>{ const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000); let d='---'; if(currentDriver?.location&&r.pickup?.lat){ const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); d=ds.toFixed(1); } const rej=r.skippedBy?.length||0; return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`; }).join(''); }
