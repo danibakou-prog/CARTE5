@@ -20,167 +20,69 @@
     <style>
         :root {
             --primary: #9ACD32; --primary-dark: #7CB342; --primary-light: #C5E1A5;
-            --secondary: #FFD54F; --bg: #FFFFFF; --text: #1B1B1B; --card: rgba(255, 255, 255, 0.95);
-            --shadow: 0 8px 32px rgba(0,0,0,0.15); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.25);
+            --secondary: #FFD54F; --bg: #FFFFFF; --text: #1B1B1B; --card: #FFFFFF;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.25);
             --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
             --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        /* Full Screen Map Background */
-        body { 
-            background: #F0F0F0; 
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-            color: var(--text); 
-        }
-        
-        .app { 
-            position: relative; 
-            width: 100%; 
-            height: 100%; 
-            display: flex; 
-            flex-direction: column; 
-        }
-
-        /* Map Container takes full space behind everything */
-        #map { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: 1; 
-        }
-
-        .view { 
-            display: none; 
-            width: 100%; 
-            height: 100%; 
-            position: relative; 
-            z-index: 10; 
-        } 
-        .view.active { display: block; }
-        
-        /* Floating Sidebar / Panel Styles */
-        .floating-panel {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 100%;
-            max-width: 400px; /* Limit width on desktop */
-            background: var(--card);
-            backdrop-filter: blur(10px);
-            border-radius: 24px 24px 0 0;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), height 0.3s ease;
-            max-height: 85vh;
-            overflow-y: auto;
-            border-top: 1px solid var(--border);
-        }
-
-        .panel-header {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: center;
-            cursor: pointer;
-            border-bottom: 1px solid transparent;
-        }
-        
-        .drag-indicator {
-            width: 40px;
-            height: 5px;
-            background-color: #ddd;
-            border-radius: 10px;
-        }
-
-        .panel-content {
-            padding: 0 20px 20px 20px;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Collapsed State */
-        .floating-panel.collapsed {
-            transform: translateY(calc(100% - 70px)); /* Show only header */
-        }
-        .floating-panel.collapsed .panel-content {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* Auth View Styling */
-        .auth-view { 
-            background: linear-gradient(135deg, var(--bg) 0%, #F9F9F9 100%); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 24px; 
-            text-align: center; 
-            height: 100%;
-        }
-        
-        .header { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-            color: #1B1B1B; 
-            padding: 16px 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            z-index: 100; 
-            box-shadow: 0 4px 20px rgba(124, 179, 66, 0.2); 
-        }
+        body { background: linear-gradient(135deg, var(--bg) 0%, #F9F9F9 100%); min-height: 100vh; padding: 8px; color: var(--text); }
+        .app { max-width: 440px; margin: 0 auto; background: var(--card); border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); position: relative; min-height: 100vh; border: 1px solid var(--border); }
+        .view { display: none; animation: fadeIn 0.35s ease; } .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.2); }
         .header h1 { font-size: 1.3em; font-weight: 800; flex: 1; text-align: center; letter-spacing: -0.3px; text-shadow: 0 1px 2px rgba(255,255,255,0.3); }
         .back-btn { background: rgba(255,255,255,0.25); border: none; color: #1B1B1B; padding: 10px 14px; border-radius: 12px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: 0.2s; }
+        .back-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.02); }
         .logout-btn { background: rgba(255,255,255,0.25); border: none; color: #1B1B1B; padding: 8px 16px; border-radius: 24px; font-size: 0.8em; cursor: pointer; font-weight: 600; transition: 0.2s; }
-
-        /* Form Elements */
+        .logout-btn:hover { background: rgba(255,255,255,0.4); }
+        .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; }
         .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
         .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
         .auth-tab.active { background: var(--card); box-shadow: var(--shadow); color: var(--primary-dark); font-weight: 700; }
         .auth-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 18px; }
         .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: var(--card); }
+        .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(156, 205, 50, 0.15); background: #FFF; }
         .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; margin-top: 8px; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-        
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } .auth-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
         .main-logo { font-size: 4.5em; margin-bottom: 18px; animation: bounce 2.5s infinite; filter: drop-shadow(0 4px 12px rgba(156, 205, 50, 0.3)); }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        .main-title { font-size: 1.8em; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; }
-
-        /* Location Inputs in Floating Panel */
+        .main-title { font-size: 1.8em; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
+        .main-subtitle { color: #555; font-size: 1em; margin-bottom: 40px; line-height: 1.5; max-width: 280px; }
+        #map { height: 300px; width: 100%; position: relative; border-radius: 20px 20px 0 0; overflow: hidden; }
+        .leaflet-routing-container { display: none !important; }
+        .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
+        .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
+        .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
+        .pulse-green { animation: pulse-green 1.5s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 var(--pulse-green); } 70% { box-shadow: 0 0 0 20px rgba(102, 187, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0); } }
+        .pulse-blue { animation: pulse-blue 1.5s infinite; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
+        .panel { padding: 18px 20px; background: var(--card); }
         .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
         .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); }
         .loc-header { display: flex; align-items: center; gap: 10px; } .loc-icon { font-size: 1.4em; } .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
         .loc-input-group { display: flex; gap: 8px; }
         .loc-input { flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.9em; outline: none; transition: 0.25s; background: #FFF; }
+        .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
         .loc-btn { padding: 10px 14px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; cursor: pointer; font-size: 0.9em; transition: 0.25s; white-space: nowrap; font-weight: 600; }
-        .loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); }
+        .loc-btn:hover { background: var(--primary-dark); transform: translateY(-1px); } .loc-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
+        .loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); } .loc-btn.gps-btn:hover { background: linear-gradient(135deg, #29B6F6, #039BE5); }
         .loc-coords { font-size: 0.75em; color: #777; margin-top: 4px; min-height: 24px; }
         .coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 5px 12px; border-radius: 8px; font-family: monospace; font-size: 0.85em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); }
-        .coords-copy-btn { margin-right: 8px; padding: 3px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; }
-
-        /* Route Info Cards */
+        .coords-copy-btn { margin-right: 8px; padding: 3px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; } .coords-copy-btn:hover { background: #FFC107; }
         .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
         .info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 12px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
         .info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); } .info-card .label { font-size: 0.75em; color: #555; margin-top: 3px; font-weight: 500; }
         .price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 14px; border: 2px solid #FFECB3; box-shadow: 0 2px 8px rgba(255, 213, 79, 0.2); }
-        
-        /* Car Selector */
         .car-selector { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
         .car-opt { flex: 0 0 28%; min-width: 80px; background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.25s; }
         .car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); }
         .car-opt .ico { font-size: 1.6em; } .car-opt .name { font-weight: 700; font-size: 0.75em; margin-top: 6px; line-height: 1.3; } .car-opt .rate { color: var(--primary-dark); font-size: 0.7em; font-weight: 600; }
-        
         .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.3); }
-        .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
-        
-        /* Driver Card */
+        .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; } .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; } .driver-card.show { display: block; animation: slideUp 0.4s; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .d-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
@@ -188,20 +90,17 @@
         .d-name { font-weight: 800; font-size: 1.05em; color: #1565C0; } .d-meta { font-size: 0.85em; color: #555; margin-top: 3px; font-weight: 500; } .d-stars { color: #FFC107; margin-top: 5px; font-size: 0.9em; }
         .d-eta { background: #FFF; padding: 10px; border-radius: 12px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 12px; border: 1px solid var(--border); }
         .cancel-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 14px; margin-top: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); }
-
-        /* Autocomplete */
         .autocomplete { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; } .autocomplete-results.show { display: block; }
         .autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
-
-        /* Dashboard Specifics */
+        .form-group { margin-bottom: 18px; text-align: right; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
         .dashboard-header { padding: 14px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; position: relative; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.25); }
         .driver-info { display: flex; align-items: center; gap: 12px; flex: 1; position: relative; }
-        .driver-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 1.4em; cursor: pointer; position: relative; z-index: 1002; font-weight: 700; transition: 0.2s; }
+        .driver-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 1.4em; cursor: pointer; position: relative; z-index: 1002; font-weight: 700; transition: 0.2s; } .driver-avatar:hover { transform: scale(1.05); background: rgba(255,255,255,0.5); }
         .driver-name { font-weight: 800; font-size: 1em; color: #1B1B1B; } .driver-status { font-size: 0.82em; opacity: 0.9; font-weight: 500; }
         .status-toggle { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; padding: 8px 16px; border-radius: 24px; font-size: 0.82em; cursor: pointer; transition: 0.25s; z-index: 1001; font-weight: 700; }
         .status-toggle.active { background: #4CAF50; color: #fff; } .status-toggle.unavailable { background: #FF9800; color: #1B1B1B; }
-        
-        /* Requests List inside Dashboard Panel */
         .requests-list { padding: 14px 16px; max-height: 58vh; overflow-y: auto; }
         .request-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 14px; border-right: 4px solid var(--primary); transition: 0.25s; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05); } .request-card.urgent { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
         .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; } .req-time { font-size: 0.82em; color: #555; background: #E3F2FD; padding: 5px 12px; border-radius: 18px; font-weight: 600; } .req-urgent { font-size: 0.78em; color: var(--danger); font-weight: 700; }
@@ -212,8 +111,6 @@
         .accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .decline-btn { background: #ECEFF1; color: #455A64; }
         .empty-state { text-align: center; padding: 45px 24px; color: #666; } .empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
         .refresh-btn { width: 100%; padding: 14px; background: #ECEFF1; color: #37474F; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: 0.2s; }
-
-        /* Chat Overlay */
         .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
         .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 88vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
         .chat-header { padding: 18px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; border-radius: 24px 24px 0 0; flex-wrap: wrap; gap: 10px; }
@@ -224,8 +121,6 @@
         .chat-send-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; transition: 0.25s; }
         .message { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.92em; line-height: 1.45; } .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; } .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; }
         .chat-mini-map { height: 160px; width: 100%; border-bottom: 1px solid var(--border); background: #F5F5F5; position: relative; } .chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; } .chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
-
-        /* Toast & Utils */
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1B1B1B; color: #fff; padding: 14px 28px; border-radius: 16px; font-size: 0.92em; z-index: 2000; transition: transform 0.35s ease; box-shadow: 0 6px 28px rgba(0,0,0,0.35); font-weight: 500; } .toast.show { transform: translateX(-50%) translateY(0); } .toast.success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .toast.error { background: linear-gradient(135deg, var(--danger), #C62828); }
         #floatingChatBtn { position: fixed; bottom: 85px; right: 22px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 34px; font-weight: 700; cursor: pointer; z-index: 2500; box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); display: flex; align-items: center; gap: 10px; animation: pulse-btn 2.5s infinite; }
         @keyframes pulse-btn { 0%, 100% { box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); } 50% { box-shadow: 0 6px 36px rgba(255, 213, 79, 0.8); } }
@@ -235,8 +130,6 @@
         .driver-dropdown { position: absolute; top: 100%; right: 0; left: 0; background: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); padding: 12px; z-index: 1003; display: none; flex-direction: column; gap: 10px; animation: slideDown 0.25s ease; border: 1px solid var(--border); margin-top: 8px; } .driver-dropdown.show { display: flex; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-btn { width: 100%; padding: 12px 18px; border: none; border-radius: 12px; background: var(--surface); color: var(--text); font-size: 0.92em; cursor: pointer; text-align: right; display: flex; align-items: center; gap: 10px; transition: 0.25s; font-weight: 600; } .dropdown-btn:hover { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); color: var(--primary-dark); } .dropdown-btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .dropdown-btn.danger { background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; }
-        
-        /* Records View */
         .records-view { padding: 18px; } .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
         .records-tabs { display: flex; gap: 6px; background: var(--surface); padding: 6px; border-radius: 14px; border: 1px solid var(--border); }
         .record-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-size: 0.88em; cursor: pointer; transition: 0.25s; font-weight: 500; } .record-tab.active { background: var(--card); font-weight: 700; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
@@ -244,24 +137,23 @@
         .record-card { background: var(--surface); border-radius: 14px; padding: 14px; border-right: 4px solid var(--primary); border: 1px solid var(--border); } .record-card.accepted { border-right-color: var(--primary); background: linear-gradient(135deg, #E8F5E9, #F1F8E9); } .record-card.rejected { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
         .record-card .route { display: flex; flex-direction: column; gap: 5px; font-size: 0.88em; margin: 10px 0; } .record-card .meta { display: flex; justify-content: space-between; font-size: 0.82em; color: #555; }
         .record-card .status { font-weight: 700; padding: 4px 12px; border-radius: 16px; font-size: 0.78em; } .record-card .status.accepted { background: #66BB6A; color: #fff; } .record-card .status.rejected { background: var(--danger); color: #fff; }
-
-        /* Search Modal */
+        .leaflet-container { font-family: inherit; } .leaflet-control-zoom { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 32px !important; height: 32px !important; line-height: 32px !important; font-weight: 700; } .leaflet-control-zoom a:hover { background: var(--surface) !important; }
+        .custom-popup { text-align: center; font-size: 0.92em; }
         .search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); } .search-modal.active { display: flex; }
         .search-content { background: #fff; width: 92%; max-width: 400px; border-radius: 24px; padding: 0; overflow: hidden; box-shadow: 0 16px 56px rgba(0,0,0,0.4); animation: slideUp 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border); }
         .search-map-container { height: 270px; width: 100%; position: relative; background: #F5F5F5; } .search-info { padding: 24px; text-align: center; } .search-spinner { width: 44px; height: 44px; border: 5px solid #ECEFF1; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 18px; } .search-text { font-size: 1.2em; font-weight: 700; color: var(--text); margin-bottom: 6px; } .search-sub { font-size: 0.9em; color: #666; }
         .cancel-search-btn { margin-top: 18px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.25s; font-size: 0.95em; }
         
-        /* Leaflet Overrides */
-        .leaflet-control-zoom { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-top: 60px !important; margin-right: 10px !important; }
-        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 32px !important; height: 32px !important; line-height: 32px !important; font-weight: 700; } .leaflet-control-zoom a:hover { background: var(--surface) !important; }
-        .custom-popup { text-align: center; font-size: 0.92em; }
-        .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
-        .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
-        .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
-        .pulse-green { animation: pulse-green 1.5s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 var(--pulse-green); } 70% { box-shadow: 0 0 0 20px rgba(102, 187, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0); } }
-        .pulse-blue { animation: pulse-blue 1.5s infinite; }
-        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
+        /* GPS Reminder Modal Styles */
+        .gps-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .gps-modal.active { display: flex; }
+        .gps-content { background: #fff; width: 90%; max-width: 350px; border-radius: 24px; padding: 24px; text-align: center; box-shadow: 0 16px 56px rgba(0,0,0,0.4); animation: slideUp 0.4s ease; border: 1px solid var(--border); }
+        .gps-icon { font-size: 3.5em; margin-bottom: 16px; animation: bounce 2s infinite; }
+        .gps-title { font-size: 1.3em; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+        .gps-desc { font-size: 0.95em; color: #666; margin-bottom: 20px; line-height: 1.5; }
+        .gps-btn-confirm { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 1em; transition: 0.25s; }
+        .gps-btn-confirm:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
     </style>
 </head>
 <body>
@@ -273,10 +165,17 @@
     <p style="color: #555; margin-top: 18px; font-size: 0.95em; font-weight: 500;">جاري التحقق من الجلسة...</p>
 </div>
 
-<div class="app" id="mainApp" style="display: none;">
-    <!-- Map is now the background for the whole app -->
-    <div id="map"></div>
+<!-- GPS Reminder Modal -->
+<div id="gpsReminderModal" class="gps-modal">
+    <div class="gps-content">
+        <div class="gps-icon">🛰️</div>
+        <h3 class="gps-title">تفعيل خدمة الموقع</h3>
+        <p class="gps-desc">للحصول على أفضل تجربة وتحديد دقيق لموقعك، يرجى التأكد من تفعيل خدمة GPS (الموقع) في هاتفك.</p>
+        <button class="gps-btn-confirm" onclick="closeGpsModal()">✅ فهمت، سأقوم بالتفعيل</button>
+    </div>
+</div>
 
+<div class="app" id="mainApp" style="display: none;">
     <div id="view-auth" class="view active">
         <div class="header" style="justify-content:center;"><h1>🚖 Yasser Ride Pro</h1></div>
         <div class="auth-view">
@@ -302,87 +201,72 @@
 
     <div id="view-driver-setup" class="view">
         <div class="header"><button class="back-btn" onclick="logoutUser()">🚪 خروج</button><h1>🚙 تسجيل مركبتك</h1></div>
-        <div class="floating-panel">
-            <div class="panel-content" style="padding: 24px; text-align: center;">
-                <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
-                <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
-                <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
-                <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
-                <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
-                <button class="auth-btn alt" onclick="skipToPassenger()" style="max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
-            </div>
+        <div class="panel" style="padding: 24px; text-align: center;">
+            <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
+            <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
+            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
+            <button class="auth-btn alt" onclick="skipToPassenger()" style="max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
         </div>
     </div>
 
     <div id="view-request" class="view">
-        <!-- Header floating over map -->
-        <div class="header">
-            <button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button>
-            <h1>📍 طلب رحلة</h1>
-            <button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.8em;">🚙 تسجيل سيارتي</button>
-        </div>
-        
-        <!-- Floating Control Panel -->
-        <div class="floating-panel collapsed" id="passengerPanel">
-            <div class="panel-header" onclick="togglePanel(this)">
-                <div class="drag-indicator"></div>
+        <div class="header"><button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button><h1>📍 طلب رحلة</h1><button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.8em;">🚙 تسجيل سيارتي</button></div>
+        <div id="map"></div>
+        <div class="panel">
+            <div class="location-box">
+                <div class="loc-row">
+                    <div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">موقع الانطلاق</span></div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
+                            <button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️ GPS</button>
+                        </div>
+                        <div class="autocomplete-results" id="pickupResults"></div>
+                    </div>
+                    <div class="loc-coords" id="pickupCoords"><span class="coords-badge">📍 جاري التحديد...</span></div>
+                </div>
+                <div class="loc-row">
+                    <div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">الوجهة المطلوبة</span></div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
+                            <button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
+                        </div>
+                        <div class="autocomplete-results" id="destResults"></div>
+                    </div>
+                    <div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
+                </div>
             </div>
-            <div class="panel-content">
-                <div class="location-box">
-                    <div class="loc-row">
-                        <div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">موقع الانطلاق</span></div>
-                        <div class="autocomplete">
-                            <div class="loc-input-group">
-                                <input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
-                                <button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️ GPS</button>
-                            </div>
-                            <div class="autocomplete-results" id="pickupResults"></div>
-                        </div>
-                        <div class="loc-coords" id="pickupCoords"><span class="coords-badge">📍 جاري التحديد...</span></div>
-                    </div>
-                    <div class="loc-row">
-                        <div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">الوجهة المطلوبة</span></div>
-                        <div class="autocomplete">
-                            <div class="loc-input-group">
-                                <input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
-                                <button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
-                            </div>
-                            <div class="autocomplete-results" id="destResults"></div>
-                        </div>
-                        <div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
-                    </div>
-                </div>
 
-                <div class="route-info" id="routeInfo" style="opacity: 0.4; pointer-events: none;">
-                    <div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
-                    <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
-                    <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
-                </div>
+            <div class="route-info" id="routeInfo" style="opacity: 0.4; pointer-events: none;">
+                <div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
+                <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
+                <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
+            </div>
 
-                <div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
+            <div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
 
-                <div class="car-selector">
-                    <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
-                    <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
-                    <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل صغيرة</div><div class="rate">60 د.ج/كم</div></div>
-                </div>
+            <div class="car-selector">
+                <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
+                <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
+                <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل صغيرة</div><div class="rate">60 د.ج/كم</div></div>
+            </div>
 
-                <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة الآن</button>
-                
-                <div class="driver-card" id="driverCard">
-                    <div class="d-header">
-                        <div class="d-avatar">👨✈️</div>
-                        <div style="flex:1"><div class="d-name" id="dName">---</div><div class="d-meta" id="dMeta">---</div><div class="d-stars">⭐⭐⭐⭐⭐ (4.9)</div></div>
-                    </div>
-                    <div class="d-eta" id="dEta">جاري التحميل...</div>
-                    <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
+            <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة الآن</button>
+            <div class="driver-card" id="driverCard">
+                <div class="d-header">
+                    <div class="d-avatar">👨✈️</div>
+                    <div style="flex:1"><div class="d-name" id="dName">---</div><div class="d-meta" id="dMeta">---</div><div class="d-stars">⭐⭐⭐⭐⭐ (4.9)</div></div>
                 </div>
+                <div class="d-eta" id="dEta">جاري التحميل...</div>
+                <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
             </div>
         </div>
     </div>
 
     <div id="view-dashboard" class="view">
-        <!-- Dashboard Header Floating -->
         <div class="dashboard-header">
             <div class="driver-info">
                 <div class="driver-avatar" id="driverAvatarBtn" title="القائمة">👨✈️</div>
@@ -395,41 +279,30 @@
             </div>
             <button class="status-toggle active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
         </div>
-        
-        <!-- Dashboard Floating Panel -->
-        <div class="floating-panel collapsed" id="driverPanel">
-            <div class="panel-header" onclick="togglePanel(this)">
-                <div class="drag-indicator"></div>
-            </div>
-            <div class="panel-content">
-                <div style="padding: 14px 0; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; padding: 10px 14px;">
-                    <span style="font-weight: 600;">📋 طلبات جديدة</span>
-                    <span id="requestsCount" style="background: var(--primary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
-                </div>
-                <div class="requests-list" id="requestsList">
-                    <div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات حالياً</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث القائمة</button></div>
-                </div>
-                <div style="padding: 14px 0; border-top: 1px solid var(--border); background: var(--surface);">
-                    <button class="refresh-btn" onclick="loadRequests()" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">🔄 تحديث الطلبات</button>
-                    <button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">👤 المتابعة كراكب</button>
-                </div>
-            </div>
+        <div style="padding: 14px 18px; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
+            <span style="font-weight: 600;">📋 طلبات جديدة</span>
+            <span id="requestsCount" style="background: var(--primary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
+        </div>
+        <div class="requests-list" id="requestsList">
+            <div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات حالياً</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث القائمة</button></div>
+        </div>
+        <div style="padding: 14px 18px; border-top: 1px solid var(--border); background: var(--surface);">
+            <button class="refresh-btn" onclick="loadRequests()" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">🔄 تحديث الطلبات</button>
+            <button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">👤 المتابعة كراكب</button>
         </div>
     </div>
 
     <div id="view-records" class="view">
         <div class="header"><button class="back-btn" onclick="switchView('view-dashboard')">🔙 رجوع</button><h1>📋 سجل الرحلات</h1></div>
-        <div class="floating-panel" style="max-height: 90vh; border-radius: 24px;">
-            <div class="panel-content records-view">
-                <div class="records-header">
-                    <div class="records-tabs">
-                        <button class="record-tab active" onclick="switchRecordsTab('all')">الكل</button>
-                        <button class="record-tab" onclick="switchRecordsTab('accepted')">✅ المقبولة</button>
-                        <button class="record-tab" onclick="switchRecordsTab('rejected')">❌ المرفوضة</button>
-                    </div>
+        <div class="records-view">
+            <div class="records-header">
+                <div class="records-tabs">
+                    <button class="record-tab active" onclick="switchRecordsTab('all')">الكل</button>
+                    <button class="record-tab" onclick="switchRecordsTab('accepted')">✅ المقبولة</button>
+                    <button class="record-tab" onclick="switchRecordsTab('rejected')">❌ المرفوضة</button>
                 </div>
-                <div class="records-list" id="recordsList"><div style="text-align:center;padding:30px;color:#666"><span class="spinner"></span><br>جاري التحميل...</div></div>
             </div>
+            <div class="records-list" id="recordsList"><div style="text-align:center;padding:30px;color:#666"><span class="spinner"></span><br>جاري التحميل...</div></div>
         </div>
     </div>
 </div>
@@ -531,18 +404,31 @@
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
     async function completeDriverSetup() { const btn=document.getElementById('setupBtn'); btn.disabled=true; btn.textContent='🔄 حفظ...'; const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; let loc={lat:36.753, lng:3.058}; if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} await db.collection('users').doc(currentUser.uid).update({role:'driver'}); await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}); Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); routeUserAfterAuth(currentUser); }
-    async function skipToPassenger() { await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); Utils.showToast('👤 جاري التحويل كراكب...'); switchView('view-request'); }
-    async function switchToPassengerMode() { if(!currentUser)return; try{ await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); document.getElementById('driverDropdown')?.classList.remove('show'); Utils.showToast('👤 تم التبديل إلى وضع الراكب'); switchView('view-request'); startPassengerLocationTracking(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} }
+    
+    // ✅ تعديل: التبديل لراكب دون تغيير الدور في قاعدة البيانات للحفاظ على بيانات السيارة
+    async function skipToPassenger() { 
+        // لا نقوم بتحديث قاعدة البيانات هنا
+        // await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); 
+        Utils.showToast('👤 جاري التحويل لوضع الراكب...'); 
+        switchView('view-request'); 
+        startPassengerLocationTracking(); 
+    }
+    
+    async function switchToPassengerMode() { 
+        if(!currentUser)return; 
+        // ✅ تعديل: التبديل للواجهة فقط
+        document.getElementById('driverDropdown')?.classList.remove('show'); 
+        Utils.showToast('👤 تم التبديل إلى وضع الراكب (بيانات سيارتك محفوظة)'); 
+        switchView('view-request'); 
+        startPassengerLocationTracking(); 
+    }
+    
     async function logoutUser() { clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); if(heartbeatInterval)clearInterval(heartbeatInterval); if(activeChatListener)activeChatListener(); if(chatLocationUpdate)clearInterval(chatLocationUpdate); await auth.signOut(); Utils.showToast('👋 تم تسجيل الخروج'); }
 
-    // 🔥 دالة فورية لتحديث حالة السائق في فايربيس عند انقطاع الإنترنت
     async function setDriverOfflineImmediately(uid) {
         if(!uid) return;
-        // تحديث الحالة المحلية فوراً
         driverAvailable = false;
         offlineUpdateQueued = true;
-        
-        // محاولة التحديث في فايربيس فوراً (حتى لو فشل سنفعلها عند العودة)
         try {
             await db.collection('drivers').doc(uid).update({
                 available: false,
@@ -552,43 +438,18 @@
                 lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             offlineUpdateQueued = false;
-        } catch(e) {
-            // إذا فشل (لعدم وجود اتصال)، نحتفظ بالطلب للقيام به عند العودة
-            console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة');
-        }
-        
-        // تحديث الواجهة فوراً
+        } catch(e) { console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة'); }
         const t = document.getElementById('statusToggle');
-        if(t) { 
-            t.textContent = '🔴 غير متاح (غير متصل)'; 
-            t.classList.remove('active'); 
-            t.classList.add('unavailable'); 
-        }
+        if(t) { t.textContent = '🔴 غير متاح (غير متصل)'; t.classList.remove('active'); t.classList.add('unavailable'); }
         updateServiceToggleUI();
         Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
-        
-        // إيقاف تحديثات الموقع لتوفير البطارية
-        if(driverLocationInterval) {
-            clearInterval(driverLocationInterval);
-            driverLocationInterval = null;
-        }
-        if(heartbeatInterval) {
-            clearInterval(heartbeatInterval);
-            heartbeatInterval = null;
-        }
+        if(driverLocationInterval) { clearInterval(driverLocationInterval); driverLocationInterval = null; }
+        if(heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
     }
 
     function initFirebase() {
         try { 
-            const config = { 
-                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
-                authDomain:"birine-app.firebaseapp.com", 
-                projectId:"birine-app", 
-                storageBucket:"birine-app.firebasestorage.app", 
-                messagingSenderId:"359460161481", 
-                appId:"1:359460161481:web:5739dcc79ed79275928a18", 
-                measurementId:"G-GX972M18B4" 
-            }; 
+            const config = { apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", authDomain:"birine-app.firebaseapp.com", projectId:"birine-app", storageBucket:"birine-app.firebasestorage.app", messagingSenderId:"359460161481", appId:"1:359460161481:web:5739dcc79ed79275928a18", measurementId:"G-GX972M18B4" }; 
             app=firebase.initializeApp(config); 
             db=firebase.firestore(app); 
             auth=firebase.auth(app); 
@@ -605,51 +466,34 @@
                 } 
                 document.getElementById('loadingOverlay').classList.add('hidden'); 
                 document.getElementById('mainApp').style.display='block'; 
+                
+                // ✅ إظهار نافذة تذكير GPS عند الدخول
+                setTimeout(() => {
+                    document.getElementById('gpsReminderModal').classList.add('active');
+                }, 1000);
             }); 
             
-            // 🚨 نظام كشف فوري لانقطاع الإنترنت - يحدث فوراً عند فقدان الاتصال
             window.addEventListener('offline', () => {
                 console.log('🔴 انترنت مقطوع - جاري تعيين available: false فوراً');
                 lastOnlineState = false;
-                if(currentDriver?.uid) {
-                    // تنفيذ فوري دون انتظار
-                    setDriverOfflineImmediately(currentDriver.uid);
-                }
+                if(currentDriver?.uid) { setDriverOfflineImmediately(currentDriver.uid); }
             }, { passive: true });
 
-            // ✅ عند عودة الاتصال، نعيد المزامنة
             window.addEventListener('online', async () => {
                 console.log('🟢 عدنا للاتصال - جاري المزامنة');
                 lastOnlineState = true;
-                
                 if(currentDriver?.uid) {
-                    // إذا كان هناك تحديث معلق من فترة الانقطاع، نفذه الآن
                     if(offlineUpdateQueued) {
                         try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                isOnline: true,
-                                connectionStatus: 'online',
-                                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                                lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
+                            await db.collection('drivers').doc(currentDriver.uid).update({ isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp() });
                             offlineUpdateQueued = false;
                         } catch(e) { console.log('⚠️ مزامنة فايربيس:', e); }
                     }
-                    
-                    // استعادة حالة التوفر السابقة (إذا كان السائق يريد أن يكون متاحاً)
                     if(driverAvailable) {
                         try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                available: true,
-                                isOnline: true,
-                                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                            });
+                            await db.collection('drivers').doc(currentDriver.uid).update({ available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() });
                             const t = document.getElementById('statusToggle');
-                            if(t) { 
-                                t.textContent = '🟢 متاح'; 
-                                t.classList.add('active'); 
-                                t.classList.remove('unavailable'); 
-                            }
+                            if(t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
                             Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
                             startLocationUpdates(currentDriver.uid);
                             loadRequests();
@@ -658,13 +502,9 @@
                 }
             }, { passive: true });
 
-            // 🔍 فحص احتياطي كل 3 ثواني لاكتشاف أي تغيير في حالة الاتصال
             setInterval(() => {
                 if(currentDriver?.uid && lastOnlineState !== navigator.onLine) {
-                    if(!navigator.onLine) {
-                        console.log('🔴 [فحص دوري] انقطاع مكتشف - تحديث فوري');
-                        setDriverOfflineImmediately(currentDriver.uid);
-                    }
+                    if(!navigator.onLine) { console.log('🔴 [فحص دوري] انقطاع مكتشف - تحديث فوري'); setDriverOfflineImmediately(currentDriver.uid); }
                     lastOnlineState = navigator.onLine;
                 }
             }, 3000);
@@ -672,10 +512,7 @@
         } catch(e) { 
             console.error(e); 
             Utils.showToast('❌ فشل الاتصال','error'); 
-            setTimeout(()=>{
-                document.getElementById('loadingOverlay').classList.add('hidden'); 
-                document.getElementById('mainApp').style.display='block';
-            }, 1500); 
+            setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }, 1500); 
         }
     }
     
@@ -702,52 +539,25 @@
     function startLocationUpdates(uid) { 
         clearInterval(driverLocationInterval); 
         clearInterval(heartbeatInterval);
-        
-        // ❤️ نبضات القلب كل 5 ثواني للحفاظ على الاتصال النشط
         heartbeatInterval = setInterval(async () => {
             if(!currentDriver?.uid || !navigator.onLine) return;
-            try {
-                await db.collection('drivers').doc(uid).update({
-                    lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(),
-                    isOnline: true
-                });
-            } catch(e) {
-                // إذا فشلت النبضات، قد يكون الاتصال ضعيفاً
-                if(navigator.onLine) {
-                    console.log('⚠️ نبضة قلب فشلت:', e);
-                }
-            }
+            try { await db.collection('drivers').doc(uid).update({ lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true }); } catch(e) {}
         }, 5000);
         
         driverLocationInterval = setInterval(async () => { 
-            // ✅ التحقق الفوري من الاتصال قبل أي عملية
-            if(!navigator.onLine) {
-                setDriverOfflineImmediately(uid);
-                return; 
-            }
+            if(!navigator.onLine) { setDriverOfflineImmediately(uid); return; }
             if(!driverAvailable || !navigator.geolocation) return; 
-            
             navigator.geolocation.getCurrentPosition(async p => { 
                 try { 
                     const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
-                    await db.collection('drivers').doc(uid).update({
-                        location: l, 
-                        lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                        isOnline: true,
-                        connectionStatus: 'online'
-                    }); 
+                    await db.collection('drivers').doc(uid).update({ location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online' }); 
                     myCurrentPos = [l.lat, l.lng]; 
                     if(chatMiniMap && currentActiveRide?.passengerId) { 
                         const o = await getPassengerLocation(currentActiveRide.passengerId); 
                         MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
                         updateChatDistanceBadge(myCurrentPos, o); 
                     } 
-                } catch(e) {
-                    // إذا فشل تحديث الموقع، نتحقق مما إذا كان بسبب انقطاع الاتصال
-                    if(!navigator.onLine) {
-                        setDriverOfflineImmediately(uid);
-                    }
-                } 
+                } catch(e) { if(!navigator.onLine) setDriverOfflineImmediately(uid); } 
             }, null, {enableHighAccuracy: true, timeout: 5000}); 
         }, 10000); 
     }
@@ -765,59 +575,153 @@
     function switchRecordsTab(f) { currentRecordsFilter=f; document.querySelectorAll('.record-tab').forEach(t=>t.classList.remove('active')); event.target.classList.add('active'); loadRecords(f); }
     
     function toggleDriverStatus() { 
-        // ✅ لا يمكن التفعيل إذا كان الجهاز غير متصل
-        if(!navigator.onLine && !driverAvailable) {
-            Utils.showToast('⚠️ تحقق من اتصال الإنترنت أولاً', 'error');
-            return;
-        }
+        if(!navigator.onLine && !driverAvailable) { Utils.showToast('⚠️ تحقق من اتصال الإنترنت أولاً', 'error'); return; }
         driverAvailable = !driverAvailable; 
         if(currentDriver?.uid) {
-            db.collection('drivers').doc(currentDriver.uid).update({
-                available: driverAvailable, 
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                isOnline: navigator.onLine
-            });
+            db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine });
         }
         const t = document.getElementById('statusToggle'); 
-        if(driverAvailable) {
-            t.textContent = '🟢 متاح'; 
-            t.classList.add('active'); 
-            t.classList.remove('unavailable'); 
-            Utils.showToast('✅ أنت متاح'); 
-            loadRequests();
-        } else { 
-            t.textContent = '🔴 غير متاح'; 
-            t.classList.remove('active'); 
-            t.classList.add('unavailable'); 
-            Utils.showToast('🔕 تم إيقاف الخدمة');
-        } 
+        if(driverAvailable) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); Utils.showToast('✅ أنت متاح'); loadRequests(); } 
+        else { t.textContent = '🔴 غير متاح'; t.classList.remove('active'); t.classList.add('unavailable'); Utils.showToast('🔕 تم إيقاف الخدمة'); } 
     }
     
     function loadRequests() { const l=document.getElementById('requestsList'), c=document.getElementById('requestsCount'); if(!currentDriver||!driverAvailable){ l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; return; } l.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; if(activeRequestListener)activeRequestListener(); activeRequestListener=db.collection('rideRequests').where('status','==','pending').where('carType','==',currentDriver.carType).limit(20).onSnapshot(s=>{ const r=[]; s.forEach(d=>{ const x=d.data(); if(x.skippedBy?.includes(currentDriver.uid))return; if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); }); const n=r.length; if(n>previousRequestsCount&&n>0){ Utils.playSound('requestSound'); const h=document.querySelector('.dashboard-header'); if(h){h.classList.remove('pulse'); void h.offsetWidth; h.classList.add('pulse');} } previousRequestsCount=n; renderRequests(r,l,c); },e=>console.error(e)); }
     function renderRequests(reqs,l,c){ c.textContent=reqs.length; if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';return;} l.innerHTML=reqs.map(r=>{ const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000); let d='---'; if(currentDriver?.location&&r.pickup?.lat){ const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); d=ds.toFixed(1); } const rej=r.skippedBy?.length||0; return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`; }).join(''); }
 
     window.handleAccept=async function(rideId){ if(!currentDriver?.uid)return Utils.showToast('⚠️ سجل الدخول أولاً','error'); const b=event.target; b.disabled=true; b.textContent='🔄 جاري...'; Utils.stopSound('requestSound'); try{ const s=await db.collection('rideRequests').doc(rideId).get(); if(!s.exists||s.data().status!=='pending'||s.data().assignedDriverId!==currentDriver.uid){Utils.showToast('⚠️ الطلب موجه لسائق آخر أو منتهي','warning');return;} const r=s.data(); await db.collection('rideRequests').doc(rideId).update({status:'accepted', acceptedBy:currentDriver.uid, acceptedAt:firebase.firestore.FieldValue.serverTimestamp()}); await db.collection('drivers').doc(currentDriver.uid).update({available:false, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); const t=document.getElementById('statusToggle'); if(t){t.textContent='🔴 غير متاح';t.classList.remove('active');t.classList.add('unavailable');driverAvailable=false;updateServiceToggleUI();} const cid=await createChat(rideId,r.passengerId,currentDriver.uid); const dn=currentDriver.carName||currentDriver.email?.split('@')[0]||'السائق'; await sendMessage(cid,currentDriver.uid,'driver',`👋 أهلاً! ${dn} في الطريق. الوصول ~${Math.max(2,Math.round(r.distance/3))} دقيقة.`); currentActiveRide={id:rideId,...r,status:'accepted'}; saveToLocalLog({id:rideId, status:'accepted', pickup:r.pickup, destination:r.destination, price:r.price, createdAt:r.createdAt?.toDate?.()||new Date().toISOString()}); Utils.showToast('✅ قبلت الرحلة! 💬 افتح المحادثة'); showChatInterface(rideId,r.passengerId,currentDriver.uid,'driver',dn,currentActiveRide); showChatButton(rideId,cid,'driver',dn,currentActiveRide); if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} finally{b.disabled=false;b.textContent='✅ قبول';loadRequests();} };
-    window.handleDecline=async function(rideId){ Utils.stopSound('requestSound'); const b=event?.target; if(b){b.disabled=true;b.textContent='🔄 جاري...';} try{ const ref=db.collection('rideRequests').doc(rideId), snap=await ref.get(); if(!snap.exists)return; const rd=snap.data(), my=currentDriver?.uid, sk=rd.skippedBy||[]; if(!sk.includes(my))sk.push(my); const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get(); const nb=[]; for(const d of ds.docs){ const x=d.data(); if(x.location&&rd.pickup?.lat){ const dist=Utils.calculateDistance(rd.pickup.lat,rd.pickup.lng,x.location.lat,x.location.lng); if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist}); } } nb.sort((a,b)=>a.distance-b.distance); if(nb.length>0){ const nx=nb[0]; await ref.update({status:'pending',assignedDriverId:nx.id,assignedAt:firebase.firestore.FieldValue.serverTimestamp(),skippedBy:sk,dispatchStage:firebase.firestore.FieldValue.increment(1)}); Utils.showToast('⏭️ تم نقل الطلب للسائق التالي'); } else { await ref.update({status:'expired',skippedBy:sk}); Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً'); } saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()}); }catch(e){console.error(e);Utils.showToast('⚠️ '+e.message,'error');} finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadRequests();} };
+    
+    // ✅ تعديل: عند الرفض، يتم البحث عن السائق التالي فوراً
+    window.handleDecline=async function(rideId){ 
+        Utils.stopSound('requestSound'); 
+        const b=event?.target; if(b){b.disabled=true;b.textContent='🔄 جاري...';} 
+        try{ 
+            const ref=db.collection('rideRequests').doc(rideId), snap=await ref.get(); 
+            if(!snap.exists)return; 
+            const rd=snap.data(), my=currentDriver?.uid, sk=rd.skippedBy||[]; 
+            if(!sk.includes(my))sk.push(my); 
+            
+            // البحث عن سائقين آخرين
+            const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get(); 
+            const nb=[]; 
+            for(const d of ds.docs){ 
+                const x=d.data(); 
+                if(x.location&&rd.pickup?.lat){ 
+                    const dist=Utils.calculateDistance(rd.pickup.lat,rd.pickup.lng,x.location.lat,x.location.lng); 
+                    if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist}); 
+                } 
+            } 
+            nb.sort((a,b)=>a.distance-b.distance); 
+            
+            if(nb.length>0){ 
+                const nx=nb[0]; 
+                // إعادة توجيه الطلب للسائق التالي
+                await ref.update({status:'pending',assignedDriverId:nx.id,assignedAt:firebase.firestore.FieldValue.serverTimestamp(),skippedBy:sk,dispatchStage:firebase.firestore.FieldValue.increment(1)}); 
+                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي'); 
+            } else { 
+                await ref.update({status:'expired',skippedBy:sk}); 
+                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً'); 
+            } 
+            saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()}); 
+        }catch(e){console.error(e);Utils.showToast('⚠️ '+e.message,'error');} 
+        finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadRequests();} 
+    };
 
     async function createChat(rid, pid, did) { const cid=`chat_${rid}`; await db.collection('chats').doc(cid).set({rideId:rid, passengerId:pid, driverId:did, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastMessage:null, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}); return cid; }
     async function sendMessage(cid, sid, st, text) { if(!text.trim())return; await db.collection('chats').doc(cid).collection('messages').add({senderId:sid, senderType:st, text:text.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp(), read:false}); await db.collection('chats').doc(cid).update({lastMessage:text.trim(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); }
     window.sendQuickMessage=async function(cid,sid,st,text){ await sendMessage(cid,sid,st,text); Utils.showToast('✅ تم الإرسال'); };
     function listenToMessages(cid, cb, uid) { lastKnownMessageCount=0; currentChatMyId=uid; return db.collection('chats').doc(cid).collection('messages').orderBy('timestamp','asc').onSnapshot(s=>{ const m=[]; s.forEach(d=>m.push({id:d.id,...d.data()})); if(m.length>0&&lastKnownMessageCount>0) m.slice(lastKnownMessageCount).forEach(msg=>{if(msg.senderId!==uid)Utils.playSound('chatMessageSound');}); lastKnownMessageCount=m.length; cb(m); }); }
-    async function showChatInterface(rid, pid, did, role, name, rd=null) { const cid=`chat_${rid}`; currentChatId=cid; const ex=document.getElementById('chatOverlay'); if(ex)ex.remove(); const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:''; const cnBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:''; const qmBtn=role==='driver'?`<div style="display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-bottom:8px;padding:0 5px"><button class="quick-msg-btn" onclick="sendQuickMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}','أنا قريب')">🚗 أنا قريب</button><button class="quick-msg-btn" onclick="sendQuickMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}','طريق مزدحمة')">🚦 طريق مزدحمة</button><button class="quick-msg-btn" onclick="sendQuickMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}','أنا في المكان المحدد')">📍 وصلت</button><button class="quick-msg-btn" onclick="sendQuickMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}','أين أنت؟')">❓ أين أنت؟</button></div>`:''; let mp=null, op=null, ml=''; if(role==='driver'){ ml='📍 موقع الراكب'; mp=currentDriver?.location?[currentDriver.location.lat,currentDriver.location.lng]:null; op=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } else { ml='🚕 موقع السائق'; op=rd?.driverLocation?[rd.driverLocation.lat,rd.driverLocation.lng]:null; if(navigator.geolocation) try{ mp=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){ mp=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } } const cc=document.createElement('div'); cc.id='chatOverlay'; cc.className='chat-overlay'; cc.innerHTML=`<div class="chat-box"><div class="chat-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div><span style="font-weight:600">${role==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>${name?`<span style="font-size:0.85em;opacity:0.9">• ${name}</span>`:''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cnBtn}${stBtn}<button class="chat-close" onclick="closeChat()">×</button></div></div>${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}<div id="chatMessages" class="chat-messages"></div><div class="chat-input-area">${qmBtn}<input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')"><button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button></div></div>`; document.body.appendChild(cc); if(activeChatListener)activeChatListener(); const uid=currentDriver?.uid||currentUser.uid; activeChatListener=listenToMessages(cid, msgs=>{ const c=document.getElementById('chatMessages'); if(!c)return; c.innerHTML=msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join(''); c.scrollTop=c.scrollHeight; }, uid); if((mp||op)&&document.getElementById('chatMiniMap')) { chatMiniMap=MapUtils.initChatMiniMap('chatMiniMap', mp, op, role); if(mp&&op)updateChatDistanceBadge(mp,op); if(chatLocationUpdate)clearInterval(chatLocationUpdate); chatLocationUpdate=setInterval(async()=>{ try{ let nm=mp, no=op; if(role==='driver'){ if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getPassengerLocation(rd?.passengerId); } else { if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getDriverLocation(rd?.assignedDriverId); } if(nm||no){ MapUtils.updateChatMiniMap(chatMiniMap, nm||mp, no||op); if(nm&&no)updateChatDistanceBadge(nm,no); } }catch(e){} },10000); } }
+    
+    // ✅ تعديل: إزالة أزرار الرسائل السريعة من الواجهة
+    async function showChatInterface(rid, pid, did, role, name, rd=null) { 
+        const cid=`chat_${rid}`; currentChatId=cid; 
+        const ex=document.getElementById('chatOverlay'); if(ex)ex.remove(); 
+        const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:''; 
+        const cnBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:''; 
+        // تم حذف qmBtn (الرسائل السريعة)
+        
+        let mp=null, op=null, ml=''; 
+        if(role==='driver'){ ml='📍 موقع الراكب'; mp=currentDriver?.location?[currentDriver.location.lat,currentDriver.location.lng]:null; op=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } 
+        else { ml='🚕 موقع السائق'; op=rd?.driverLocation?[rd.driverLocation.lat,rd.driverLocation.lng]:null; if(navigator.geolocation) try{ mp=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){ mp=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } } 
+        
+        const cc=document.createElement('div'); cc.id='chatOverlay'; cc.className='chat-overlay'; 
+        cc.innerHTML=`<div class="chat-box"><div class="chat-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div><span style="font-weight:600">${role==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>${name?`<span style="font-size:0.85em;opacity:0.9">• ${name}</span>`:''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cnBtn}${stBtn}<button class="chat-close" onclick="closeChat()">×</button></div></div>${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}<div id="chatMessages" class="chat-messages"></div><div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')"><button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button></div></div>`; 
+        document.body.appendChild(cc); 
+        if(activeChatListener)activeChatListener(); 
+        const uid=currentDriver?.uid||currentUser.uid; 
+        activeChatListener=listenToMessages(cid, msgs=>{ const c=document.getElementById('chatMessages'); if(!c)return; c.innerHTML=msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join(''); c.scrollTop=c.scrollHeight; }, uid); 
+        if((mp||op)&&document.getElementById('chatMiniMap')) { 
+            chatMiniMap=MapUtils.initChatMiniMap('chatMiniMap', mp, op, role); 
+            if(mp&&op)updateChatDistanceBadge(mp,op); 
+            if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
+            chatLocationUpdate=setInterval(async()=>{ try{ let nm=mp, no=op; if(role==='driver'){ if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getPassengerLocation(rd?.passengerId); } else { if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getDriverLocation(rd?.assignedDriverId); } if(nm||no){ MapUtils.updateChatMiniMap(chatMiniMap, nm||mp, no||op); if(nm&&no)updateChatDistanceBadge(nm,no); } }catch(e){} },10000); 
+        } 
+    }
     window.closeChat=function(){ const o=document.getElementById('chatOverlay'); if(o)o.remove(); if(activeChatListener){activeChatListener();activeChatListener=null;} if(chatLocationUpdate){clearInterval(chatLocationUpdate);chatLocationUpdate=null;} if(chatMiniMap?.map){chatMiniMap.map.remove();chatMiniMap=null;} currentChatId=null; };
     window.sendChatMessage=async function(cid,sid,st){ const i=document.getElementById('chatInput'), t=i.value.trim(); if(!t)return; await sendMessage(cid,sid,st,t); i.value=''; };
-    window.startTripNavigation=function(lat,lng,name){ if(!lat||!lng)return Utils.showToast('⚠️ بيانات الوجهة غير متاحة','warning'); Utils.showToast('🗺️ جاري فتح الخرائط...'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank'); setTimeout(()=>{ if(confirm(`🗺️ الوجهة: ${name}\nهل تريد استخدام واز بدلاً من خرائط جوجل؟`)) window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,'_blank'); },1500); if(currentActiveRide?.id) db.collection('rideRequests').doc(currentActiveRide.id).update({tripStarted:true,tripStartedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{}); };
-    window.cancelActiveTrip=async function(rid){ if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟'))return; try{ await db.collection('rideRequests').doc(rid).update({status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp()}); if(currentDriver?.uid) await db.collection('drivers').doc(currentDriver.uid).update({available:true}); Utils.showToast('❌ تم إلغاء الرحلة','error'); closeChat(); if(currentActiveRide?.id===rid)currentActiveRide=null; loadRequests(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} };
+    
+    // ✅ تعديل: إرسال إشعار للراكب عند بدء الرحلة
+    window.startTripNavigation=function(lat,lng,name){ 
+        if(!lat||!lng)return Utils.showToast('⚠️ بيانات الوجهة غير متاحة','warning'); 
+        Utils.showToast('🗺️ جاري فتح الخرائط...'); 
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank'); 
+        
+        // إرسال رسالة نظامية للراكب تفيد ببدء الرحلة
+        if(currentActiveRide?.id) {
+             const cid = `chat_${currentActiveRide.id}`;
+             sendMessage(cid, currentDriver.uid, 'driver', `🚀 بدأت الرحلة الآن نحو: ${name}`);
+             db.collection('rideRequests').doc(currentActiveRide.id).update({tripStarted:true,tripStartedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+        }
+    };
+    
+    // ✅ تعديل: عند إلغاء السائق للرحلة، يتم البحث عن سائق آخر وإشعار الراكب
+    window.cancelActiveTrip=async function(rid){ 
+        if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟'))return; 
+        try{ 
+            // إشعار الراكب عبر الشات
+            const cid = `chat_${rid}`;
+            await sendMessage(cid, currentDriver.uid, 'driver', `❌ عذراً، تم إلغاء الرحلة من قبل السائق. جاري البحث عن سائق آخر...`);
+            
+            // تحديث حالة الرحلة والبحث عن سائق جديد
+            const ref=db.collection('rideRequests').doc(rid);
+            const snap = await ref.get();
+            if(snap.exists) {
+                const rd = snap.data();
+                const my = currentDriver?.uid;
+                let sk = rd.skippedBy || [];
+                if(!sk.includes(my)) sk.push(my);
+                
+                const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get(); 
+                const nb=[]; 
+                for(const d of ds.docs){ 
+                    const x=d.data(); 
+                    if(x.location&&rd.pickup?.lat){ 
+                        const dist=Utils.calculateDistance(rd.pickup.lat,rd.pickup.lng,x.location.lat,x.location.lng); 
+                        if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist}); 
+                    } 
+                } 
+                nb.sort((a,b)=>a.distance-b.distance); 
+                
+                if(nb.length>0){ 
+                    const nx=nb[0]; 
+                    await ref.update({status:'pending',assignedDriverId:nx.id,assignedAt:firebase.firestore.FieldValue.serverTimestamp(),skippedBy:sk,dispatchStage:firebase.firestore.FieldValue.increment(1)}); 
+                    Utils.showToast('⏭️ تم إلغاء رحلتك وجاري توجيهها لسائق آخر'); 
+                } else { 
+                    await ref.update({status:'expired',skippedBy:sk}); 
+                    Utils.showToast('⚠️ تم الإلغاء ولا يوجد سائقين متاحين حالياً'); 
+                } 
+            }
+            
+            // إعادة تفعيل السائق
+            if(currentDriver?.uid) await db.collection('drivers').doc(currentDriver.uid).update({available:true}); 
+            
+            closeChat(); 
+            if(currentActiveRide?.id===rid)currentActiveRide=null; 
+            loadRequests(); 
+        }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
+    };
     function showChatButton(rid, cid, role, name, rd){ const ex=document.getElementById('floatingChatBtn'); if(ex)ex.remove(); const b=document.createElement('button'); b.id='floatingChatBtn'; b.innerHTML='💬 محادثة'; b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); document.body.appendChild(b); }
 
     function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); if(id==='view-dashboard'&&currentDriver)loadRequests(); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
-    
-    // Toggle Panel Functionality
-    function togglePanel(headerElement) {
-        const panel = headerElement.closest('.floating-panel');
-        panel.classList.toggle('collapsed');
-    }
-
     function initMap() { map=MapUtils.initMap('map'); setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); if(navigator.geolocation) useGPS(); else fallbackLocation(); map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); }); }
     function setLocation(m, pos, iid, cid, isP) { if(isP) pickupPos=pos; else destPos=pos; document.getElementById(iid).value = isP?'موقعي الحالي':document.getElementById(iid).value||'محدد'; document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋 نسخ</button>`; if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16); if(pickupPos&&destPos) drawRoute(); return m; }
     function useGPS() { const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...'; navigator.geolocation.getCurrentPosition(p=>{ pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('pickupInput').value='موقعي الحالي'; document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; if(pickupMarker)map.removeLayer(pickupMarker); pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); map.setView(pickupPos,16); if(destPos)drawRoute(); b.textContent='🛰️ GPS';b.disabled=false; },()=>{b.textContent='❌';setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);},{enableHighAccuracy:true,timeout:10000}); }
@@ -842,6 +746,12 @@
     function listenForRideUpdate() { if(rideTimeoutId)clearTimeout(rideTimeoutId); const unsub=db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap=>{ if(!docSnap.exists)return; const data=docSnap.data(); if(data.status==='accepted'){ rideState='matched'; if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); closeSearchModal(); stopPulseOnCurrent(); document.getElementById('driverCard').classList.add('show'); db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{ if(ds.exists){ const dr=ds.data(), dn=dr.carName||dr.email?.split('@')[0]||'سائق'; document.getElementById('dName').textContent=dn; document.getElementById('dMeta').textContent=dr.carType; document.getElementById('dEta').textContent=`🚗 في الطريق • ~${Math.max(2,Math.round(data.distance/3))} دقائق`; createChat(currentRideId,currentUser.uid,data.acceptedBy).then(cid=>{ showChatButton(currentRideId,cid,'passenger',dn,data); showChatInterface(currentRideId,currentUser.uid,data.acceptedBy,'passenger',dn,data); }); Utils.showToast(`✅ قبل السائق! تم فتح المحادثة 💬`); if(dr.location&&pickupPos&&destPos) MapUtils.drawDualRoute(map,[dr.location.lat,dr.location.lng],pickupPos,destPos); saveToLocalLog({id:currentRideId, status:'accepted', pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); } }); unsub(); } else if(data.status==='expired'||data.status==='cancelled'){ rideState='idle'; closeSearchModal(); stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false; unsub(); saveToLocalLog({id:currentRideId, status:data.status, pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); } }); }
     function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
     function cancelRide(){ if(confirm('إلغاء الرحلة؟')&&currentRideId){ updateRideStatus('cancelled'); rideState='idle'; closeSearchModal(); stopPulseOnCurrent(); document.getElementById('driverCard').classList.remove('show'); document.getElementById('bookBtn').disabled=false; Utils.showToast('❌ تم الإلغاء','error'); currentRideId=null; if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); saveToLocalLog({id:currentRideId, status:'cancelled', pickup:null, destination:null, price:0, createdAt:new Date().toISOString()}); } }
+    
+    // ✅ وظيفة إغلاق نافذة GPS
+    window.closeGpsModal = function() {
+        document.getElementById('gpsReminderModal').classList.remove('active');
+    }
+    
     window.onload=initFirebase;
 </script>
 </body>
