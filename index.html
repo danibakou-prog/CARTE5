@@ -25,18 +25,122 @@
             --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
             --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, var(--bg) 0%, #F9F9F9 100%); min-height: 100vh; padding: 8px; color: var(--text); }
-        .app { max-width: 440px; margin: 0 auto; background: var(--card); border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); position: relative; min-height: 100vh; border: 1px solid var(--border); }
-        .view { display: none; animation: fadeIn 0.35s ease; } .view.active { display: block; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: linear-gradient(135deg, var(--bg) 0%, #F9F9F9 100%); 
+            min-height: 100vh; 
+            color: var(--text); 
+            overflow-x: hidden; /* منع التمرير الأفقي */
+        }
+
+        .app { 
+            max-width: 100%; 
+            margin: 0 auto; 
+            position: relative; 
+            height: 100vh; 
+            width: 100%;
+            overflow: hidden;
+        } 
+
+        .view { display: none; animation: fadeIn 0.35s ease; height: 100%; } 
+        .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Full Screen Map Styles --- */
+        #map { 
+            height: 100vh; 
+            width: 100vw; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            z-index: 1; /* خلفية */
+            border-radius: 0;
+        }
+
+        /* --- Floating Request Button --- */
+        .floating-request-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000; /* فوق الخريطة */
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #1B1B1B;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 800;
+            border: none;
+            box-shadow: 0 8px 24px rgba(124, 179, 66, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 85%;
+            max-width: 400px;
+            justify-content: center;
+        }
+        .floating-request-btn:hover { transform: translateX(-50%) scale(1.02); box-shadow: 0 12px 32px rgba(124, 179, 66, 0.5); }
+        .floating-request-btn.hidden { display: none; }
+
+        /* --- Bottom Sheet / Sliding Panel --- */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 32px rgba(0,0,0,0.15);
+            z-index: 2000; /* فوق الزر والخريطة */
+            transform: translateY(110%); /* مخفي افتراضياً */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 500px; /* لتجميل العرض على الشاشات الكبيرة */
+            margin: 0 auto;
+        }
+        .bottom-sheet.open { transform: translateY(0); }
+        
+        .sheet-handle {
+            width: 40px;
+            height: 5px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 12px auto;
+        }
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px 10px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sheet-title { font-weight: 800; font-size: 1.1em; }
+        .close-sheet-btn {
+            background: var(--surface);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Header & Auth Styles (Preserved but adapted) --- */
         .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 16px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.2); }
         .header h1 { font-size: 1.3em; font-weight: 800; flex: 1; text-align: center; letter-spacing: -0.3px; text-shadow: 0 1px 2px rgba(255,255,255,0.3); }
         .back-btn { background: rgba(255,255,255,0.25); border: none; color: #1B1B1B; padding: 10px 14px; border-radius: 12px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: 0.2s; }
-        .back-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.02); }
         .logout-btn { background: rgba(255,255,255,0.25); border: none; color: #1B1B1B; padding: 8px 16px; border-radius: 24px; font-size: 0.8em; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .logout-btn:hover { background: rgba(255,255,255,0.4); }
-        .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; }
+        
+        .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 3000; position: relative; }
         .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
         .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
         .auth-tab.active { background: var(--card); box-shadow: var(--shadow); color: var(--primary-dark); font-weight: 700; }
@@ -49,7 +153,7 @@
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
         .main-title { font-size: 1.8em; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
         .main-subtitle { color: #555; font-size: 1em; margin-bottom: 40px; line-height: 1.5; max-width: 280px; }
-        #map { height: 300px; width: 100%; position: relative; border-radius: 20px 20px 0 0; overflow: hidden; }
+
         .leaflet-routing-container { display: none !important; }
         .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
         .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
@@ -58,6 +162,7 @@
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 var(--pulse-green); } 70% { box-shadow: 0 0 0 20px rgba(102, 187, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0); } }
         .pulse-blue { animation: pulse-blue 1.5s infinite; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
+        
         .panel { padding: 18px 20px; background: var(--card); }
         .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
         .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); }
@@ -176,6 +281,14 @@
 </div>
 
 <div class="app" id="mainApp" style="display: none;">
+    <!-- Map is now full screen and fixed in background -->
+    <div id="map"></div>
+
+    <!-- Floating Action Button for Request View -->
+    <button id="openRequestSheetBtn" class="floating-request-btn hidden" onclick="toggleRequestSheet(true)">
+        <span>📍</span> اطلب سيارة
+    </button>
+
     <div id="view-auth" class="view active">
         <div class="header" style="justify-content:center;"><h1>🚖 Yasser Ride Pro</h1></div>
         <div class="auth-view">
@@ -201,7 +314,7 @@
 
     <div id="view-driver-setup" class="view">
         <div class="header"><button class="back-btn" onclick="logoutUser()">🚪 خروج</button><h1>🚙 تسجيل مركبتك</h1></div>
-        <div class="panel" style="padding: 24px; text-align: center;">
+        <div class="panel" style="padding: 24px; text-align: center; background:white; height:100%;">
             <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
             <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
             <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
@@ -211,9 +324,13 @@
         </div>
     </div>
 
-    <div id="view-request" class="view">
-        <div class="header"><button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button><h1>📍 طلب رحلة</h1><button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.8em;">🚙 تسجيل سيارتي</button></div>
-        <div id="map"></div>
+    <!-- Modified Request View: Now a Bottom Sheet -->
+    <div id="view-request" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <span class="sheet-title">📍 تفاصيل الرحلة</span>
+            <button class="close-sheet-btn" onclick="toggleRequestSheet(false)">✕</button>
+        </div>
         <div class="panel">
             <div class="location-box">
                 <div class="loc-row">
@@ -321,7 +438,7 @@
 
 <div class="toast" id="toast"></div>
 <audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
-<audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/2947.mp3" type="audio/mpeg"></audio>
+<audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1111.mp3" type="audio/mpeg"></audio>
 
 <script>
     let db, auth, app, currentUser = null, currentDriver = null;
@@ -766,7 +883,44 @@
     window.cancelActiveTrip=async function(rid){ if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟'))return; try{ await db.collection('rideRequests').doc(rid).update({status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp()}); if(currentDriver?.uid) await db.collection('drivers').doc(currentDriver.uid).update({available:true}); const cid = `chat_${rid}`; await sendMessage(cid, currentDriver?.uid||currentUser.uid, 'system', '❌ تم إلغاء الرحلة من قبل السائق. جاري البحث عن سائق آخر...'); Utils.showToast('❌ تم إلغاء الرحلة','error'); closeChat(); if(currentActiveRide?.id===rid)currentActiveRide=null; loadRequests(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} };
     function showChatButton(rid, cid, role, name, rd){ const ex=document.getElementById('floatingChatBtn'); if(ex)ex.remove(); const b=document.createElement('button'); b.id='floatingChatBtn'; b.innerHTML='💬 محادثة'; b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); document.body.appendChild(b); }
 
-    function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); if(id==='view-dashboard'&&currentDriver)loadRequests(); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
+    // New Function to Toggle the Bottom Sheet
+    function toggleRequestSheet(show) {
+        const sheet = document.getElementById('view-request');
+        const btn = document.getElementById('openRequestSheetBtn');
+        if (show) {
+            sheet.classList.add('open');
+            btn.classList.add('hidden');
+            // Re-init map size when sheet opens just in case
+            if(map) setTimeout(() => map.invalidateSize(), 400);
+        } else {
+            sheet.classList.remove('open');
+            btn.classList.remove('hidden');
+        }
+    }
+
+    function switchView(id) { 
+        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        
+        // Handle visibility of Map and Request Button based on view
+        const mapEl = document.getElementById('map');
+        const reqBtn = document.getElementById('openRequestSheetBtn');
+        const reqSheet = document.getElementById('view-request');
+
+        if(id === 'view-request') {
+            mapEl.style.zIndex = 1; // Map stays behind
+            reqBtn.classList.remove('hidden'); // Show button
+            reqSheet.classList.remove('open'); // Ensure sheet is closed initially
+        } else {
+            reqBtn.classList.add('hidden'); // Hide button in other views
+            reqSheet.classList.remove('open');
+        }
+
+        if(id==='view-request' && !map) setTimeout(initMap, 100); 
+        if(id==='view-dashboard' && currentDriver) loadRequests(); 
+        const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); 
+    }
+
     function initMap() { map=MapUtils.initMap('map'); setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); if(navigator.geolocation) useGPS(); else fallbackLocation(); map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); }); }
     function setLocation(m, pos, iid, cid, isP) { if(isP) pickupPos=pos; else destPos=pos; document.getElementById(iid).value = isP?'موقعي الحالي':document.getElementById(iid).value||'محدد'; document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋 نسخ</button>`; if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16); if(pickupPos&&destPos) drawRoute(); return m; }
     function useGPS() { const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...'; navigator.geolocation.getCurrentPosition(p=>{ pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('pickupInput').value='موقعي الحالي'; document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; if(pickupMarker)map.removeLayer(pickupMarker); pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); map.setView(pickupPos,16); if(destPos)drawRoute(); b.textContent='🛰️ GPS';b.disabled=false; },()=>{b.textContent='❌';setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);},{enableHighAccuracy:true,timeout:10000}); }
