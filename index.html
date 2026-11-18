@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Yasser Ride Pro 🚖</title>
     
     <!-- Leaflet & Routing Machine -->
@@ -20,452 +20,598 @@
     <style>
         :root {
             --primary: #9ACD32; --primary-dark: #7CB342; --primary-light: #C5E1A5;
-            --secondary: #FFD54F; --bg: #FFFFFF; --text: #1B1B1B; --card: #FFFFFF;
-            --shadow: 0 8px 32px rgba(0,0,0,0.08); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.25);
-            --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
-            --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
-            --glass-bg: rgba(255, 255, 255, 0.95);
+            --secondary: #FFD54F; --bg: #FFFFFF; --text: #1B1B1B; 
+            --shadow: 0 -4px 20px rgba(0,0,0,0.1); 
+            --danger: #EF5350; --warning: #FFA726;
+            --glass: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.5);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f0f0; min-height: 100vh; color: var(--text); overflow: hidden; } /* منع التمرير للصفحة الرئيسية */
         
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #f0f0f0; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            color: var(--text); 
+        }
+
         /* Full Screen Map */
-        #map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        
-        .app { position: relative; z-index: 10; pointer-events: none; height: 100vh; width: 100vw; max-width: 100%; }
-        /* السماح بالنقر للعناصر داخل التطبيق */
-        .view, .panel, .header, .modal-content, .floating-ui { pointer-events: auto; }
+        #map { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            z-index: 1; width: 100%; height: 100%; 
+        }
+        .leaflet-routing-container { display: none !important; }
+        .leaflet-control-zoom { border-radius: 50% !important; overflow: hidden; margin-bottom: 100px !important; }
+        .leaflet-control-attribution { display: none; }
 
-        .view { display: none; animation: fadeIn 0.35s ease; width: 100%; height: 100%; } 
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* App Container */
+        .app { 
+            position: relative; z-index: 10; height: 100%; width: 100%; pointer-events: none; 
+        }
+        .view { 
+            display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; 
+        } 
+        .view.active { display: block; pointer-events: auto; }
 
-        /* Auth View Styling */
-        .auth-view { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); height: 100%; }
-        .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
-        .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
-        .auth-tab.active { background: var(--card); box-shadow: var(--shadow); color: var(--primary-dark); font-weight: 700; }
-        .auth-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 18px; }
-        .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: var(--card); }
-        .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; margin-top: 8px; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-        .main-logo { font-size: 4.5em; margin-bottom: 18px; animation: bounce 2.5s infinite; filter: drop-shadow(0 4px 12px rgba(156, 205, 50, 0.3)); }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        /* Auth View (Centered Glass Card) */
+        .auth-view { 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); 
+        }
+        .auth-card {
+            background: var(--glass); padding: 30px; border-radius: 24px; width: 90%; max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+        .main-logo { font-size: 3em; margin-bottom: 10px; }
+        .auth-tabs { display: flex; gap: 10px; margin: 20px 0; background: #eee; padding: 5px; border-radius: 15px; }
+        .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .auth-tab.active { background: #fff; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .auth-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1em; outline: none; }
+        .auth-btn { width: 100%; padding: 15px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1em; cursor: pointer; }
 
-        /* Floating Passenger Menu */
-        .passenger-float-container {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 400px; z-index: 1000;
-            display: flex; flex-direction: column-reverse; align-items: center;
+        /* Passenger Bottom Sheet */
+        .passenger-ui {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: var(--glass);
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 85vh; overflow-y: auto;
+            display: flex; flex-direction: column;
         }
         
-        .main-toggle-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #1B1B1B; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            font-size: 1.5em; cursor: pointer; z-index: 1001;
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .ui-header {
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        .main-toggle-btn.open { transform: rotate(45deg); background: var(--danger); color: white; }
-
-        .passenger-menu {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 20px;
-            width: 100%;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--border);
-            margin-bottom: 15px;
-            transform: translateY(20px); opacity: 0; visibility: hidden;
-            transition: all 0.3s ease;
-            max-height: 75vh; overflow-y: auto;
-        }
-        .passenger-menu.show { transform: translateY(0); opacity: 1; visibility: visible; }
-
-        /* Driver Setup Modal */
-        .driver-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            z-index: 2000; display: none; align-items: center; justify-content: center;
-        }
-        .driver-modal-overlay.active { display: flex; }
-        .driver-modal-content {
-            background: #fff; width: 90%; max-width: 380px; border-radius: 24px;
-            padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
-        .close-modal { position: absolute; top: 15px; left: 15px; background: #f0f0f0; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: bold; }
-
-        /* Driver Dashboard Overlay */
-        .dashboard-overlay {
-            position: fixed; top: 0; right: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.98); z-index: 1500;
-            display: none; flex-direction: column;
-            animation: slideInRight 0.3s ease;
-        }
-        .dashboard-overlay.active { display: flex; }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-        /* Controls inside Menus */
-        .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-        .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 12px; border-radius: 16px; border: 1px solid var(--border); }
-        .loc-header { display: flex; align-items: center; gap: 10px; } .loc-icon { font-size: 1.2em; } .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
-        .loc-input-group { display: flex; gap: 8px; }
-        .loc-input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9em; background: #FFF; }
-        .loc-btn { padding: 8px 12px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 10px; cursor: pointer; font-size: 0.85em; font-weight: 600; }
-        .loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: white; }
+        .menu-title { font-weight: 800; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
         
-        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 3000; box-shadow: var(--shadow); display: none; } 
-        .autocomplete-results.show { display: block; }
-        .autocomplete-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #f5f5f5; font-size: 0.85em; }
+        .ui-content { padding: 20px; display: none; }
+        .ui-content.expanded { display: block; animation: fadeIn 0.3s; }
 
-        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-        .info-card { background: #f9f9f9; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
-        .info-card .val { font-weight: 800; font-size: 0.9em; color: var(--primary-dark); } .info-card .label { font-size: 0.7em; color: #555; }
+        /* Inputs in Bottom Sheet */
+        .loc-row { margin-bottom: 15px; position: relative; }
+        .loc-input-group { display: flex; gap: 10px; }
+        .loc-input { flex: 1; padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #fff; font-size: 0.95em; }
+        .loc-btn { padding: 0 15px; background: var(--primary); border: none; border-radius: 10px; color: #1B1B1B; font-weight: 600; cursor: pointer; }
+        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #eee; border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: none; }
+        .autocomplete-item { padding: 12px; border-bottom: 1px solid #f5f5f5; cursor: pointer; font-size: 0.9em; }
         
-        .price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 10px; border-radius: 12px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 12px; border: 1px solid #FFECB3; }
-        
-        .car-selector { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-        .car-opt { flex: 1; min-width: 70px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        /* Car Selector Horizontal Scroll */
+        .car-selector { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px 0; margin-bottom: 10px; scrollbar-width: none; }
+        .car-opt { min-width: 100px; background: #fff; border: 2px solid #eee; border-radius: 16px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
         .car-opt.selected { border-color: var(--primary); background: #F1F8E9; }
-        .car-opt .ico { font-size: 1.4em; } .car-opt .name { font-weight: 700; font-size: 0.7em; margin-top: 4px; }
+        .car-opt .ico { font-size: 1.5em; }
         
-        .book-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 14px; font-size: 1em; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-        
-        /* Driver Toggle Button (Floating) */
-        .driver-float-btn {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background: #fff; border: 1px solid var(--border);
+        .book-btn { width: 100%; padding: 16px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.1em; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(154, 205, 50, 0.4); }
+        .book-btn:disabled { background: #ccc; box-shadow: none; }
+
+        /* Driver Dashboard Floating Elements */
+        .driver-float-controls {
+            position: absolute; top: 20px; right: 20px; left: 20px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: none;
+        }
+        .driver-btn {
+            pointer-events: auto;
+            background: var(--glass);
             padding: 10px 16px; border-radius: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid var(--glass-border);
+            font-weight: 700; font-size: 0.9em; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
-            cursor: pointer; font-weight: 600; font-size: 0.9em;
             transition: 0.2s;
         }
-        .driver-float-btn:hover { transform: scale(1.05); }
-        .driver-float-btn i { font-size: 1.2em; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+        .status-dot.active { background: #4CAF50; box-shadow: 0 0 8px #4CAF50; }
 
-        /* Search Modal */
-        .search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .search-modal.active { display: flex; }
+        /* Modals (Driver Setup & Requests) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            z-index: 2000; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
         
-        /* Chat & Others */
-        .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1B1B1B; color: #fff; padding: 12px 24px; border-radius: 16px; font-size: 0.9em; z-index: 5000; transition: transform 0.35s ease; } .toast.show { transform: translateX(-50%) translateY(0); }
+        .modal-card {
+            background: #fff; width: 90%; max-width: 400px;
+            border-radius: 24px; padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh; overflow-y: auto;
+        }
         
-        .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .request-card-modal {
+            background: linear-gradient(135deg, #fff, #FAFAFA);
+            border-left: 6px solid var(--primary);
+        }
+        .req-details { margin: 15px 0; font-size: 0.95em; line-height: 1.6; }
+        .req-price { font-size: 1.4em; font-weight: 800; color: var(--primary-dark); text-align: center; margin: 10px 0; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-half { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; font-size: 1em; }
+        .btn-accept { background: var(--primary); color: #1B1B1B; }
+        .btn-decline { background: #f5f5f5; color: #555; }
+
+        /* Chat Overlay */
+        .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+        .chat-box { background: #fff; width: 100%; max-width: 100%; height: 80vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9; }
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 15px; margin-bottom: 10px; font-size: 0.9em; }
+        .message.me { background: var(--primary); color: #1B1B1B; margin-right: auto; border-bottom-right-radius: 2px; }
+        .message.other { background: #E3F2FD; color: #1565C0; margin-left: auto; border-bottom-left-radius: 2px; }
+        .chat-input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        
+        /* Utilities */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Marker Styles */
-        .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; border: 3px solid var(--primary); }
-        .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; }
-        .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: var(--danger); color: #fff; font-size: 1.1em; border: none; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 0.9em; z-index: 5000; opacity: 0; transition: 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; bottom: 110px; }
         
-        /* Hide Leaflet Controls initially to keep clean look, show on interaction if needed */
-        .leaflet-control-zoom { display: none; } 
+        .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 1.2em; border: 2px solid var(--primary); }
+        .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: var(--danger); color: #fff; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(239, 83, 80, 0.4); }
+        
+        /* Search Modal */
+        .search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4000; display: none; align-items: center; justify-content: center; flex-direction: column; color: #fff; text-align: center; }
+        .search-modal.active { display: flex; }
+        .search-spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<!-- GPS Reminder Modal -->
-<div id="gpsReminderModal" class="gps-modal" style="display:none; position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:6000;align-items:center;justify-content:center;">
-    <div style="background:#fff;padding:24px;border-radius:24px;text-align:center;width:90%;max-width:350px;">
-        <div style="font-size:3em;margin-bottom:15px;">🛰️</div>
-        <h3>تفعيل خدمة تحديد المواقع</h3>
-        <p style="margin:15px 0;color:#666;">للحصول على أفضل تجربة وتحديد دقيق لموقعك، يرجى تفعيل الـ GPS.</p>
-        <button onclick="enableGPSAndClose()" style="width:100%;padding:12px;background:var(--primary);border:none;border-radius:12px;font-weight:bold;margin-bottom:8px;">✅ تفعيل الآن</button>
-        <button onclick="closeGPSModal()" style="width:100%;padding:12px;background:transparent;border:none;color:#666;">ربما لاحقاً</button>
-    </div>
-</div>
-
 <!-- Loading Overlay -->
-<div id="loadingOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-    <div style="font-size:3.5em;margin-bottom:18px;">🚖</div>
-    <h2 style="color:var(--primary-dark);">Yasser Ride Pro</h2>
-    <div class="spinner" style="margin-top:12px;"></div>
+<div id="loadingOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="font-size:3em;margin-bottom:10px">🚖</div>
+    <h2 style="color:var(--primary-dark)">Yasser Ride Pro</h2>
+    <div class="spinner" style="margin-top:15px"></div>
 </div>
 
-<!-- MAP BACKGROUND -->
+<!-- The Map Background -->
 <div id="map"></div>
 
 <div class="app">
     
     <!-- AUTH VIEW -->
-    <div id="view-auth" class="view active">
-        <div class="auth-view">
+    <div id="view-auth" class="view active auth-view">
+        <div class="auth-card">
             <div class="main-logo">✨</div>
-            <h2 style="color:var(--primary-dark);margin-bottom:10px;">مرحباً بك في ياسر رايد</h2>
-            <p style="color:#666;margin-bottom:30px;">أسرع طريقة للتنقل</p>
+            <h2 style="margin-bottom:5px">مرحباً بك</h2>
+            <p style="color:#666;font-size:0.9em;margin-bottom:20px">سجل دخولك لبدء الرحلة</p>
+            
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('login')">دخول</button>
                 <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
             </div>
-            <div id="loginForm" class="auth-form">
+            
+            <div id="loginForm">
                 <input type="email" id="loginEmail" class="auth-input" placeholder="البريد الإلكتروني">
                 <input type="password" id="loginPassword" class="auth-input" placeholder="كلمة المرور">
-                <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">🔐 دخول</button>
+                <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">تسجيل الدخول</button>
             </div>
-            <div id="registerForm" class="auth-form" style="display:none;">
+            
+            <div id="registerForm" style="display:none">
                 <input type="email" id="regEmail" class="auth-input" placeholder="البريد الإلكتروني">
                 <input type="password" id="regPassword" class="auth-input" placeholder="كلمة المرور">
-                <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">✅ إنشاء حساب</button>
+                <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">إنشاء حساب</button>
             </div>
         </div>
     </div>
 
-    <!-- PASSENGER FLOATING MENU -->
+    <!-- PASSENGER VIEW (Bottom Sheet) -->
     <div id="view-request" class="view">
-        <!-- Driver Side Button (Visible only if user is driver) -->
-        <button id="driverSetupBtn" class="driver-float-btn" onclick="openDriverModal()" style="display:none;">
-            <i>🚙</i> <span id="driverSetupText">تسجيل مركبتك</span>
-        </button>
-
-        <div class="passenger-float-container">
-            <!-- Main Toggle Button -->
-            <button class="main-toggle-btn" id="menuToggleBtn" onclick="togglePassengerMenu()">
-                🚖
-            </button>
-
-            <!-- Collapsible Menu -->
-            <div class="passenger-menu" id="passengerMenu">
-                <div class="location-box">
-                    <div class="loc-row">
-                        <div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">من أين؟</span></div>
-                        <div class="loc-input-group" style="position:relative;">
-                            <input type="text" class="loc-input" id="pickupInput" placeholder="موقع الانطلاق..." autocomplete="off">
-                            <button class="loc-btn gps-btn" onclick="useGPS()">GPS</button>
-                            <div class="autocomplete-results" id="pickupResults"></div>
-                        </div>
-                        <div id="pickupCoords" style="font-size:0.7em;color:#777;"></div>
+        <div class="passenger-ui">
+            <div class="ui-header">
+                <div class="menu-title" onclick="togglePassengerMenu()">
+                    <span>📍 أين تريد الذهاب؟</span>
+                    <span style="font-size:0.8em;color:#999">▼</span>
+                </div>
+                <button class="driver-btn" onclick="openSetupModal()" style="padding:8px 12px;font-size:0.8em;background:#f0f0f0">
+                    🚙 تسجيل سيارتي
+                </button>
+            </div>
+            
+            <!-- Collapsible Content -->
+            <div class="ui-content expanded" id="passengerMenuContent">
+                <div class="loc-row">
+                    <div class="loc-input-group">
+                        <input type="text" class="loc-input" id="pickupInput" placeholder="موقع الانطلاق" autocomplete="off">
+                        <button class="loc-btn" onclick="useGPS()">🛰️</button>
                     </div>
-                    <div class="loc-row">
-                        <div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">إلى أين؟</span></div>
-                        <div class="loc-input-group" style="position:relative;">
-                            <input type="text" class="loc-input" id="destInput" placeholder="الوجهة..." autocomplete="off">
-                            <button class="loc-btn" onclick="enableMapClick()">🗺️</button>
-                            <div class="autocomplete-results" id="destResults"></div>
-                        </div>
-                        <div id="destCoords" style="font-size:0.7em;color:#777;"></div>
+                    <div class="autocomplete-results" id="pickupResults"></div>
+                </div>
+                
+                <div class="loc-row">
+                    <div class="loc-input-group">
+                        <input type="text" class="loc-input" id="destInput" placeholder="الوجهة المطلوبة" autocomplete="off">
                     </div>
+                    <div class="autocomplete-results" id="destResults"></div>
                 </div>
 
-                <div class="route-info" id="routeInfo" style="opacity:0.5;">
-                    <div class="info-card"><div class="val" id="distVal">---</div><div class="label">المسافة</div></div>
-                    <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">الوقت</div></div>
-                    <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">الحالة</div></div>
+                <div id="routeInfo" style="display:none; margin-bottom:15px; padding:10px; background:#f9f9f9; border-radius:10px; font-size:0.9em; display:flex; justify-content:space-between">
+                    <span>📏 <b id="distVal">-</b></span>
+                    <span>⏱️ <b id="timeVal">-</b></span>
+                    <span>💰 <b id="priceDisplay" style="color:var(--primary-dark)">-</b></span>
                 </div>
-
-                <div class="price-display" id="priceBox">اختر الوجهة لحساب السعر</div>
 
                 <div class="car-selector">
-                    <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">ناري</div></div>
-                    <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div></div>
-                    <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">نقل</div></div>
-                </div>
-
-                <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة</button>
-                
-                <!-- Driver Card (Hidden by default) -->
-                <div id="driverCard" style="display:none; margin-top:15px; background:#E3F2FD; padding:15px; border-radius:16px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div style="font-size:2em;">👨✈️</div>
-                        <div>
-                            <div style="font-weight:bold;" id="dName">السائق</div>
-                            <div style="font-size:0.8em;color:#555;" id="dMeta">...</div>
-                        </div>
+                    <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)">
+                        <div class="ico">🏍️</div><div style="font-size:0.8em;font-weight:700">ناري</div>
                     </div>
-                    <div id="dEta" style="margin-top:8px;font-weight:bold;text-align:center;">في الطريق</div>
-                    <button onclick="cancelRide()" style="width:100%;margin-top:10px;padding:10px;background:var(--danger);color:white;border:none;border-radius:10px;">إلغاء</button>
+                    <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)">
+                        <div class="ico">🚙</div><div style="font-size:0.8em;font-weight:700">مريحة</div>
+                    </div>
+                    <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)">
+                        <div class="ico">🚚</div><div style="font-size:0.8em;font-weight:700">نقل</div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- DRIVER MODAL (Popup instead of new view) -->
-    <div id="driverSetupModal" class="driver-modal-overlay">
-        <div class="driver-modal-content">
-            <button class="close-modal" onclick="closeDriverModal()">×</button>
-            <div style="text-align:center;margin-bottom:20px;">
-                <div style="font-size:3em;">🚕</div>
-                <h3 id="modalTitle" style="color:var(--primary-dark);">تسجيل مركبتك</h3>
+                <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>🚕 اطلب سيارة</button>
             </div>
             
-            <div class="form-group" style="margin-bottom:15px;">
-                <label style="display:block;margin-bottom:5px;font-weight:600;">نوع المركبة</label>
-                <select id="setupCarType" class="auth-input">
-                    <option value="دراجة نارية">🏍️ دراجة نارية</option>
-                    <option value="مريحة" selected>🚙 مريحة</option>
-                    <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
-                    <option value="فاخرة">✨ فاخرة</option>
-                </select>
+            <!-- Active Ride Status (Hidden by default) -->
+            <div id="activeRidePanel" style="display:none; padding:20px; text-align:center;">
+                <h3>السائق في الطريق</h3>
+                <div id="driverInfoCard" style="margin:15px 0; padding:15px; background:#E3F2FD; border-radius:15px; text-align:right">
+                    <!-- Filled by JS -->
+                </div>
+                <button class="btn-decline btn-half" style="width:100%;background:#FFEBEE;color:#D32F2F" onclick="cancelRide()">إلغاء الطلب</button>
             </div>
-            <div class="form-group" style="margin-bottom:20px;">
-                <label style="display:block;margin-bottom:5px;font-weight:600;">اسم/لوحة السيارة</label>
-                <input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345">
-            </div>
-            
-            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn">✅ حفظ والبدء كسائق</button>
-            <button class="auth-btn" style="background:#eee;color:#333;margin-top:10px;" onclick="skipToPassenger()">👤 المتابعة كراكب فقط</button>
         </div>
     </div>
 
-    <!-- DRIVER DASHBOARD OVERLAY -->
-    <div id="view-dashboard" class="dashboard-overlay">
-        <div style="padding:20px;background:linear-gradient(135deg, var(--primary), var(--primary-dark));color:#1B1B1B;display:flex;justify-content:space-between;align-items:center;">
-            <div>
-                <h2 style="font-size:1.2em;">لوحة السائق</h2>
-                <div style="font-size:0.9em;opacity:0.9;" id="dashDriverName">...</div>
+    <!-- DRIVER VIEW (Floating Controls) -->
+    <div id="view-dashboard" class="view">
+        <div class="driver-float-controls">
+            <div class="driver-btn" onclick="toggleDriverStatus()" id="statusBtn">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">متاح</span>
             </div>
-            <button onclick="closeDashboard()" style="background:rgba(255,255,255,0.3);border:none;padding:8px 16px;border-radius:20px;font-weight:bold;">إغلاق ✕</button>
+            <div class="driver-btn" onclick="openRecordsPage()">📋 سجلاتي</div>
+            <div class="driver-btn" onclick="logoutUser()" style="background:#FFEBEE;color:#D32F2F">خروج</div>
         </div>
-        
-        <div style="padding:15px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid #eee;">
-            <span>حالة الخدمة:</span>
-            <button id="statusToggle" class="auth-btn" style="width:auto;padding:8px 20px;margin:0;" onclick="toggleDriverStatus()">🟢 متاح</button>
-        </div>
-
-        <div style="flex:1;overflow-y:auto;padding:15px;" id="requestsList">
-            <div style="text-align:center;padding:40px;color:#666;">جاري البحث عن طلبات...</div>
-        </div>
-    </div>
-
-    <!-- RECORDS VIEW (Simple Overlay) -->
-    <div id="view-records" class="view" style="background:#fff;z-index:1600;">
-        <div style="padding:15px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
-            <h3>سجل الرحلات</h3>
-            <button onclick="switchView('view-dashboard')" style="border:none;background:none;font-size:1.2em;">✕</button>
-        </div>
-        <div id="recordsList" style="padding:15px;"></div>
     </div>
 
 </div>
 
-<!-- SEARCH MODAL -->
+<!-- MODALS -->
+
+<!-- 1. Driver Setup Modal -->
+<div id="setupModal" class="modal-overlay">
+    <div class="modal-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3>🚙 تسجيل مركبتك</h3>
+            <button onclick="closeModal('setupModal')" style="background:none;border:none;font-size:1.5em;cursor:pointer">×</button>
+        </div>
+        <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:3em">🚕</div>
+            <p style="color:#666;font-size:0.9em">أدخل بيانات سيارتك للبدء باستقبال الطلبات</p>
+        </div>
+        <div style="margin-bottom:15px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">نوع المركبة</label>
+            <select id="setupCarType" class="auth-input">
+                <option value="دراجة نارية">🏍️ دراجة نارية</option>
+                <option value="مريحة" selected>🚙 مريحة</option>
+                <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
+                <option value="فاخرة">✨ فاخرة</option>
+            </select>
+        </div>
+        <div style="margin-bottom:20px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">اسم/لوحة السيارة</label>
+            <input type="text" id="setupCarName" class="auth-input" placeholder="مثال: هيونداي - 12345">
+        </div>
+        <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn">✅ حفظ والبدء</button>
+        <button class="auth-btn" style="background:#f5f5f5;color:#555;margin-top:10px" onclick="closeModal('setupModal')">إلغاء</button>
+    </div>
+</div>
+
+<!-- 2. Incoming Request Modal (For Drivers) -->
+<div id="requestModal" class="modal-overlay">
+    <div class="modal-card request-card-modal">
+        <div style="text-align:center;margin-bottom:10px">
+            <span style="font-size:2em">🔔</span>
+            <h3 style="color:var(--primary-dark)">طلب رحلة جديد!</h3>
+        </div>
+        <div class="req-details">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span>📍 من:</span> <strong id="reqPickup">...</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span>🏁 إلى:</span> <strong id="reqDest">...</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <span>🚗 النوع:</span> <span id="reqType">...</span>
+            </div>
+            <div class="req-price" id="reqPrice">0 د.ج</div>
+            <div style="text-align:center;font-size:0.85em;color:#666" id="reqDist">المسافة: ...</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-half btn-decline" onclick="handleDecline(currentRequestId)">❌ رفض</button>
+            <button class="btn-half btn-accept" onclick="handleAccept(currentRequestId)" id="acceptReqBtn">✅ قبول</button>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Search/Loading Modal -->
 <div id="searchModal" class="search-modal">
-    <div style="text-align:center;">
-        <div class="spinner" style="width:40px;height:40px;margin-bottom:20px;"></div>
-        <h3 id="searchStatusText">جاري البحث عن سائقين...</h3>
-        <p id="searchSubText" style="color:#666;margin-top:10px;">يرجى الانتظار</p>
-        <button onclick="cancelRide()" style="margin-top:30px;padding:12px 30px;background:var(--danger);color:white;border:none;border-radius:12px;font-weight:bold;">إلغاء الطلب</button>
-    </div>
+    <div class="search-spinner"></div>
+    <h3>جاري البحث عن سائقين...</h3>
+    <p id="searchSubText" style="opacity:0.8;margin-top:10px">يرجى الانتظار</p>
+    <button onclick="cancelRide()" style="margin-top:30px;background:rgba(255,255,255,0.2);border:1px solid #fff;color:#fff;padding:10px 30px;border-radius:20px;cursor:pointer">إلغاء</button>
 </div>
 
-<!-- CHAT OVERLAY -->
-<div id="chatOverlayContainer"></div>
+<!-- Chat Overlay -->
+<div id="chatOverlay" class="chat-overlay" style="display:none">
+    <div class="chat-box">
+        <div style="padding:15px;background:var(--primary);color:#1B1B1B;display:flex;justify-content:space-between;align-items:center">
+            <strong>💬 المحادثة</strong>
+            <button onclick="closeChat()" style="background:none;border:none;font-size:1.5em">×</button>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="loc-input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter')sendChatMessage(currentChatId, currentUser?.uid||currentDriver?.uid, currentRole)">
+            <button class="loc-btn" onclick="sendChatMessage(currentChatId, currentUser?.uid||currentDriver?.uid, currentRole)">➤</button>
+        </div>
+    </div>
+</div>
 
 <div class="toast" id="toast"></div>
-<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
 
 <script>
-    // --- CONFIG & GLOBALS ---
+    // --- Global Variables ---
     let db, auth, app, currentUser = null, currentDriver = null;
     let map, pickupMarker, destMarker, routeControl;
-    let pickupPos = null, destPos = null;
-    let selectedRate = 25, baseFare = 50, distKm = 0, timeMin = 0;
-    let rideState = 'idle', currentRideId = null;
-    let driverLocationInterval = null, activeRequestListener = null;
-    let driverAvailable = false;
-    
-    // Map Config
+    let pickupPos = null, destPos = null, myCurrentPos = null;
+    let selectedRate = 25, baseFare = 50, distKm = 0, timeMin = 0, rideState = 'idle';
+    let driverAvailable = false, currentRideId = null, currentChatId = null, currentRole = '';
+    let activeRequestListener = null, activeChatListener = null;
+    let dispatchDrivers = [], dispatchIndex = 0, dispatchTimeoutId = null;
+    let searchMarkers = [], searchMarkerMap = {};
+    let currentRequestId = null; // For modal
+
     const MAP_CONFIG = {
-        defaultView: [36.753, 3.058], defaultZoom: 14,
-        tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OSM' }]
+        defaultView: [36.753, 3.058], defaultZoom: 13,
+        tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '' }]
     };
 
-    // Utils
+    // --- Utils ---
     const Utils = {
-        showToast: (msg, type='success') => { const t=document.getElementById('toast'); t.textContent=msg; t.className=`toast ${type} show`; setTimeout(()=>t.classList.remove('show'), 3000); },
-        calculateDistance: (lat1, lng1, lat2, lng2) => { const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLng=(lng2-lng1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); },
-        formatCoords: (lat, lng) => `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        showToast: (msg) => { 
+            const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); 
+            setTimeout(()=>t.classList.remove('show'), 3000); 
+        },
+        calculateDistance: (lat1, lng1, lat2, lng2) => { 
+            const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLng=(lng2-lng1)*Math.PI/180; 
+            const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2; 
+            return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); 
+        },
         debounce: (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
     };
 
-    // --- INITIALIZATION ---
-    function initApp() {
-        try {
-            const config = { 
-                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
-                authDomain:"birine-app.firebaseapp.com", 
-                projectId:"birine-app", 
-                storageBucket:"birine-app.firebasestorage.app", 
-                messagingSenderId:"359460161481", 
-                appId:"1:359460161481:web:5739dcc79ed79275928a18" 
-            };
-            app = firebase.initializeApp(config);
-            db = firebase.firestore(app);
-            auth = firebase.auth(app);
-            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-            auth.onAuthStateChanged(async user => {
-                if(user){
-                    currentUser = user;
-                    checkUserRole();
-                    setTimeout(showGPSReminder, 1500);
-                } else {
-                    switchView('view-auth');
-                }
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                document.getElementById('loadingOverlay').style.display = 'none';
-            });
-        } catch(e) { console.error(e); }
-    }
-
-    async function checkUserRole() {
-        const ud = await db.collection('users').doc(currentUser.uid).get();
-        if(!ud.exists) return switchView('view-auth');
-        const data = ud.data();
-        
-        if(data.role === 'driver') {
-            const dd = await db.collection('drivers').doc(currentUser.uid).get();
-            if(dd.exists) {
-                currentDriver = dd.data();
-                setupDriverUI();
-                openDashboard(); // Open dashboard automatically for drivers
-            } else {
-                openDriverModal(); // Show modal if registered as driver but no car
-            }
-        } else {
-            // Passenger or Unregistered Driver
-            document.getElementById('driverSetupBtn').style.display = 'flex'; // Show button to register car
-            updateDriverButtonText(false);
-        }
-        switchView('view-request');
-        initMap();
-    }
-
-    // --- MAP FUNCTIONS ---
+    // --- Map Init ---
     function initMap() {
         if(map) return;
-        map = L.map('map', {zoomControl:false}).setView(MAP_CONFIG.defaultView, MAP_CONFIG.defaultZoom);
-        L.tileLayer(MAP_CONFIG.tileLayers[0].url, {attribution: MAP_CONFIG.tileLayers[0].attribution}).addTo(map);
+        map = L.map('map', { zoomControl: true }).setView(MAP_CONFIG.defaultView, MAP_CONFIG.defaultZoom);
+        L.tileLayer(MAP_CONFIG.tileLayers[0].url, { attribution: '', maxZoom: 19 }).addTo(map);
         
-        // Autocomplete Setup
-        setupAutocomplete('pickupInput','pickupResults',(lat,lng)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true));
-        setupAutocomplete('destInput','destResults',(lat,lng)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false));
-        
+        // Click to set destination
         map.on('click', e => {
-            if(document.getElementById('mapBtn')?.textContent === '✅ انقر') selectDestinationFromMap(e.latlng.lat, e.latlng.lng);
+            if(document.getElementById('view-request').classList.contains('active')) {
+                selectDestinationFromMap(e.latlng.lat, e.latlng.lng);
+            }
         });
-
-        if(navigator.geolocation) useGPS();
     }
 
-    function setLocation(m, pos, iid, cid, isP) {
-        if(isP) pickupPos=pos; else destPos=pos;
-        document.getElementById(iid).value = isP?'موقعي الحالي':'محدد';
-        document.getElementById(cid).innerHTML = `<span style="color:var(--primary)">📍 ${Utils.formatCoords(pos[0],pos[1])}</span>`;
-        if(m) map.removeLayer(m);
+    // --- View Switching ---
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        if(viewId === 'view-request' || viewId === 'view-dashboard') {
+            setTimeout(() => map.invalidateSize(), 300);
+        }
+    }
+
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function togglePassengerMenu() {
+        const c = document.getElementById('passengerMenuContent');
+        c.classList.toggle('expanded');
+    }
+
+    function openSetupModal() {
+        document.getElementById('setupModal').classList.add('show');
+    }
+    
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    // --- Firebase Init ---
+    function initFirebase() {
+        const config = { 
+            apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
+            authDomain:"birine-app.firebaseapp.com", 
+            projectId:"birine-app", 
+            storageBucket:"birine-app.firebasestorage.app", 
+            messagingSenderId:"359460161481", 
+            appId:"1:359460161481:web:5739dcc79ed79275928a18" 
+        };
+        app = firebase.initializeApp(config);
+        db = firebase.firestore(app);
+        auth = firebase.auth(app);
         
-        const iconHtml = isP ? '<div class="marker-base marker-passenger">📍</div>' : '<div class="marker-destination">🏁</div>';
-        const icon = L.divIcon({html: iconHtml, className:'dummy', iconSize:[36,36], iconAnchor:[18,36]});
+        auth.onAuthStateChanged(async user => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            if(user) {
+                currentUser = user;
+                const ud = await db.collection('users').doc(user.uid).get();
+                if(ud.exists && ud.data().role === 'driver') {
+                    const dd = await db.collection('drivers').doc(user.uid).get();
+                    if(dd.exists) {
+                        currentDriver = dd.data();
+                        driverAvailable = dd.data().available || false;
+                        updateDriverUI();
+                        switchView('view-dashboard');
+                        startLocationUpdates(user.uid);
+                        listenForRequests();
+                    } else {
+                        openSetupModal(); // Force setup if driver role but no data
+                    }
+                } else {
+                    switchView('view-request');
+                    initMap();
+                    setupAutocomplete();
+                    useGPS();
+                }
+            } else {
+                switchView('view-auth');
+            }
+        });
+    }
+
+    // --- Auth Logic ---
+    async function handleAuth(type) {
+        const email = document.getElementById(type==='login'?'loginEmail':'regEmail').value;
+        const pass = document.getElementById(type==='login'?'loginPassword':'regPassword').value;
+        const btn = document.getElementById(type==='login'?'loginBtn':'regBtn');
+        btn.disabled = true; btn.textContent = '...';
         
-        m = L.marker(pos, {icon:icon}).addTo(map);
+        try {
+            if(type === 'login') await auth.signInWithEmailAndPassword(email, pass);
+            else {
+                await auth.createUserWithEmailAndPassword(email, pass);
+                await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+            }
+        } catch(e) { Utils.showToast('خطأ: ' + e.message); btn.disabled=false; btn.textContent=type==='login'?'دخول':'إنشاء'; }
+    }
+
+    async function completeDriverSetup() {
+        const carType = document.getElementById('setupCarType').value;
+        const carName = document.getElementById('setupCarName').value || 'سيارتي';
+        const btn = document.getElementById('setupBtn');
+        btn.disabled = true; btn.textContent = 'جاري الحفظ...';
+        
+        let loc = {lat: 36.753, lng: 3.058};
+        if(navigator.geolocation) {
+            try {
+                const p = await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:5000}));
+                loc = {lat: p.coords.latitude, lng: p.coords.longitude};
+            } catch(e){}
+        }
+
+        await db.collection('users').doc(currentUser.uid).update({role:'driver'});
+        await db.collection('drivers').doc(currentUser.uid).set({
+            uid: currentUser.uid, email: currentUser.email, carType, carName, location: loc, 
+            available: false, rating: 5.0, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        closeModal('setupModal');
+        Utils.showToast('تم تسجيل السيارة بنجاح! 🎉');
+        // Refresh user data
+        const ud = await db.collection('users').doc(currentUser.uid).get();
+        if(ud.data().role === 'driver') {
+             const dd = await db.collection('drivers').doc(currentUser.uid).get();
+             currentDriver = dd.data();
+             driverAvailable = false;
+             switchView('view-dashboard');
+             updateDriverUI();
+             startLocationUpdates(currentUser.uid);
+             listenForRequests();
+        }
+    }
+
+    function logoutUser() {
+        auth.signOut();
+        window.location.reload();
+    }
+
+    // --- Passenger Logic ---
+    function setupAutocomplete() {
+        ['pickup', 'dest'].forEach(type => {
+            const inp = document.getElementById(type+'Input');
+            const res = document.getElementById(type+'Results');
+            inp.addEventListener('input', Utils.debounce(async () => {
+                const q = inp.value.trim();
+                if(q.length < 3) { res.style.display='none'; return; }
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=dz&limit=5`);
+                    const d = await r.json();
+                    if(d.length > 0) {
+                        res.innerHTML = d.map(i => `<div class="autocomplete-item" onclick="setLoc('${type}', ${i.lat}, ${i.lon}, '${i.display_name.replace(/'/g, "\\'")}')">📍 ${i.display_name.substring(0,50)}...</div>`).join('');
+                        res.style.display = 'block';
+                    } else { res.style.display = 'none'; }
+                } catch(e){}
+            }, 500));
+        });
+    }
+
+    function setLoc(type, lat, lng, name) {
+        document.getElementById(type+'Results').style.display = 'none';
+        document.getElementById(type+'Input').value = name.split(',')[0];
+        const pos = [parseFloat(lat), parseFloat(lng)];
+        if(type === 'pickup') {
+            pickupPos = pos;
+            if(pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker(pos).addTo(map);
+        } else {
+            destPos = pos;
+            if(destMarker) map.removeLayer(destMarker);
+            destMarker = L.marker(pos, {icon: L.divIcon({className:'marker-destination', html:'🏁'})}).addTo(map);
+        }
         map.setView(pos, 15);
-        if(isP) pickupMarker=m; else destMarker=m;
-        
         if(pickupPos && destPos) drawRoute();
+    }
+
+    function useGPS() {
+        if(!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(p => {
+            const pos = [p.coords.latitude, p.coords.longitude];
+            pickupPos = pos;
+            document.getElementById('pickupInput').value = 'موقعي الحالي';
+            if(pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker(pos).addTo(map);
+            map.setView(pos, 15);
+            if(destPos) drawRoute();
+        }, () => Utils.showToast('تعذر تحديد الموقع'), {enableHighAccuracy:true});
+    }
+
+    function selectDestinationFromMap(lat, lng) {
+        setLoc('dest', lat, lng, 'محدد على الخريطة');
+    }
+
+    function selectCar(el, name, rate) {
+        document.querySelectorAll('.car-opt').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedRate = rate;
+        if(distKm > 0) updatePrice();
     }
 
     function drawRoute() {
@@ -473,296 +619,281 @@
         routeControl = L.Routing.control({
             waypoints: [L.latLng(pickupPos), L.latLng(destPos)],
             routeWhileDragging: false, addWaypoints: false, show: false, createMarker: ()=>null,
-            lineOptions: {styles: [{color:'#9ACD32', weight:5, opacity:0.8}]},
-            router: L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1'})
+            lineOptions: { styles: [{color:'#9ACD32', weight:5, opacity:0.8}] }
         }).addTo(map);
-
+        
         routeControl.on('routesfound', e => {
             const r = e.routes[0];
             distKm = (r.summary.totalDistance/1000).toFixed(1);
             timeMin = Math.round(r.summary.totalTime/60);
-            document.getElementById('routeInfo').style.opacity='1';
-            document.getElementById('distVal').textContent = `${distKm} كم`;
-            document.getElementById('timeVal').textContent = `~${timeMin} د`;
-            document.getElementById('statusVal').textContent = 'جاهز';
+            
+            document.getElementById('routeInfo').style.display = 'flex';
+            document.getElementById('distVal').textContent = distKm + ' كم';
+            document.getElementById('timeVal').textContent = timeMin + ' د';
             updatePrice();
             document.getElementById('bookBtn').disabled = false;
         });
     }
 
-    function useGPS() {
-        navigator.geolocation.getCurrentPosition(p => {
-            const pos = [p.coords.latitude, p.coords.longitude];
-            setLocation(pickupMarker, pos, 'pickupInput', 'pickupCoords', true);
-        }, () => Utils.showToast('تعذر تحديد الموقع', 'error'), {enableHighAccuracy:true});
-    }
-
-    // --- UI INTERACTION ---
-    function togglePassengerMenu() {
-        const menu = document.getElementById('passengerMenu');
-        const btn = document.getElementById('menuToggleBtn');
-        menu.classList.toggle('show');
-        btn.classList.toggle('open');
-        btn.innerHTML = menu.classList.contains('show') ? '✕' : '🚖';
-    }
-
-    function openDriverModal() {
-        document.getElementById('driverSetupModal').classList.add('active');
-        // If already has car, fill data
-        if(currentDriver && currentDriver.carType) {
-            document.getElementById('modalTitle').textContent = 'تعديل بيانات المركبة';
-            document.getElementById('setupCarType').value = currentDriver.carType;
-            document.getElementById('setupCarName').value = currentDriver.carName || '';
-            document.getElementById('setupBtn').textContent = '💾 حفظ التعديلات';
-        } else {
-            document.getElementById('modalTitle').textContent = 'تسجيل مركبتك';
-            document.getElementById('setupBtn').textContent = '✅ حفظ والبدء كسائق';
-        }
-    }
-
-    function closeDriverModal() {
-        document.getElementById('driverSetupModal').classList.remove('active');
-    }
-
-    function openDashboard() {
-        document.getElementById('view-dashboard').classList.add('active');
-        loadRequests();
-    }
-
-    function closeDashboard() {
-        document.getElementById('view-dashboard').classList.remove('active');
-    }
-
-    function updateDriverButtonText(isDriver) {
-        const txt = document.getElementById('driverSetupText');
-        const btn = document.getElementById('driverSetupBtn');
-        if(isDriver) {
-            txt.textContent = 'لوحة القيادة';
-            btn.onclick = openDashboard;
-            btn.style.background = '#E8F5E9';
-        } else {
-            txt.textContent = 'تسجيل مركبتك';
-            btn.onclick = openDriverModal;
-            btn.style.background = '#fff';
-        }
-    }
-
-    // --- AUTH & SETUP ---
-    function switchAuthTab(tab) {
-        document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById('loginForm').style.display = tab==='login'?'flex':'none';
-        document.getElementById('registerForm').style.display = tab==='register'?'flex':'none';
-    }
-
-    async function handleAuth(type) {
-        const email = document.getElementById(type==='login'?'loginEmail':'regEmail').value;
-        const pass = document.getElementById(type==='login'?'loginPassword':'regPassword').value;
-        try {
-            if(type==='login') await auth.signInWithEmailAndPassword(email, pass);
-            else {
-                await auth.createUserWithEmailAndPassword(email, pass);
-                await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-            }
-        } catch(e) { Utils.showToast('خطأ: '+e.message, 'error'); }
-    }
-
-    async function completeDriverSetup() {
-        const carType = document.getElementById('setupCarType').value;
-        const carName = document.getElementById('setupCarName').value;
-        const btn = document.getElementById('setupBtn');
-        btn.disabled = true; btn.textContent = 'جاري الحفظ...';
-
-        let loc = {lat:36.753, lng:3.058};
-        if(navigator.geolocation) {
-            try {
-                const p = await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(r,j,{timeout:5000}));
-                loc = {lat:p.coords.latitude, lng:p.coords.longitude};
-            } catch(e){}
-        }
-
-        await db.collection('users').doc(currentUser.uid).update({role:'driver'});
-        await db.collection('drivers').doc(currentUser.uid).set({
-            uid: currentUser.uid, email: currentUser.email, carType, carName,
-            location: loc, available: false, rating: 5.0,
-            lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
-        }, {merge:true});
-
-        Utils.showToast('تم تسجيل المركبة بنجاح! 🎉');
-        closeDriverModal();
-        currentDriver = {carType, carName, location: loc}; // Update local state
-        updateDriverButtonText(true);
-        openDashboard();
-    }
-
-    async function skipToPassenger() {
-        await db.collection('users').doc(currentUser.uid).update({role:'passenger'});
-        closeDriverModal();
-        Utils.showToast('أنت الآن تتصفح كراكب');
-    }
-
-    // --- DRIVER LOGIC ---
-    function setupDriverUI() {
-        document.getElementById('dashDriverName').textContent = `${currentDriver.carName} (${currentDriver.carType})`;
-        updateServiceToggleUI();
-    }
-
-    function toggleDriverStatus() {
-        driverAvailable = !driverAvailable;
-        db.collection('drivers').doc(currentUser.uid).update({available: driverAvailable});
-        updateServiceToggleUI();
-        if(driverAvailable) loadRequests();
-    }
-
-    function updateServiceToggleUI() {
-        const btn = document.getElementById('statusToggle');
-        if(driverAvailable) {
-            btn.textContent = '🟢 متاح'; btn.style.background = '#4CAF50'; btn.style.color = '#fff';
-        } else {
-            btn.textContent = '🔴 غير متاح'; btn.style.background = '#eee'; btn.style.color = '#333';
-        }
-    }
-
-    function loadRequests() {
-        if(activeRequestListener) activeRequestListener();
-        const list = document.getElementById('requestsList');
-        
-        activeRequestListener = db.collection('rideRequests')
-            .where('status','==','pending')
-            .where('carType','==', currentDriver?.carType)
-            .onSnapshot(snap => {
-                if(snap.empty) {
-                    list.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">لا توجد طلبات حالياً 😴</div>';
-                    return;
-                }
-                list.innerHTML = '';
-                snap.forEach(doc => {
-                    const r = doc.data();
-                    const div = document.createElement('div');
-                    div.style = "background:#fff;border:1px solid #eee;border-radius:12px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);";
-                    div.innerHTML = `
-                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                            <span style="font-weight:bold;color:var(--primary-dark);">${r.price} د.ج</span>
-                            <span style="font-size:0.8em;color:#666;">${r.distance} كم</span>
-                        </div>
-                        <div style="font-size:0.9em;margin-bottom:10px;">
-                            <div>📍 من: ${r.pickup.name}</div>
-                            <div>🏁 إلى: ${r.destination.name}</div>
-                        </div>
-                        <div style="display:flex;gap:10px;">
-                            <button onclick="acceptRide('${doc.id}')" style="flex:1;padding:8px;background:var(--primary);border:none;border-radius:8px;font-weight:bold;">قبول</button>
-                            <button onclick="declineRide('${doc.id}')" style="flex:1;padding:8px;background:#eee;border:none;border-radius:8px;">رفض</button>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
-            });
-    }
-
-    async function acceptRide(id) {
-        await db.collection('rideRequests').doc(id).update({status:'accepted', assignedDriverId: currentUser.uid});
-        await db.collection('drivers').doc(currentUser.uid).update({available:false});
-        driverAvailable = false; updateServiceToggleUI();
-        closeDashboard();
-        Utils.showToast('تم قبول الرحلة! 💬');
-        // Here you would normally open chat/nav logic
-    }
-
-    // --- PASSENGER BOOKING ---
     function updatePrice() {
         const price = baseFare + Math.round(distKm * selectedRate);
-        document.getElementById('priceBox').innerHTML = `💰 السعر التقريبي: <span style="font-size:1.2em">${price}</span> د.ج`;
-    }
-
-    function selectCar(el, type, rate) {
-        document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedRate = rate;
-        if(distKm > 0) updatePrice();
+        document.getElementById('priceDisplay').textContent = price + ' د.ج';
     }
 
     async function bookRide() {
         if(!pickupPos || !destPos) return;
-        const carType = document.querySelector('.car-opt.selected .name').textContent.trim();
-        // Simplified booking for demo
+        const carOpt = document.querySelector('.car-opt.selected .name')?.textContent || 'مريحة';
+        
         document.getElementById('searchModal').classList.add('active');
+        rideState = 'searching';
         
         try {
             const ref = await db.collection('rideRequests').add({
                 passengerId: currentUser.uid,
                 pickup: {lat:pickupPos[0], lng:pickupPos[1], name:document.getElementById('pickupInput').value},
                 destination: {lat:destPos[0], lng:destPos[1], name:document.getElementById('destInput').value},
-                distance: distKm, carType: carType,
-                price: baseFare + Math.round(distKm*selectedRate),
-                status: 'pending',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                distance: parseFloat(distKm), time: timeMin,
+                carType: carOpt,
+                price: baseFare + Math.round(distKm * selectedRate),
+                status: 'pending', assignedDriverId: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                skippedBy: []
             });
             currentRideId = ref.id;
-            listenForRideUpdate();
-        } catch(e) {
-            Utils.showToast('فشل الطلب', 'error');
-            document.getElementById('searchModal').classList.remove('active');
+            
+            // Find drivers
+            const ds = await db.collection('drivers').where('available','==',true).where('carType','==',carOpt).get();
+            dispatchDrivers = [];
+            ds.forEach(d => {
+                if(d.data().location) {
+                    const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.data().location.lat, d.data().location.lng);
+                    if(dist <= 20) dispatchDrivers.push({id:d.id, ...d.data(), distance: dist});
+                }
+            });
+            dispatchDrivers.sort((a,b) => a.distance - b.distance);
+            
+            if(dispatchDrivers.length === 0) {
+                document.getElementById('searchSubText').textContent = 'لا يوجد سائقين متاحين حالياً';
+                setTimeout(cancelRide, 3000);
+            } else {
+                dispatchNextDriver();
+                listenForRideUpdate();
+            }
+        } catch(e) { console.error(e); cancelRide(); }
+    }
+
+    function dispatchNextDriver() {
+        if(dispatchIndex >= dispatchDrivers.length) {
+            document.getElementById('searchSubText').textContent = 'انتهت مهلة البحث';
+            setTimeout(cancelRide, 3000);
+            return;
         }
+        const target = dispatchDrivers[dispatchIndex];
+        document.getElementById('searchSubText').textContent = `جاري الاتصال بالسائق ${dispatchIndex+1}...`;
+        
+        db.collection('rideRequests').doc(currentRideId).update({
+            status: 'pending', assignedDriverId: target.id,
+            skippedBy: firebase.firestore.FieldValue.arrayUnion(target.id) // Logic fix: usually skip list is checked before, but here we assign
+        });
+        
+        // Timeout to move to next driver if not accepted in 20s
+        dispatchTimeoutId = setTimeout(() => {
+             // Check if still pending
+             db.collection('rideRequests').doc(currentRideId).get().then(doc => {
+                 if(doc.exists && doc.data().status === 'pending' && doc.data().assignedDriverId === target.id) {
+                     dispatchIndex++;
+                     dispatchNextDriver();
+                 }
+             });
+        }, 20000);
     }
 
     function listenForRideUpdate() {
         db.collection('rideRequests').doc(currentRideId).onSnapshot(doc => {
+            if(!doc.exists) return;
             const data = doc.data();
             if(data.status === 'accepted') {
                 document.getElementById('searchModal').classList.remove('active');
-                document.getElementById('driverCard').style.display = 'block';
-                document.getElementById('dName').textContent = 'تم تعيين سائق';
-                document.getElementById('dEta').textContent = 'في الطريق إليك...';
-                Utils.showToast('سائق في الطريق! 🚖');
-                togglePassengerMenu(); // Close menu to see map
+                rideState = 'matched';
+                showActiveRide(data);
+                createAndOpenChat(currentRideId, data.passengerId, data.acceptedBy, 'passenger');
+            } else if (data.status === 'cancelled' || data.status === 'expired') {
+                document.getElementById('searchModal').classList.remove('active');
+                rideState = 'idle';
+                Utils.showToast('تم إلغاء الطلب أو انتهت المهلة');
+                document.getElementById('bookBtn').disabled = false;
+            }
+        });
+    }
+
+    function showActiveRide(data) {
+        document.getElementById('passengerMenuContent').style.display = 'none';
+        document.getElementById('activeRidePanel').style.display = 'block';
+        
+        db.collection('drivers').doc(data.acceptedBy).get().then(d => {
+            if(d.exists) {
+                const dr = d.data();
+                document.getElementById('driverInfoCard').innerHTML = `
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                        <div style="font-size:2em">👨‍✈️</div>
+                        <div><strong>${dr.carName}</strong><br><small>${dr.carType}</small></div>
+                    </div>
+                    <div style="text-align:center;color:#1565C0">⭐ ${dr.rating || 5.0}</div>
+                `;
             }
         });
     }
 
     function cancelRide() {
-        if(currentRideId) db.collection('rideRequests').doc(currentRideId).update({status:'cancelled'});
+        if(currentRideId) {
+            db.collection('rideRequests').doc(currentRideId).update({status:'cancelled'});
+            clearTimeout(dispatchTimeoutId);
+        }
         document.getElementById('searchModal').classList.remove('active');
-        document.getElementById('driverCard').style.display = 'none';
+        document.getElementById('passengerMenuContent').style.display = 'block';
+        document.getElementById('activeRidePanel').style.display = 'none';
+        document.getElementById('bookBtn').disabled = false;
         rideState = 'idle';
+        currentRideId = null;
     }
 
-    // --- HELPERS ---
-    function switchView(id) {
-        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    // --- Driver Logic ---
+    function updateDriverUI() {
+        const dot = document.getElementById('statusDot');
+        const txt = document.getElementById('statusText');
+        if(driverAvailable) {
+            dot.classList.add('active');
+            txt.textContent = 'متاح للطلبات';
+        } else {
+            dot.classList.remove('active');
+            txt.textContent = 'غير متاح';
+        }
     }
 
-    function setupAutocomplete(inputId, resultsId, callback) {
-        const input = document.getElementById(inputId);
-        const results = document.getElementById(resultsId);
-        input.addEventListener('input', Utils.debounce(async () => {
-            const q = input.value;
-            if(q.length < 3) { results.classList.remove('show'); return; }
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&countrycodes=dz&limit=5`);
-                const data = await res.json();
-                if(data.length) {
-                    results.innerHTML = data.map(i => `<div class="autocomplete-item" onclick="(${callback})(${i.lat},${i.lon},'${i.display_name}')">${i.display_name}</div>`).join('');
-                    results.classList.add('show');
-                }
-            } catch(e){}
-        }, 500));
-        document.addEventListener('click', e => { if(!results.contains(e.target)) results.classList.remove('show'); });
+    function toggleDriverStatus() {
+        driverAvailable = !driverAvailable;
+        db.collection('drivers').doc(currentDriver.uid).update({available: driverAvailable});
+        updateDriverUI();
+        if(driverAvailable) Utils.showToast('أنت الآن متاح ✅');
+    }
+
+    function startLocationUpdates(uid) {
+        setInterval(() => {
+            if(!driverAvailable || !navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(p => {
+                db.collection('drivers').doc(uid).update({
+                    location: {lat:p.coords.latitude, lng:p.coords.longitude},
+                    lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }, null, {enableHighAccuracy:true, timeout:5000});
+        }, 10000);
+    }
+
+    function listenForRequests() {
+        if(activeRequestListener) activeRequestListener();
+        activeRequestListener = db.collection('rideRequests')
+            .where('status','==','pending')
+            .where('carType','==', currentDriver?.carType || '...')
+            .onSnapshot(snap => {
+                snap.forEach(doc => {
+                    const req = doc.data();
+                    // Simple check: if assigned to me or unassigned (logic simplified for demo)
+                    if(req.assignedDriverId === currentDriver.uid || (!req.assignedDriverId && driverAvailable)) {
+                         showRequestModal(doc.id, req);
+                    }
+                });
+            });
+    }
+
+    function showRequestModal(id, req) {
+        if(document.getElementById('requestModal').classList.contains('show')) return; // Already showing one
+        currentRequestId = id;
+        document.getElementById('reqPickup').textContent = req.pickup.name.split(',')[0];
+        document.getElementById('reqDest').textContent = req.destination.name.split(',')[0];
+        document.getElementById('reqType').textContent = req.carType;
+        document.getElementById('reqPrice').textContent = req.price + ' د.ج';
+        document.getElementById('reqDist').textContent = `مسافة الرحلة: ${req.distance} كم`;
+        document.getElementById('requestModal').classList.add('show');
+    }
+
+    async function handleAccept(id) {
+        const btn = document.getElementById('acceptReqBtn');
+        btn.disabled = true; btn.textContent = 'جاري...';
+        
+        try {
+            await db.collection('rideRequests').doc(id).update({
+                status: 'accepted',
+                acceptedBy: currentDriver.uid,
+                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            await db.collection('drivers').doc(currentDriver.uid).update({available: false});
+            driverAvailable = false; updateDriverUI();
+            
+            closeModal('requestModal');
+            Utils.showToast('قبلت الرحلة! 💬');
+            
+            // Get passenger ID to start chat
+            const req = await db.collection('rideRequests').doc(id).get();
+            createAndOpenChat(id, req.data().passengerId, currentDriver.uid, 'driver');
+            
+        } catch(e) { Utils.showToast('حدث خطأ'); btn.disabled=false; btn.textContent='✅ قبول'; }
+    }
+
+    async function handleDecline(id) {
+        closeModal('requestModal');
+        // Logic to re-assign or mark skipped would go here
+    }
+
+    // --- Chat Logic ---
+    async function createAndOpenChat(rideId, pid, did, role) {
+        const cid = `chat_${rideId}`;
+        currentChatId = cid;
+        currentRole = role;
+        
+        // Create doc if not exists
+        await db.collection('chats').doc(cid).set({
+            rideId: rideId, passengerId: pid, driverId: did,
+            lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+        }, {merge:true});
+        
+        document.getElementById('chatOverlay').style.display = 'flex';
+        
+        if(activeChatListener) activeChatListener();
+        activeChatListener = db.collection('chats').doc(cid).collection('messages')
+            .orderBy('timestamp', 'asc')
+            .onSnapshot(snap => {
+                const div = document.getElementById('chatMessages');
+                div.innerHTML = '';
+                snap.forEach(d => {
+                    const m = d.data();
+                    const isMe = m.senderId === (currentUser?.uid || currentDriver?.uid);
+                    div.innerHTML += `<div class="message ${isMe?'me':'other'}">${m.text}</div>`;
+                });
+                div.scrollTop = div.scrollHeight;
+            });
+    }
+
+    async function sendChatMessage(cid, uid, role) {
+        const inp = document.getElementById('chatInput');
+        if(!inp.value.trim()) return;
+        await db.collection('chats').doc(cid).collection('messages').add({
+            senderId: uid, senderType: role, text: inp.value,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        inp.value = '';
+    }
+
+    function closeChat() {
+        document.getElementById('chatOverlay').style.display = 'none';
+        if(activeChatListener) activeChatListener();
     }
     
-    // Expose functions to window for HTML onclicks
-    window.enableMapClick = () => {
-        const btn = event.target;
-        btn.textContent = '✅ انقر';
-        setTimeout(() => { btn.textContent = '🗺️'; }, 5000);
-    };
-    window.selectDestinationFromMap = (lat, lng) => setLocation(destMarker, [lat,lng], 'destInput', 'destCoords', false);
-    window.showGPSReminder = () => document.getElementById('gpsReminderModal').style.display = 'flex';
-    window.closeGPSModal = () => document.getElementById('gpsReminderModal').style.display = 'none';
-    window.enableGPSAndClose = () => { useGPS(); closeGPSModal(); };
+    function openRecordsPage() {
+        Utils.showToast('صفحة السجلات قيد التطوير');
+    }
 
     // Start
-    window.onload = initApp;
+    window.onload = () => { initMap(); initFirebase(); };
 </script>
 </body>
 </html>
