@@ -153,14 +153,6 @@
         .gps-desc { font-size: 0.9em; color: #666; margin-bottom: 20px; line-height: 1.5; }
         .gps-btn { width: 100%; padding: 12px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
         .gps-later { background: transparent; color: #666; }
-
-        /* NEW CAR MODAL STYLES */
-        .car-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 5000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .car-modal.active { display: flex; }
-        .car-modal-content { background: #fff; width: 90%; max-width: 380px; border-radius: 24px; padding: 24px; box-shadow: 0 16px 56px rgba(0,0,0,0.4); animation: slideUp 0.4s ease; border: 1px solid var(--border); position: relative; }
-        .car-modal-close { position: absolute; top: 15px; left: 15px; background: #f5f5f5; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2em; color: #666; display: flex; align-items: center; justify-content: center; }
-        .car-float-btn { position: fixed; bottom: 24px; left: 24px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; padding: 12px 20px; border-radius: 30px; font-weight: 700; cursor: pointer; z-index: 2500; box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); display: flex; align-items: center; gap: 8px; transition: 0.25s; }
-        .car-float-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255, 213, 79, 0.6); }
     </style>
 </head>
 <body>
@@ -175,26 +167,6 @@
         <button class="gps-btn gps-later" onclick="closeGPSModal()">ربما لاحقاً</button>
     </div>
 </div>
-
-<!-- Car Registration/Edit Modal -->
-<div id="carModal" class="car-modal">
-    <div class="car-modal-content">
-        <button class="car-modal-close" onclick="toggleCarModal(false)">×</button>
-        <div style="text-align:center; margin-bottom:20px;">
-            <div style="font-size:3em; margin-bottom:10px;">🚕</div>
-            <h3 style="color:var(--primary-dark); font-weight:700;" id="carModalTitle">تسجيل مركبتك</h3>
-            <p style="color:#666; font-size:0.9em;">أضف بيانات سيارتك للبدء كسائق محترف</p>
-        </div>
-        <div class="form-group"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
-        <div class="form-group"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
-        <button class="auth-btn" onclick="saveCarData()" id="saveCarBtn">💾 حفظ البيانات</button>
-    </div>
-</div>
-
-<!-- Floating Car Button -->
-<button id="carFloatBtn" class="car-float-btn" onclick="toggleCarModal(true)" style="display:none;">
-    🚙 <span id="carBtnText">سيارتي</span>
-</button>
 
 <div id="loadingOverlay">
     <div style="font-size: 3.5em; margin-bottom: 18px;">🚖</div>
@@ -227,10 +199,20 @@
         </div>
     </div>
 
-    <!-- Removed view-driver-setup as requested -->
+    <div id="view-driver-setup" class="view">
+        <div class="header"><button class="back-btn" onclick="logoutUser()">🚪 خروج</button><h1>🚙 تسجيل مركبتك</h1></div>
+        <div class="panel" style="padding: 24px; text-align: center;">
+            <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
+            <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+            <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
+            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
+            <button class="auth-btn alt" onclick="skipToPassenger()" style="max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
+        </div>
+    </div>
 
     <div id="view-request" class="view">
-        <div class="header"><button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button><h1>📍 طلب رحلة</h1></div>
+        <div class="header"><button class="back-btn" onclick="switchView('view-auth')">🚪 خروج</button><h1>📍 طلب رحلة</h1><button class="logout-btn" onclick="switchView('view-driver-setup')" style="margin-right:auto; font-size:0.8em;">🚙 تسجيل سيارتي</button></div>
         <div id="map"></div>
         <div class="panel">
             <div class="location-box">
@@ -339,7 +321,7 @@
 
 <div class="toast" id="toast"></div>
 <audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
-<audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1111.mp3" type="audio/mpeg"></audio>
+<audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/2947.mp3" type="audio/mpeg"></audio>
 
 <script>
     let db, auth, app, currentUser = null, currentDriver = null;
@@ -421,34 +403,9 @@
 
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
-    
-    // Modified to use the modal instead of switching views
-    async function saveCarData() { 
-        const btn=document.getElementById('saveCarBtn'); 
-        btn.disabled=true; 
-        btn.textContent='🔄 حفظ...'; 
-        const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; 
-        let loc={lat:36.753, lng:3.058}; 
-        if(navigator.geolocation) try{ 
-            loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); 
-        }catch(e){} 
-        
-        await db.collection('users').doc(currentUser.uid).update({role:'driver'}); 
-        await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}, {merge:true}); 
-        
-        Utils.showToast('✅ تم حفظ بيانات السيارة بنجاح! 🎉'); 
-        toggleCarModal(false); 
-        
-        // If we are currently in request view, refresh logic or just stay there
-        // If we want to switch to dashboard immediately, uncomment below:
-        // routeUserAfterAuth(currentUser);
-        
-        // Update button text immediately
-        updateCarButtonUI();
-    }
-
+    async function completeDriverSetup() { const btn=document.getElementById('setupBtn'); btn.disabled=true; btn.textContent='🔄 حفظ...'; const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; let loc={lat:36.753, lng:3.058}; if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} await db.collection('users').doc(currentUser.uid).update({role:'driver'}); await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}); Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); routeUserAfterAuth(currentUser); }
     async function skipToPassenger() { await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); Utils.showToast('👤 جاري التحويل كراكب...'); switchView('view-request'); }
-    async function switchToPassengerMode() { if(!currentUser)return; try{ await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); document.getElementById('driverDropdown')?.classList.remove('show'); Utils.showToast('👤 تم التبديل إلى وضع الراكب'); switchView('view-request'); startPassengerLocationTracking(); updateCarButtonUI(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} }
+    async function switchToPassengerMode() { if(!currentUser)return; try{ await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); document.getElementById('driverDropdown')?.classList.remove('show'); Utils.showToast('👤 تم التبديل إلى وضع الراكب'); switchView('view-request'); startPassengerLocationTracking(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} }
     async function logoutUser() { clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); if(heartbeatInterval)clearInterval(heartbeatInterval); if(activeChatListener)activeChatListener(); if(chatLocationUpdate)clearInterval(chatLocationUpdate); await auth.signOut(); Utils.showToast('👋 تم تسجيل الخروج'); }
 
     async function setDriverOfflineImmediately(uid) {
@@ -569,17 +526,11 @@
                 updateServiceToggleUI(); 
                 switchView('view-dashboard'); 
                 startLocationUpdates(user.uid); 
-            } else {
-                // If driver doc missing but role is driver, maybe force setup or just treat as passenger for now
-                // For safety, let's assume they need to setup again via modal if they want to drive
-                switchView('view-request');
-                startPassengerLocationTracking();
-            } 
+            } else switchView('view-driver-setup'); 
         } else { 
             switchView('view-request'); 
             startPassengerLocationTracking(); 
         } 
-        updateCarButtonUI();
     }
     
     function startLocationUpdates(uid) { 
@@ -832,37 +783,65 @@
     function startSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); updateNearbyDriversOnSearchMap(); searchUpdateInterval=setInterval(updateNearbyDriversOnSearchMap,5000); }
     function stopSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); }
     
+    // ✅ تم تحسين هذه الدالة لإصلاح مشكلة عدم ظهور السائقين عند الكتابة اليدوية
     async function updateNearbyDriversOnSearchMap() { 
         if(!searchMap || !pickupPos) return; 
+        
+        // مسح العلامات القديمة بشكل آمن لتجنب التكرار أو الأخطاء
         searchMarkerMap = {}; 
-        searchMarkers.forEach(m => { try { searchMap.removeLayer(m); } catch(e){} }); 
+        searchMarkers.forEach(m => {
+            try { searchMap.removeLayer(m); } catch(e){}
+        }); 
         searchMarkers = []; 
+        
         try { 
+            // استخدام .trim() لإزالة أي مسافات زائدة قد تسبب عدم تطابق نوع السيارة
             const selectedCarOpt = document.querySelector('.car-opt.selected');
             const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة'; 
+            
             console.log("🔍 جاري البحث عن سائقين لنوع:", requestedType, "في موقع:", pickupPos);
-            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get(); 
+
+            const ds = await db.collection('drivers')
+                .where('available', '==', true)
+                .where('carType', '==', requestedType)
+                .get(); 
+                
             let foundCount = 0;
+
             ds.forEach(doc => { 
                 const d = doc.data(); 
+                // التحقق من الموقع والاتصال
                 if(d.location && d.isOnline !== false) { 
                     const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.location.lat, d.location.lng); 
+                    
+                    // زيادة المدى إلى 20 كم لضمان العثور على سائقين حتى مع تقريب إحداثيات العنوان المكتوب
                     if(dist <= 20) { 
                         const ic = d.carType === 'دراجة نارية' ? 'motorcycle' : (d.carType === 'شاحنة نقل صغيرة' ? 'truck' : 'driver'); 
-                        const mk = MapUtils.createMarker([d.location.lat, d.location.lng], ic, `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`).addTo(searchMap); 
+                        
+                        const mk = MapUtils.createMarker(
+                            [d.location.lat, d.location.lng], 
+                            ic, 
+                            `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`
+                        ).addTo(searchMap); 
+                        
                         searchMarkers.push(mk); 
                         searchMarkerMap[doc.id] = mk; 
                         foundCount++;
                     } 
                 } 
             }); 
+            
             console.log(`✅ تم العثور على ${foundCount} سائقين قريبين`);
+            
             if(foundCount === 0) {
                  document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`;
             } else {
                  document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين`;
             }
-        } catch(e) { console.error("❌ خطأ في البحث:", e); } 
+
+        } catch(e) {
+            console.error("❌ خطأ في البحث:", e);
+        } 
     }
 
     function dispatchNext() { 
@@ -904,8 +883,11 @@
         } 
     }
 
+    // ✅ تم تحسين هذه الدالة لضمان مطابقة نوع السيارة بدقة عند الطلب
     async function bookRide() { 
         if(!pickupPos||!destPos)return Utils.showToast('⚠️ حدد الانطلاق والوجهة','error'); 
+        
+        // استخدام .trim() لضمان عدم وجود مسافات زائدة في اسم النوع
         const selectedEl = document.querySelector('.car-opt.selected .name');
         const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
         
@@ -924,7 +906,7 @@
                 destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, 
                 distance:parseFloat(distKm), 
                 time:timeMin, 
-                carType: requestedCarType, 
+                carType: requestedCarType, // النوع المضمن بدقة
                 price:baseFare+Math.round(distKm*selectedRate), 
                 status:'pending', 
                 assignedDriverId:null, 
@@ -944,6 +926,7 @@
             const dd=d.data(); 
             if(dd.location){ 
                 const dist=Utils.calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); 
+                // زيادة المدى إلى 20 كم ليتوافق مع دالة العرض
                 if(dist<=20) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)}); 
             }
         }); 
@@ -1037,46 +1020,6 @@
             );
         } else {
             Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error');
-        }
-    }
-
-    // New functions for Car Modal
-    function toggleCarModal(show) {
-        const modal = document.getElementById('carModal');
-        if(show) {
-            // Pre-fill data if exists
-            if(currentDriver) {
-                document.getElementById('setupCarType').value = currentDriver.carType || 'مريحة';
-                document.getElementById('setupCarName').value = currentDriver.carName || '';
-                document.getElementById('carModalTitle').textContent = 'تعديل بيانات السيارة';
-                document.getElementById('saveCarBtn').textContent = '💾 حفظ التعديلات';
-            } else {
-                document.getElementById('setupCarType').value = 'مريحة';
-                document.getElementById('setupCarName').value = '';
-                document.getElementById('carModalTitle').textContent = 'تسجيل مركبتك';
-                document.getElementById('saveCarBtn').textContent = '💾 حفظ البيانات';
-            }
-            modal.classList.add('active');
-        } else {
-            modal.classList.remove('active');
-        }
-    }
-
-    function updateCarButtonUI() {
-        const btn = document.getElementById('carFloatBtn');
-        const txt = document.getElementById('carBtnText');
-        
-        // Show button only if logged in and NOT in driver dashboard view (or always show if you prefer)
-        // Let's show it always when logged in
-        if(currentUser) {
-            btn.style.display = 'flex';
-            if(currentDriver) {
-                txt.textContent = 'تعديل السيارة';
-            } else {
-                txt.textContent = 'سيارتي';
-            }
-        } else {
-            btn.style.display = 'none';
         }
     }
 
