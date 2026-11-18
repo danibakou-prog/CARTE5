@@ -83,7 +83,88 @@
             justify-content: space-between;
         }
         .header h1 { font-size: 1.1em; font-weight: 800; flex: 1; text-align: center; }
-        .back-btn { background: rgba(0,0,0,0.05); border: none; color: #1B1B1B; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
+        
+        /* أزرار الهيدر الجديدة */
+        .header-icon-btn {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            position: relative;
+        }
+        .header-icon-btn:hover { background: rgba(0,0,0,0.1); transform: scale(1.05); }
+
+        /* القائمة المنسدلة للمستخدم (User Dropdown) */
+        .user-dropdown-menu {
+            position: absolute;
+            top: 65px;
+            left: 20px; /* RTL Left is actually visual Right in LTR logic, but here we use logical props or just specific positioning */
+            /* In RTL mode: left: 20px puts it on the left side of screen? No, let's fix positioning for RTL */
+            right: 20px; 
+            background: white;
+            width: 300px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 1100;
+            display: none;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            animation: slideDown 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .user-dropdown-menu.show { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 20px;
+            color: #1B1B1B;
+            text-align: center;
+        }
+        .dropdown-avatar {
+            width: 60px; height: 60px; background: white; border-radius: 50%;
+            margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 2em; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .dropdown-name { font-weight: 800; font-size: 1.1em; }
+        .dropdown-role { font-size: 0.85em; opacity: 0.8; margin-top: 4px; }
+
+        .dropdown-body { padding: 15px; max-height: 400px; overflow-y: auto; }
+        
+        .dd-section-title {
+            font-size: 0.8em; color: #888; font-weight: 700; margin-bottom: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .dd-action-btn {
+            width: 100%; padding: 12px; background: #F5F5F5; border: none; border-radius: 12px;
+            margin-bottom: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            transition: 0.2s; color: #333; font-size: 0.95em;
+        }
+        .dd-action-btn:hover { background: #ECEFF1; }
+        .dd-action-btn.primary { background: #E8F5E9; color: var(--primary-dark); }
+        .dd-action-btn.danger { background: #FFEBEE; color: var(--danger); }
+
+        /* سجل الطلبات داخل القائمة */
+        .mini-history-list {
+            display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+        }
+        .mini-history-item {
+            background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+            font-size: 0.85em;
+        }
+        .mini-h-route { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 600; }
+        .mini-h-meta { display: flex; justify-content: space-between; color: #666; font-size: 0.8em; }
+        .status-badge { padding: 2px 8px; border-radius: 6px; font-size: 0.75em; font-weight: 700; }
+        .status-completed { background: #E8F5E9; color: var(--primary-dark); }
+        .status-cancelled { background: #FFEBEE; color: var(--danger); }
+
         .logout-btn { background: rgba(0,0,0,0.05); border: none; color: #1B1B1B; padding: 6px 12px; border-radius: 20px; font-size: 0.75em; cursor: pointer; font-weight: 600; }
         
         /* شاشات الدخول والإعداد */
@@ -433,18 +514,50 @@
 
     <!-- Passenger View with Full Screen Map -->
     <div id="view-request" class="view">
-        <!-- Header floating on map (Modified: Removed Logout & Title) -->
+        <!-- Header floating on map (Modified: Added User Icon) -->
         <div class="header">
-            <!-- Empty left side for balance or future use -->
+            <!-- Empty left side for balance -->
             <div style="width: 24px;"></div> 
             
-            <!-- Driver Registration Button in Header -->
-            <button class="logout-btn" id="registerCarHeaderBtn" onclick="openDriverSetupModal()" style="margin:0 auto; font-size:0.85em; padding: 8px 16px; background: rgba(255,255,255,0.8);">
-                🚙 تسجيل سيارتي
+            <!-- Title -->
+            <h1>Yasser Ride Pro</h1>
+
+            <!-- User Icon Button -->
+            <button class="header-icon-btn" id="userProfileBtn" onclick="toggleUserDropdown()">
+                👤
             </button>
-            
-            <!-- Empty right side -->
-            <div style="width: 24px;"></div>
+        </div>
+
+        <!-- User Dropdown Menu (Hidden by default) -->
+        <div id="userDropdownMenu" class="user-dropdown-menu">
+            <div class="dropdown-header">
+                <div class="dropdown-avatar" id="ddAvatar">👤</div>
+                <div class="dropdown-name" id="ddName">مستخدم</div>
+                <div class="dropdown-role" id="ddRole">راكب</div>
+            </div>
+            <div class="dropdown-body">
+                
+                <!-- Driver Controls (Visible only if driver) -->
+                <div id="driverControlsSection" style="display:none;">
+                    <div class="dd-section-title">⚙️ إعدادات السائق</div>
+                    <button class="dd-action-btn primary" onclick="openDriverSetupModal(); toggleUserDropdown();">
+                        🚗 تعديل بيانات السيارة
+                    </button>
+                    <button class="dd-action-btn" id="ddToggleAvailabilityBtn" onclick="toggleDriverStatus();">
+                        🟢 استقبال الطلبات
+                    </button>
+                    <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+                </div>
+
+                <!-- History Section -->
+                <div class="dd-section-title">📋 سجل الطلبات</div>
+                <div id="miniHistoryList" class="mini-history-list">
+                    <div style="text-align:center; color:#999; font-size:0.8em; padding:10px;">لا توجد طلبات سابقة</div>
+                </div>
+                
+                <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+                <button class="dd-action-btn danger" onclick="logoutUser()">🚪 تسجيل الخروج</button>
+            </div>
         </div>
         
         <!-- Map Background -->
@@ -884,13 +997,7 @@
         closeDriverSetupModal();
         
         // Update UI to reflect driver status but stay on map
-        const regBtn = document.getElementById('registerCarHeaderBtn');
-        if(regBtn) {
-            regBtn.textContent = '🚙 أنت سائق الآن';
-            regBtn.onclick = openDriverRequestsModal; // Change click action to open requests
-            regBtn.style.background = 'var(--primary)';
-            regBtn.style.color = '#1B1B1B';
-        }
+        updateUserDropdownUI(); // Refresh dropdown UI
         
         routeUserAfterAuth(currentUser); 
     }
@@ -1003,14 +1110,6 @@
             const dd=await db.collection('drivers').doc(user.uid).get(); 
             if(dd.exists) { 
                 currentDriver=dd.data(); 
-                // Update Header Button for Driver
-                const regBtn = document.getElementById('registerCarHeaderBtn');
-                if(regBtn) {
-                    regBtn.textContent = '🚙 استقبال الطلبات';
-                    regBtn.onclick = openDriverRequestsModal;
-                    regBtn.style.background = 'var(--primary)';
-                    regBtn.style.color = '#1B1B1B';
-                }
                 
                 // Update Popup Info
                 document.getElementById('popupDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
@@ -1026,6 +1125,7 @@
             switchView('view-request'); 
             startPassengerLocationTracking(); 
         } 
+        updateUserDropdownUI();
     }
     
     function startLocationUpdates(uid) { 
@@ -1097,6 +1197,7 @@
         } else { 
             Utils.showToast('🔕 تم إيقاف الخدمة');
         } 
+        updateUserDropdownUI(); // Update button text
     }
     
     function loadRequests() { 
@@ -1544,6 +1645,96 @@
         } else {
             Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error');
         }
+    }
+
+    // ==========================================
+    // USER DROPDOWN LOGIC (NEW)
+    // ==========================================
+
+    function toggleUserDropdown() {
+        const menu = document.getElementById('userDropdownMenu');
+        menu.classList.toggle('show');
+        if(menu.classList.contains('show')) {
+            loadMiniHistory();
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('userDropdownMenu');
+        const btn = document.getElementById('userProfileBtn');
+        if (menu.classList.contains('show') && !menu.contains(event.target) && !btn.contains(event.target)) {
+            menu.classList.remove('show');
+        }
+    });
+
+    function updateUserDropdownUI() {
+        const avatar = document.getElementById('ddAvatar');
+        const name = document.getElementById('ddName');
+        const role = document.getElementById('ddRole');
+        const driverSection = document.getElementById('driverControlsSection');
+        const toggleBtn = document.getElementById('ddToggleAvailabilityBtn');
+
+        if (!currentUser) return;
+
+        const userEmail = currentUser.email ? currentUser.email.split('@')[0] : 'مستخدم';
+        name.textContent = userEmail;
+
+        if (currentDriver) {
+            // Driver Mode
+            avatar.textContent = '👨✈️';
+            role.textContent = `سائق (${currentDriver.carType})`;
+            driverSection.style.display = 'block';
+            
+            // Update Toggle Button Text
+            if(driverAvailable) {
+                toggleBtn.innerHTML = '🔴 إيقاف استقبال الطلبات';
+                toggleBtn.classList.remove('primary');
+                toggleBtn.classList.add('danger');
+            } else {
+                toggleBtn.innerHTML = '🟢 استقبال الطلبات';
+                toggleBtn.classList.add('primary');
+                toggleBtn.classList.remove('danger');
+            }
+
+        } else {
+            // Passenger Mode
+            avatar.textContent = '👤';
+            role.textContent = 'راكب';
+            driverSection.style.display = 'none';
+        }
+    }
+
+    function loadMiniHistory() {
+        const list = document.getElementById('miniHistoryList');
+        const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs';
+        const logs = JSON.parse(localStorage.getItem(key) || '[]');
+
+        if (logs.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#999; font-size:0.8em; padding:10px;">لا توجد طلبات سابقة</div>';
+            return;
+        }
+
+        list.innerHTML = logs.slice(0, 5).map(log => {
+            const date = new Date(log.createdAt).toLocaleDateString('ar-DZ');
+            const statusClass = log.status === 'accepted' ? 'status-completed' : 'status-cancelled';
+            const statusText = log.status === 'accepted' ? 'مكتملة' : 'ملغاة';
+            
+            return `
+            <div class="mini-history-item">
+                <div class="mini-h-route">
+                    <span>${log.pickup?.name?.substring(0,15) || '...'}</span>
+                    <span>➝</span>
+                    <span>${log.destination?.name?.substring(0,15) || '...'}</span>
+                </div>
+                <div class="mini-h-meta">
+                    <span>${date}</span>
+                    <span>${log.price ? log.price + ' د.ج' : ''}</span>
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </div>
+            </div>
+            `;
+        }).join('');
     }
 
     window.onload=initFirebase;
