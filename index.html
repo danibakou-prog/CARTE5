@@ -23,7 +23,7 @@
             --secondary: #FFD54F; --bg: #F5F7FA; --text: #1B1B1B; --card: #FFFFFF;
             --shadow: 0 8px 32px rgba(0,0,0,0.12); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.3);
             --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
-            --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
+            --surface: #FAFAFA; --border: #E8E8E8;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); min-height: 100vh; color: var(--text); overflow: hidden; }
@@ -56,7 +56,7 @@
         .main-logo { font-size: 4em; margin-bottom: 16px; animation: bounce 2.5s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* Bottom Sheet (Passenger Controls) */
+        /* Bottom Sheet (Passenger Request Ride) */
         .bottom-sheet {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--card); border-radius: 28px 28px 0 0;
@@ -98,10 +98,21 @@
         .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.3); }
         .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); padding: 20px; }
+        /* Modals (Car Setup, Incoming Request, etc.) */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); z-index: 2000; 
+            display: none; align-items: center; justify-content: center; 
+            backdrop-filter: blur(6px); padding: 20px; 
+        }
         .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
-        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        .modal-content { 
+            background: var(--card); width: 100%; max-width: 400px; 
+            border-radius: 24px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); 
+            position: relative;
+        }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
@@ -146,7 +157,24 @@
         .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; } 
         .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; }
         
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1B1B1B; color: #fff; padding: 14px 28px; border-radius: 16px; font-size: 0.9em; z-index: 4000; transition: transform 0.35s ease; box-shadow: 0 6px 28px rgba(0,0,0,0.35); font-weight: 500; white-space: nowrap; } 
+        /* Toast Notifications - TOP OF SCREEN */
+        .toast { 
+            position: fixed; 
+            top: max(20px, env(safe-area-inset-top)); 
+            left: 50%; 
+            transform: translateX(-50%) translateY(-150%); 
+            background: #1B1B1B; 
+            color: #fff; 
+            padding: 14px 28px; 
+            border-radius: 16px; 
+            font-size: 0.9em; 
+            z-index: 9999; 
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 6px 28px rgba(0,0,0,0.35); 
+            font-weight: 500; 
+            white-space: nowrap; 
+            cursor: pointer;
+        } 
         .toast.show { transform: translateX(-50%) translateY(0); } 
         .toast.success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } 
         .toast.error { background: linear-gradient(135deg, var(--danger), #C62828); }
@@ -220,7 +248,7 @@
     </div>
 </div>
 
-<!-- Passenger Bottom Sheet -->
+<!-- Passenger Bottom Sheet (Request Ride) -->
 <div id="passengerSheet" class="bottom-sheet collapsed" style="display: none;">
     <div class="sheet-handle" onclick="toggleBottomSheet()"></div>
     <div class="sheet-header">
@@ -288,12 +316,12 @@
 <!-- Driver Floating Controls (Visible only for drivers) -->
 <div id="driverFab" class="driver-fab" style="display: none;">
     <button class="fab-btn status-active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
-    <button class="fab-btn" onclick="openCarSetupModal()">⚙️ تعديل بياناتي</button>
+    <button class="fab-btn" onclick="openCarSetupModal()">⚙️ تعديل مركبتي</button>
     <button class="fab-btn" onclick="switchToPassengerMode()">👤 وضع الراكب</button>
 </div>
 
-<!-- Car Setup Modal -->
-<div id="carSetupModal" class="modal-overlay">
+<!-- Car Setup Modal (Independent) -->
+<div id="carSetupModal" class="modal-overlay" onclick="if(event.target===this) closeCarSetupModal()">
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">🚙 تسجيل / تعديل مركبتك</h3>
@@ -318,10 +346,11 @@
 </div>
 
 <!-- Incoming Driver Request Modal -->
-<div id="incomingRequestModal" class="modal-overlay">
+<div id="incomingRequestModal" class="modal-overlay" onclick="if(event.target===this) closeRequestModal()">
     <div class="modal-content" style="border-top: 5px solid var(--primary);">
         <div class="modal-header">
             <h3 class="modal-title">🔔 طلب رحلة جديد!</h3>
+            <button class="modal-close" onclick="closeRequestModal()">✕</button>
         </div>
         <div id="requestModalContent">
             <!-- Content injected via JS -->
@@ -334,7 +363,7 @@
 </div>
 
 <!-- Search/Dispatch Modal -->
-<div id="searchModal" class="search-modal">
+<div id="searchModal" class="search-modal" onclick="if(event.target===this) cancelRide()">
     <div class="search-content">
         <div id="searchMap" class="search-map-container"></div>
         <div class="search-info">
@@ -349,9 +378,11 @@
 <!-- Chat Overlay -->
 <div id="chatOverlayContainer"></div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
+<!-- Toast Notification -->
+<div class="toast" id="toast" onclick="this.classList.remove('show')"></div>
+
+<!-- Audio Elements -->
+<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"></audio>
 <audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1111.mp3" type="audio/mpeg"></audio>
 
 <script>
@@ -364,7 +395,7 @@
     let currentActiveRide = null, dispatchDrivers = [], dispatchIndex = 0, dispatchTimeoutId = null;
     let searchMap = null, searchMarkers = [], searchUpdateInterval = null, searchMarkerMap = {};
     let lastKnownMessageCount = 0, currentChatMyId = null, chatMiniMap = null, chatLocationUpdate = null;
-    let currentPendingRequestId = null; // For modal handling
+    let currentPendingRequestId = null;
     
     const MAP_CONFIG = {
         defaultView: [36.753, 3.058], defaultZoom: 14,
@@ -382,21 +413,41 @@
     };
 
     const Utils = {
-        showToast: (msg, type='success') => { const t=document.getElementById('toast'); t.textContent=msg; t.className=`toast ${type} show`; setTimeout(()=>t.classList.remove('show'), 3500); },
+        showToast: (msg, type='success') => { 
+            const t=document.getElementById('toast'); 
+            t.textContent=msg; 
+            t.className=`toast ${type} show`; 
+            setTimeout(()=>t.classList.remove('show'), 4000); 
+        },
         calculateDistance: (lat1, lng1, lat2, lng2) => { const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLng=(lng2-lng1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); },
         formatDistance: (km) => km<1?`${Math.round(km*1000)} م`:`${km.toFixed(1)} كم`,
         formatTime: (min) => min<1?'أقل من دقيقة':`${Math.round(min)} دقيقة`,
         copyToClipboard: (text) => navigator.clipboard.writeText(text).then(()=>Utils.showToast('📋 تم النسخ')),
         formatCoords: (lat, lng) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
         debounce: (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; },
-        playSound: (id) => { const a=document.getElementById(id); if(a){ a.currentTime=0; a.play().catch(()=>{ const h=()=>{a.play().catch(()=>{}); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); }; document.addEventListener('click',h,{once:true}); document.addEventListener('touchstart',h,{once:true}); }); } },
-        stopSound: (id) => { const a=document.getElementById(id); if(a){a.pause(); a.currentTime=0;} }
+        playSound: (id) => { 
+            const a=document.getElementById(id); 
+            if(a){ 
+                a.currentTime=0; 
+                a.play().catch(()=>{ 
+                    const h=()=>{a.play().catch(()=>{}); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); }; 
+                    document.addEventListener('click',h,{once:true}); 
+                    document.addEventListener('touchstart',h,{once:true}); 
+                }); 
+            } 
+        },
+        stopSound: (id) => { 
+            const a=document.getElementById(id); 
+            if(a){ 
+                a.pause(); 
+                a.currentTime=0; 
+            } 
+        }
     };
 
     const MapUtils = {
         initMap: (id, opts={}) => {
             const c={...MAP_CONFIG, ...opts};
-            // Ensure touch interactions work perfectly
             const m=L.map(id, {zoomControl:true, attributionControl:false, preferCanvas:true, tap: true, touchZoom: true, scrollWheelZoom: true}).setView(c.defaultView, c.defaultZoom);
             c.tileLayers.forEach((l,i)=>{ const t=L.tileLayer(l.url, {attribution:l.attribution, maxZoom:l.maxZoom}); if(i===0)t.addTo(m); });
             L.control.zoom({position:'topright'}).addTo(m); 
@@ -440,7 +491,6 @@
 
     function openCarSetupModal() {
         document.getElementById('carSetupModal').classList.add('active');
-        // Pre-fill if exists
         if(currentDriver) {
             document.getElementById('setupCarType').value = currentDriver.carType || 'مريحة';
             document.getElementById('setupCarName').value = currentDriver.carName || '';
@@ -538,14 +588,13 @@
         if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
         await auth.signOut(); 
         Utils.showToast('👋 تم تسجيل الخروج'); 
-        location.reload(); // Clean reset
+        location.reload();
     }
 
     async function routeUserAfterAuth(user) { 
         try {
             const ud=await db.collection('users').doc(user.uid).get(); 
             if(!ud.exists) {
-                // Should not happen if registration worked, but fallback
                 switchView('auth'); 
                 return;
             }
@@ -557,9 +606,9 @@
                     document.getElementById('driverFab').style.display = 'flex';
                     document.getElementById('passengerSheet').style.display = 'none';
                     startLocationUpdates(user.uid); 
-                    loadRequests(); // Start listening
+                    loadRequests();
                 } else {
-                    openCarSetupModal(); // Force setup if driver role but no doc
+                    openCarSetupModal();
                 } 
             } else { 
                 switchView('passenger'); 
@@ -782,7 +831,7 @@
     }
 
     function showIncomingRequestModal(rideId, data) {
-        if(document.getElementById('incomingRequestModal').classList.contains('active')) return; // Already showing one
+        if(document.getElementById('incomingRequestModal').classList.contains('active')) return;
         
         currentPendingRequestId = rideId;
         Utils.playSound('requestSound');
@@ -815,6 +864,9 @@
     }
 
     async function handleAcceptFromModal() {
+        // ✅ إيقاف الصوت فوراً عند الضغط على قبول
+        Utils.stopSound('requestSound');
+        
         if(!currentPendingRequestId || !currentDriver?.uid) return;
         const btn = document.getElementById('modalAcceptBtn');
         btn.disabled = true; btn.textContent = '🔄 جاري...';
@@ -833,7 +885,7 @@
             });
             await db.collection('drivers').doc(currentDriver.uid).update({available: false});
             
-            toggleDriverStatus(); // Set to unavailable visually
+            toggleDriverStatus();
             
             const cid = await createChat(currentPendingRequestId, r.passengerId, currentDriver.uid);
             const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
@@ -857,10 +909,12 @@
     }
 
     async function handleDeclineFromModal() {
+        // ✅ إيقاف الصوت فوراً عند الضغط على رفض
+        Utils.stopSound('requestSound');
+        
         if(!currentPendingRequestId) return;
         const btn = document.getElementById('modalDeclineBtn');
         btn.disabled = true; btn.textContent = '🔄...';
-        Utils.stopSound('requestSound');
         
         try {
             const ref = db.collection('rideRequests').doc(currentPendingRequestId);
@@ -870,7 +924,6 @@
             const rd = snap.data(), my = currentDriver?.uid, sk = rd.skippedBy || [];
             if(!sk.includes(my)) sk.push(my);
             
-            // Simple dispatch logic: find next available
             const ds = await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get();
             const nb = [];
             for(const d of ds.docs) {
@@ -902,6 +955,7 @@
     }
 
     function closeRequestModal() {
+        Utils.stopSound('requestSound'); // ضمان إضافي لإيقاف الصوت عند الإغلاق
         document.getElementById('incomingRequestModal').classList.remove('active');
         currentPendingRequestId = null;
     }
@@ -957,7 +1011,7 @@
         if(dispatchDrivers.length === 0) {
             document.getElementById('searchStatusText').textContent = 'لا يوجد سائقين متاحين';
             document.getElementById('searchSubText').innerHTML = `لم نجد سائقي <b>${requestedCarType}</b> قريبين.<br>يرجى المحاولة لاحقاً.`;
-            setTimeout(() => { rideState = 'idle'; document.getElementById('searchModal').classList.remove('active'); }, 4000);
+            setTimeout(() => { rideState = 'idle'; document.getElementById('searchModal').classList.remove('active'); document.getElementById('bookBtn').disabled = false; }, 4000);
             return;
         }
         
@@ -992,7 +1046,7 @@
                     dispatchNext();
                 }
             });
-        }, 30000); // 30 seconds per driver
+        }, 30000);
     }
 
     function listenForRideUpdate() {
@@ -1098,7 +1152,7 @@
     async function showChatInterface(rid, pid, did, role, name, rd=null) {
         const cid = `chat_${rid}`; 
         currentChatId = cid;
-        document.getElementById('chatOverlayContainer').innerHTML = ''; // Clear old
+        document.getElementById('chatOverlayContainer').innerHTML = '';
         
         const stBtn = role === 'driver' && rd && rd.status === 'accepted' ? 
             `<button class="loc-btn" style="background:#66BB6A;color:#fff" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء</button>` : '';
@@ -1108,7 +1162,7 @@
             mp = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
             op = rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null;
         } else {
-            op = rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null; // Simplified for demo
+            op = rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null;
             if(navigator.geolocation) {
                 try { mp = await new Promise((r,j) => navigator.geolocation.getCurrentPosition(p => r([p.coords.latitude, p.coords.longitude]), j, {timeout: 3000})); } catch(e) {}
             }
@@ -1151,7 +1205,6 @@
         if((mp || op) && document.getElementById('chatMiniMap')) {
             chatMiniMap = MapUtils.initChatMiniMap('chatMiniMap', mp, op, role);
             if(chatLocationUpdate) clearInterval(chatLocationUpdate);
-            // Simplified live update for demo
         }
     }
 
