@@ -292,6 +292,81 @@
         .gps-desc { font-size: 0.9em; color: #666; margin-bottom: 20px; line-height: 1.5; }
         .gps-btn { width: 100%; padding: 12px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
         .gps-later { background: transparent; color: #666; }
+
+        /* --- DRIVER POPUP WINDOW STYLES --- */
+        .driver-float-window {
+            position: fixed;
+            top: 80px; /* أسفل الهيدر قليلاً */
+            left: 10px;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 16px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 2000; /* أعلى من كل شيء */
+            display: none; /* مخفي افتراضياً */
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border);
+            animation: slideInLeft 0.4s ease;
+            cursor: pointer;
+            max-width: 200px;
+        }
+        
+        .driver-float-window.show {
+            display: flex;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .float-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: #1B1B1B;
+            box-shadow: 0 2px 8px rgba(154, 205, 50, 0.4);
+        }
+
+        .float-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .float-title {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .float-count {
+            font-size: 0.75em;
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .float-close {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #eee;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            cursor: pointer;
+            color: #666;
+            border: 1px solid #fff;
+        }
     </style>
 </head>
 <body>
@@ -312,6 +387,16 @@
     <h2 style="color: var(--primary-dark); margin-bottom: 12px; font-weight: 800; letter-spacing: -0.5px;">Yasser Ride Pro</h2>
     <div class="spinner" style="width: 28px; height: 28px; border-width: 4px; margin-top: 12px;"></div>
     <p style="color: #555; margin-top: 18px; font-size: 0.95em; font-weight: 500;">جاري التحقق من الجلسة...</p>
+</div>
+
+<!-- Driver Floating Popup Window -->
+<div id="driverFloatWindow" class="driver-float-window" onclick="switchView('view-dashboard')">
+    <div class="float-close" onclick="event.stopPropagation(); document.getElementById('driverFloatWindow').classList.remove('show');">×</div>
+    <div class="float-icon">🚕</div>
+    <div class="float-content">
+        <span class="float-title">طلبات جديدة</span>
+        <span class="float-count" id="floatRequestCount">0 طلبات بانتظارك</span>
+    </div>
 </div>
 
 <div class="app" id="mainApp" style="display: none;">
@@ -683,8 +768,10 @@
                 document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
                 document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; 
                 updateServiceToggleUI(); 
-                switchView('view-dashboard'); 
+                // Note: We don't automatically switch to dashboard anymore, we stay where we are or go to request view
+                // But we start the listener regardless
                 startLocationUpdates(user.uid); 
+                loadRequests(); // Start listening for requests immediately
             } else switchView('view-driver-setup'); 
         } else { 
             switchView('view-request'); 
@@ -771,12 +858,12 @@
     
     function loadRequests() { 
         const l=document.getElementById('requestsList'), c=document.getElementById('requestsCount'); 
-        if(!currentDriver||!driverAvailable){ 
-            l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; 
-            return; 
-        } 
-        l.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; 
-        if(activeRequestListener)activeRequestListener(); 
+        
+        // Always listen if driver is logged in, regardless of view
+        if(!currentDriver) return; 
+
+        if(activeRequestListener) activeRequestListener(); 
+        
         activeRequestListener=db.collection('rideRequests').where('status','==','pending').where('carType','==',currentDriver.carType).limit(20).onSnapshot(s=>{ 
             const r=[]; 
             s.forEach(d=>{ 
@@ -785,13 +872,37 @@
                 if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); 
             }); 
             const n=r.length; 
-            if(n>previousRequestsCount&&n>0){ 
-                Utils.playSound('requestSound'); 
+            
+            // Update Dashboard List if visible
+            if(document.getElementById('view-dashboard').classList.contains('active')) {
+                 renderRequests(r,l,c); 
+            } else {
+                // Update Counter in Dashboard anyway
+                if(c) c.textContent = n;
+            }
+
+            // UPDATE FLOATING WINDOW (Always)
+            const floatWin = document.getElementById('driverFloatWindow');
+            const floatCount = document.getElementById('floatRequestCount');
+            
+            if(n > 0 && driverAvailable) {
+                floatWin.classList.add('show');
+                floatCount.textContent = `${n} طلبات بانتظارك`;
+                
+                // Play sound only if count increased and we are NOT in dashboard view (to avoid double noise if dashboard is open)
+                if(n > previousRequestsCount && !document.getElementById('view-dashboard').classList.contains('active')){ 
+                    Utils.playSound('requestSound'); 
+                }
+            } else {
+                floatWin.classList.remove('show');
+            }
+
+            if(n>previousRequestsCount && n>0 && document.getElementById('view-dashboard').classList.contains('active')){ 
+                 Utils.playSound('requestSound'); 
                 const h=document.querySelector('.dashboard-header'); 
                 if(h){h.classList.remove('pulse'); void h.offsetWidth; h.classList.add('pulse');} 
             } 
             previousRequestsCount=n; 
-            renderRequests(r,l,c); 
         },e=>console.error(e)); 
     }
     
