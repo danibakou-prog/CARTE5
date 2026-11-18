@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Yasser Ride Pro 🚖</title>
     
-    <!-- Leaflet & Routing Machine -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
     
-    <!-- Firebase Compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -20,393 +18,575 @@
     <style>
         :root {
             --primary: #9ACD32; --primary-dark: #7CB342; --primary-light: #C5E1A5;
-            --secondary: #FFD54F; --bg: #F5F7FA; --text: #1B1B1B; --card: #FFFFFF;
-            --shadow: 0 8px 32px rgba(0,0,0,0.12); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.3);
+            --secondary: #FFD54F; --bg: #FFFFFF; --text: #1B1B1B; --card: #FFFFFF;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08); --shadow-hover: 0 12px 48px rgba(156, 205, 50, 0.25);
             --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
-            --surface: #FAFAFA; --border: #E8E8E8;
+            --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); min-height: 100vh; color: var(--text); overflow: hidden; }
+        html, body { height: 100%; width: 100%; overflow: hidden; }
+        body { background: #000; color: var(--text); }
+        .app { position: fixed; inset: 0; width: 100vw; height: 100vh; overflow: hidden; }
+        .view { display: none; animation: fadeIn 0.35s ease; } .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Full Screen Map */
-        #map { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
-        .leaflet-routing-container { display: none !important; }
-        .leaflet-control-zoom { border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); border: none !important; }
-        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 36px !important; height: 36px !important; line-height: 36px !important; font-weight: 700; font-size: 1.2em; }
+        /* Full screen map as background */
+        #map, #dashMap { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; background: #E8F5E9; }
         
-        /* Markers */
-        .marker-base { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.4em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
-        .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
-        .marker-destination { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.2em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
+        /* Top overlay header */
+        .top-overlay { position: absolute; top: 0; left: 0; right: 0; z-index: 50; padding: 12px 14px; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%); display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+        .top-overlay > * { pointer-events: auto; }
+        .top-title { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 0.95em; color: var(--primary-dark); box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px; }
+        .top-right-btns { display: flex; gap: 8px; }
+        .top-btn { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: none; padding: 8px 14px; border-radius: 16px; font-size: 0.85em; cursor: pointer; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.15); color: var(--text); display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .top-btn:hover { transform: translateY(-1px); }
+        .top-btn.danger { background: rgba(239,83,80,0.95); color: #fff; }
         
-        /* Views & Overlays */
-        .view { display: none; position: relative; z-index: 10; height: 100vh; } 
-        .view.active { display: flex; flex-direction: column; }
+        /* Services button (floating) */
+        .services-btn { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; padding: 16px 34px; border-radius: 40px; font-size: 1.1em; font-weight: 800; cursor: pointer; box-shadow: 0 10px 32px rgba(124, 179, 66, 0.5); display: flex; align-items: center; gap: 10px; animation: pulse-btn 2.5s infinite; }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 10px 32px rgba(124, 179, 66, 0.5); } 50% { box-shadow: 0 10px 48px rgba(124, 179, 66, 0.9); } }
+        .services-btn.pulse-alert { animation: pulse-red 1.2s infinite; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; }
+        @keyframes pulse-red { 0%, 100% { box-shadow: 0 10px 32px rgba(239, 83, 80, 0.6); } 50% { box-shadow: 0 10px 48px rgba(239, 83, 80, 1); } }
         
-        /* Auth View */
-        #view-auth { justify-content: center; align-items: center; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 24px; }
-        .auth-card { width: 100%; max-width: 380px; background: var(--card); padding: 32px 24px; border-radius: 28px; box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border); }
-        .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; border: 1px solid var(--border); }
-        .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
-        .auth-tab.active { background: var(--card); box-shadow: 0 2px 8px rgba(0,0,0,0.08); color: var(--primary-dark); }
-        .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: var(--card); margin-bottom: 16px; }
+        /* Services dropdown menu */
+        .services-menu { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 150; background: #fff; border-radius: 24px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); padding: 10px; min-width: 260px; display: none; flex-direction: column; gap: 6px; opacity: 0; transition: all 0.3s ease; }
+        .services-menu.show { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
+        .menu-item { width: 100%; padding: 14px 18px; border: none; background: var(--surface); color: var(--text); border-radius: 16px; font-size: 0.95em; font-weight: 600; cursor: pointer; text-align: right; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .menu-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
+        .menu-item.primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .menu-item.danger { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); }
+        .menu-badge { margin-right: auto; background: var(--danger); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.75em; font-weight: 800; }
+        
+        /* Bottom sheets */
+        .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; display: none; backdrop-filter: blur(3px); }
+        .sheet-overlay.show { display: block; animation: fadeInSheet 0.3s ease; }
+        @keyframes fadeInSheet { from { opacity: 0; } to { opacity: 1; } }
+        .bottom-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 600; background: #fff; border-radius: 28px 28px 0 0; max-height: 92vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 -16px 48px rgba(0,0,0,0.25); display: none; }
+        .bottom-sheet.show { display: block; transform: translateY(0); }
+        .sheet-handle { width: 50px; height: 5px; background: #D0D0D0; border-radius: 3px; margin: 10px auto 12px; }
+        .sheet-content { padding: 8px 20px 32px; }
+        .sheet-title { font-size: 1.2em; font-weight: 800; color: var(--primary-dark); text-align: center; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        /* Auth view (centered card on map) */
+        .auth-container { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
+        .auth-card { background: #fff; border-radius: 28px; padding: 28px 24px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .auth-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: var(--surface); padding: 5px; border-radius: 14px; }
+        .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; font-size: 0.9em; }
+        .auth-tab.active { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); color: var(--primary-dark); font-weight: 700; }
+        .auth-form { display: flex; flex-direction: column; gap: 14px; }
+        .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #fff; }
         .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(156, 205, 50, 0.15); }
-        .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-        .auth-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } .auth-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-        .main-logo { font-size: 4em; margin-bottom: 16px; animation: bounce 2.5s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        /* Bottom Sheet (Passenger Request Ride) */
-        .bottom-sheet {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--card); border-radius: 28px 28px 0 0;
-            z-index: 100; max-height: 85vh; overflow-y: auto;
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            border-top: 1px solid var(--border);
-        }
-        .bottom-sheet.collapsed { transform: translateY(calc(100% - 70px)); }
-        .sheet-handle { width: 40px; height: 5px; background: #DDD; border-radius: 3px; margin: 12px auto; cursor: pointer; }
-        .sheet-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-        .sheet-title { font-weight: 800; font-size: 1.1em; color: var(--text); }
-        .sheet-toggle-btn { background: var(--surface); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 600; cursor: pointer; color: var(--primary-dark); }
+        .auth-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 14px; font-size: 1em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
+        .auth-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .auth-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
+        .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); color: #fff; }
+        .main-logo { font-size: 3em; margin-bottom: 12px; text-align: center; }
+        .main-title { font-size: 1.5em; color: var(--primary-dark); margin-bottom: 6px; font-weight: 800; text-align: center; }
+        .main-subtitle { color: #555; font-size: 0.9em; margin-bottom: 20px; text-align: center; line-height: 1.5; }
         
-        .panel { padding: 0 20px 24px; }
-        .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-        .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); }
-        .loc-header { display: flex; align-items: center; gap: 10px; } .loc-icon { font-size: 1.3em; } .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
-        .loc-input-group { display: flex; gap: 8px; }
-        .loc-input { flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.9em; outline: none; background: #FFF; }
-        .loc-input:focus { border-color: var(--primary); }
-        .loc-btn { padding: 10px 14px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; cursor: pointer; font-size: 0.85em; font-weight: 600; white-space: nowrap; }
+        /* Ride request sheet */
+        .location-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+        .loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 12px; border-radius: 14px; border: 1px solid var(--border); }
+        .loc-header { display: flex; align-items: center; gap: 8px; }
+        .loc-icon { font-size: 1.2em; }
+        .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
+        .loc-input-group { display: flex; gap: 6px; }
+        .loc-input { flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 0.9em; outline: none; transition: 0.25s; background: #fff; }
+        .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
+        .loc-btn { padding: 9px 12px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 10px; cursor: pointer; font-size: 0.85em; transition: 0.25s; white-space: nowrap; font-weight: 600; }
         .loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #fff; }
-        .loc-coords { font-size: 0.75em; color: #777; margin-top: 4px; min-height: 24px; }
-        .coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 4px 10px; border-radius: 8px; font-family: monospace; font-size: 0.8em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px; }
-        .coords-copy-btn { margin-right: 8px; padding: 2px 8px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.75em; cursor: pointer; font-weight: 600; }
-
-        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; opacity: 0.5; pointer-events: none; transition: 0.3s; }
-        .route-info.active { opacity: 1; pointer-events: auto; }
-        .info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 12px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
-        .info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); } .info-card .label { font-size: 0.7em; color: #555; margin-top: 3px; font-weight: 500; }
+        .loc-coords { font-size: 0.75em; color: #777; margin-top: 3px; min-height: 20px; }
+        .coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 4px 10px; border-radius: 7px; font-family: monospace; font-size: 0.8em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); }
+        .coords-copy-btn { margin-right: 6px; padding: 2px 8px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 5px; font-size: 0.75em; cursor: pointer; font-weight: 600; }
+        .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+        .info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .info-card .val { font-weight: 800; font-size: 0.95em; color: var(--primary-dark); }
+        .info-card .label { font-size: 0.7em; color: #555; margin-top: 2px; }
+        .price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 12px; border-radius: 12px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 12px; border: 2px solid #FFECB3; font-size: 0.95em; }
+        .car-selector { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
+        .car-opt { flex: 0 0 30%; min-width: 75px; background: var(--surface); border: 2px solid var(--border); border-radius: 14px; padding: 10px 6px; text-align: center; cursor: pointer; transition: 0.25s; }
+        .car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 12px rgba(156, 205, 50, 0.2); }
+        .car-opt .ico { font-size: 1.4em; }
+        .car-opt .name { font-weight: 700; font-size: 0.72em; margin-top: 4px; line-height: 1.3; }
+        .car-opt .rate { color: var(--primary-dark); font-size: 0.65em; font-weight: 600; }
+        .book-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 14px; font-size: 1em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
+        .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
         
-        .price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 14px; border: 2px solid #FFECB3; }
-        .car-selector { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
-        .car-opt { flex: 0 0 28%; min-width: 80px; background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.25s; }
-        .car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); }
-        .car-opt .ico { font-size: 1.5em; } .car-opt .name { font-weight: 700; font-size: 0.75em; margin-top: 6px; } .car-opt .rate { color: var(--primary-dark); font-size: 0.65em; font-weight: 600; }
-        
-        .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.3); }
-        .book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
-
-        /* Modals (Car Setup, Incoming Request, etc.) */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.6); z-index: 2000; 
-            display: none; align-items: center; justify-content: center; 
-            backdrop-filter: blur(6px); padding: 20px; 
-        }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
-        .modal-content { 
-            background: var(--card); width: 100%; max-width: 400px; 
-            border-radius: 24px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); 
-            position: relative;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 1.2em; font-weight: 800; color: var(--text); }
-        .modal-close { background: var(--surface); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .modal-close:hover { background: #FFEBEE; color: var(--danger); }
-
-        /* Driver Request Modal Specifics */
-        .req-modal-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-bottom: 16px; border-right: 4px solid var(--primary); }
-        .req-modal-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85em; color: #555; }
-        .req-modal-route { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-size: 0.95em; }
-        .req-modal-point { display: flex; align-items: center; gap: 10px; }
-        .req-modal-actions { display: flex; gap: 12px; margin-top: 16px; }
-        .req-btn { flex: 1; padding: 14px; border: none; border-radius: 14px; font-weight: 700; font-size: 1em; cursor: pointer; transition: 0.25s; }
-        .accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
-        .decline-btn { background: #ECEFF1; color: #455A64; }
-
-        /* Driver Dashboard Floating UI */
-        .driver-fab { position: fixed; top: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
-        .fab-btn { background: var(--card); border: 1px solid var(--border); padding: 12px 18px; border-radius: 50px; box-shadow: var(--shadow); font-weight: 700; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.25s; }
-        .fab-btn:hover { transform: scale(1.05); }
-        .fab-btn.status-active { background: #4CAF50; color: white; border-color: #4CAF50; }
-        .fab-btn.status-inactive { background: #FF9800; color: #1B1B1B; border-color: #FF9800; }
-
-        /* Autocomplete */
-        .autocomplete { position: relative; } 
-        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; margin-top: 4px; } 
-        .autocomplete-results.show { display: block; }
-        .autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.85em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
-        .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
-
-        /* Chat & Misc */
-        .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
-        .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 85vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
-        .chat-header { padding: 16px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; border-radius: 24px 24px 0 0; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #FAFAFA; min-height: 200px; }
-        .chat-input-area { padding: 14px 18px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
-        .chat-input { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 24px; outline: none; font-size: 0.9em; }
-        .chat-send-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.2em; font-weight: bold; }
-        .message { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.9em; line-height: 1.4; } 
-        .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; } 
-        .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; }
-        
-        /* Toast Notifications - TOP OF SCREEN */
-        .toast { 
-            position: fixed; 
-            top: max(20px, env(safe-area-inset-top)); 
-            left: 50%; 
-            transform: translateX(-50%) translateY(-150%); 
-            background: #1B1B1B; 
-            color: #fff; 
-            padding: 14px 28px; 
-            border-radius: 16px; 
-            font-size: 0.9em; 
-            z-index: 9999; 
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 6px 28px rgba(0,0,0,0.35); 
-            font-weight: 500; 
-            white-space: nowrap; 
-            cursor: pointer;
-        } 
-        .toast.show { transform: translateX(-50%) translateY(0); } 
-        .toast.success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } 
-        .toast.error { background: linear-gradient(135deg, var(--danger), #C62828); }
-
-        #loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: #fff; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; } 
-        #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
-        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; border: 1px solid #90CAF9; } 
+        /* Driver card (within ride sheet) */
+        .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 14px; padding: 14px; margin-top: 12px; display: none; }
         .driver-card.show { display: block; animation: slideUp 0.4s; }
-        .d-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-        .d-avatar { width: 50px; height: 50px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.6em; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2); }
-        .d-name { font-weight: 800; font-size: 1em; color: #1565C0; } .d-meta { font-size: 0.8em; color: #555; } 
-        .d-eta { background: #FFF; padding: 10px; border-radius: 12px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 12px; border: 1px solid var(--border); font-size: 0.9em; }
-        .cancel-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 12px; margin-top: 12px; font-weight: 700; cursor: pointer; font-size: 0.9em; }
-
-        /* Search Modal */
-        .search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); } 
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .d-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .d-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #BBDEFB, #90CAF9); display: flex; align-items: center; justify-content: center; font-size: 1.6em; }
+        .d-name { font-weight: 800; font-size: 1em; color: #1565C0; }
+        .d-meta { font-size: 0.82em; color: #555; margin-top: 2px; }
+        .d-stars { color: #FFC107; margin-top: 4px; font-size: 0.85em; }
+        .d-eta { background: #fff; padding: 9px; border-radius: 10px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 10px; border: 1px solid var(--border); font-size: 0.9em; }
+        .cancel-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 12px; margin-top: 10px; font-weight: 700; cursor: pointer; font-size: 0.9em; }
+        
+        /* Autocomplete */
+        .autocomplete { position: relative; }
+        .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 220px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; }
+        .autocomplete-results.show { display: block; }
+        .autocomplete-item { padding: 11px 13px; cursor: pointer; font-size: 0.88em; border-bottom: 1px solid #f5f5f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
+        
+        /* Form groups */
+        .form-group { margin-bottom: 14px; text-align: right; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9em; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.92em; outline: none; background: #fff; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(255, 213, 79, 0.2); }
+        
+        /* Dashboard / Driver requests - popup style */
+        .driver-status-bar { position: absolute; top: 70px; left: 14px; right: 14px; z-index: 50; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.1); font-size: 0.85em; }
+        .status-indicator { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); }
+        .status-dot.online { background: #4CAF50; animation: pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); } 50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); } }
+        .status-toggle { background: var(--primary); border: none; color: #1B1B1B; padding: 6px 14px; border-radius: 12px; font-size: 0.82em; cursor: pointer; font-weight: 700; }
+        .status-toggle.unavailable { background: var(--danger); color: #fff; }
+        
+        /* Request popup */
+        .request-popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); padding: 20px; }
+        .request-popup-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+        .request-popup { background: #fff; border-radius: 24px; max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .rp-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+        .rp-title { font-weight: 800; font-size: 1em; display: flex; align-items: center; gap: 8px; }
+        .rp-countdown { background: rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.85em; }
+        .rp-body { padding: 16px; }
+        .rp-route { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; padding: 12px; background: var(--surface); border-radius: 14px; }
+        .rp-point { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9em; }
+        .rp-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+        .rp-dot.pickup { background: #4CAF50; }
+        .rp-dot.dest { background: var(--danger); }
+        .rp-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+        .rp-info-box { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 8px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .rp-info-box .val { font-weight: 800; font-size: 0.9em; color: var(--primary-dark); }
+        .rp-info-box .label { font-size: 0.7em; color: #555; margin-top: 2px; }
+        .rp-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .rp-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.92em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .rp-btn.accept { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .rp-btn.decline { background: #ECEFF1; color: #455A64; }
+        
+        /* Active ride banner for driver */
+        .active-ride-banner { position: absolute; bottom: 24px; left: 14px; right: 14px; z-index: 80; background: linear-gradient(135deg, #4CAF50, #2E7D32); color: #fff; padding: 12px 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4); display: none; align-items: center; justify-content: space-between; gap: 10px; }
+        .active-ride-banner.show { display: flex; }
+        .arb-text { font-weight: 700; font-size: 0.9em; flex: 1; }
+        .arb-btns { display: flex; gap: 6px; }
+        .arb-btn { padding: 8px 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.8em; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .arb-btn.chat { background: rgba(255,255,255,0.25); color: #fff; }
+        .arb-btn.nav { background: #fff; color: #2E7D32; }
+        
+        /* Records sheet */
+        .records-tabs { display: flex; gap: 5px; background: var(--surface); padding: 5px; border-radius: 12px; margin-bottom: 12px; }
+        .record-tab { flex: 1; padding: 9px; border: none; background: transparent; border-radius: 9px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
+        .record-tab.active { background: #fff; font-weight: 700; color: var(--primary-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .records-list { max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .record-card { background: var(--surface); border-radius: 12px; padding: 12px; border-right: 4px solid var(--primary); border: 1px solid var(--border); }
+        .record-card.accepted { border-right-color: var(--primary); background: linear-gradient(135deg, #E8F5E9, #F1F8E9); }
+        .record-card.rejected { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        .record-card .route { display: flex; flex-direction: column; gap: 4px; font-size: 0.85em; margin: 8px 0; }
+        .record-card .meta { display: flex; justify-content: space-between; font-size: 0.8em; color: #555; }
+        .record-card .status { font-weight: 700; padding: 3px 10px; border-radius: 14px; font-size: 0.75em; }
+        .record-card .status.accepted { background: #66BB6A; color: #fff; }
+        .record-card .status.rejected { background: var(--danger); color: #fff; }
+        
+        /* Car setup sheet */
+        .car-setup-card { background: var(--surface); border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .car-display { display: flex; align-items: center; gap: 12px; padding: 12px; background: #fff; border-radius: 12px; border: 1px solid var(--border); }
+        .car-display .ico { font-size: 2em; }
+        .car-display .info { flex: 1; }
+        .car-display .name { font-weight: 700; color: var(--primary-dark); }
+        .car-display .type { font-size: 0.85em; color: #666; }
+        .edit-car-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 0.9em; }
+        
+        /* Spinner */
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 6px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: #1B1B1B; color: #fff; padding: 12px 24px; border-radius: 14px; font-size: 0.88em; z-index: 3000; transition: transform 0.35s ease; box-shadow: 0 6px 24px rgba(0,0,0,0.35); font-weight: 500; max-width: 90%; text-align: center; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
+        .toast.error { background: linear-gradient(135deg, var(--danger), #C62828); }
+        .toast.warning { background: linear-gradient(135deg, var(--warning), #F57C00); color: #fff; }
+        
+        /* Chat overlay */
+        .chat-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+        .chat-box { background: #fff; width: 100%; max-width: 500px; max-height: 92vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
+        .chat-header { padding: 14px 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; border-radius: 24px 24px 0 0; gap: 8px; }
+        .chat-close { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; }
+        .chat-actions { display: flex; gap: 6px; }
+        .chat-action-btn { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; padding: 7px 12px; border-radius: 10px; cursor: pointer; font-size: 0.8em; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: #FAFAFA; min-height: 200px; }
+        .chat-input-area { padding: 12px 14px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+        .chat-input { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 26px; outline: none; font-size: 0.92em; }
+        .chat-send-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; width: 46px; height: 46px; border-radius: 50%; cursor: pointer; font-size: 1.2em; font-weight: bold; }
+        .message { max-width: 78%; padding: 10px 14px; border-radius: 18px; font-size: 0.9em; line-height: 1.4; word-wrap: break-word; }
+        .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 5px; margin-right: auto; }
+        .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 5px; margin-left: auto; }
+        .chat-mini-map { height: 150px; width: 100%; border-bottom: 1px solid var(--border); background: #F5F5F5; position: relative; }
+        .chat-mini-map .map-label { position: absolute; top: 8px; right: 10px; background: rgba(27,27,27,0.8); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; z-index: 1000; }
+        .chat-mini-map .distance-badge { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 5px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 5px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
+        
+        /* Map markers */
+        .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
+        .marker-passenger { border-color: #66BB6A; }
+        .marker-driver { border-color: #42A5F5; }
+        .marker-truck { border-color: #9C27B0; }
+        .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
+        .pulse-green { animation: pulse-green 1.5s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 var(--pulse-green); } 70% { box-shadow: 0 0 0 20px rgba(102, 187, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0); } }
+        .pulse-blue { animation: pulse-blue 1.5s infinite; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
+        .pulse-marker-chat { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #F44336; box-shadow: 0 0 0 0 rgba(244,67,54,0.7); animation: pulse-red 1.5s infinite; font-size: 0.8em; color: #fff; }
+        .marker-me { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #2196F3; font-size: 0.8em; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        
+        /* Loading */
+        #loadingOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #FFF, #F9F9F9); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #loadingOverlay.hidden { display: none; }
+        
+        /* Search modal */
+        .search-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
         .search-modal.active { display: flex; }
-        .search-content { background: #fff; width: 90%; max-width: 380px; border-radius: 24px; overflow: hidden; box-shadow: 0 16px 56px rgba(0,0,0,0.4); animation: slideUp 0.45s ease; }
-        .search-map-container { height: 200px; width: 100%; position: relative; background: #F5F5F5; } 
-        .search-info { padding: 24px; text-align: center; } 
-        .search-text { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 6px; } 
-        .search-sub { font-size: 0.85em; color: #666; margin-bottom: 16px; }
-        .cancel-search-btn { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 12px 24px; border-radius: 14px; font-weight: 700; cursor: pointer; width: 100%; font-size: 0.9em; }
-
-        /* Form Groups for Modal */
-        .form-group { margin-bottom: 16px; text-align: right; } 
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9em; color: #333; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.95em; outline: none; background: #FFF; }
-        .form-group input:focus, .form-group select:focus { border-color: var(--secondary); }
+        .search-content { background: #fff; width: 100%; max-width: 400px; border-radius: 24px; overflow: hidden; box-shadow: 0 16px 56px rgba(0,0,0,0.4); animation: slideUp 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--border); }
+        .search-map-container { height: 250px; width: 100%; position: relative; background: #F5F5F5; }
+        .search-info { padding: 20px; text-align: center; }
+        .search-spinner { width: 40px; height: 40px; border: 4px solid #ECEFF1; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 14px; }
+        .search-text { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .search-sub { font-size: 0.85em; color: #666; line-height: 1.5; }
+        .cancel-search-btn { margin-top: 14px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 11px 22px; border-radius: 14px; font-weight: 700; cursor: pointer; width: 100%; font-size: 0.92em; }
+        
+        /* GPS Reminder Modal */
+        .gps-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px; }
+        .gps-content { background: #fff; width: 100%; max-width: 350px; border-radius: 24px; padding: 22px; text-align: center; box-shadow: 0 16px 56px rgba(0,0,0,0.4); }
+        .gps-icon { font-size: 2.8em; margin-bottom: 12px; }
+        .gps-title { font-size: 1.1em; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .gps-desc { font-size: 0.88em; color: #666; margin-bottom: 18px; line-height: 1.5; }
+        .gps-btn { width: 100%; padding: 11px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 7px; }
+        .gps-later { background: transparent; color: #666; }
+        
+        /* Leaflet overrides */
+        .leaflet-container { font-family: inherit; }
+        .leaflet-routing-container { display: none !important; }
+        .leaflet-control-zoom { border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 30px !important; height: 30px !important; line-height: 30px !important; font-weight: 700; }
+        .custom-popup { text-align: center; font-size: 0.88em; }
+        
+        /* Responsive adjustments */
+        @media (max-height: 700px) {
+            .chat-messages { min-height: 150px; }
+            .sheet-content { padding: 6px 18px 24px; }
+        }
     </style>
 </head>
 <body>
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay">
-    <div style="font-size: 3.5em; margin-bottom: 16px;">🚖</div>
-    <h2 style="color: var(--primary-dark); margin-bottom: 12px; font-weight: 800;">Yasser Ride Pro</h2>
-    <div class="spinner"></div>
-    <p style="color: #555; margin-top: 16px; font-size: 0.9em;">جاري التحقق من الجلسة...</p>
-</div>
-
-<!-- Full Screen Map -->
-<div id="map"></div>
-
-<!-- Auth View -->
-<div id="view-auth" class="view active">
-    <div class="auth-card">
-        <div class="main-logo">✨</div>
-        <h2 style="color: var(--primary-dark); margin-bottom: 8px; font-weight: 800;">مرحباً بك في ياسر رايد</h2>
-        <p style="color: #666; font-size: 0.9em; margin-bottom: 24px;">أسرع وأذكى طريقة للتنقل في مدينتك</p>
-        
-        <div class="auth-tabs">
-            <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
-            <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
-        </div>
-        
-        <div id="loginForm">
-            <input type="email" id="loginEmail" class="auth-input" placeholder="البريد الإلكتروني" required>
-            <input type="password" id="loginPassword" class="auth-input" placeholder="كلمة المرور" required>
-            <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">🔐 تسجيل الدخول</button>
-        </div>
-        
-        <div id="registerForm" style="display:none;">
-            <input type="email" id="regEmail" class="auth-input" placeholder="البريد الإلكتروني" required>
-            <input type="password" id="regPassword" class="auth-input" placeholder="كلمة المرور (6 أحرف على الأقل)" required minlength="6">
-            <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">✅ إنشاء الحساب</button>
-        </div>
+<!-- GPS Reminder Modal -->
+<div id="gpsReminderModal" class="gps-modal" style="display:none;">
+    <div class="gps-content">
+        <div class="gps-icon">🛰️</div>
+        <h3 class="gps-title">تفعيل خدمة تحديد المواقع</h3>
+        <p class="gps-desc">للحصول على أفضل تجربة وتحديد دقيق لموقعك، يرجى تفعيل الـ GPS والسماح للتطبيق بالوصول للموقع.</p>
+        <button class="gps-btn" onclick="enableGPSAndClose()">✅ تفعيل الآن</button>
+        <button class="gps-btn gps-later" onclick="closeGPSModal()">ربما لاحقاً</button>
     </div>
 </div>
 
-<!-- Passenger Bottom Sheet (Request Ride) -->
-<div id="passengerSheet" class="bottom-sheet collapsed" style="display: none;">
-    <div class="sheet-handle" onclick="toggleBottomSheet()"></div>
-    <div class="sheet-header">
-        <span class="sheet-title">📍 طلب رحلة</span>
-        <div style="display: flex; gap: 8px;">
-            <button class="sheet-toggle-btn" onclick="openCarSetupModal()">🚙 تسجيل سيارتي</button>
-            <button class="sheet-toggle-btn" onclick="logoutUser()" style="color: var(--danger);">🚪 خروج</button>
+<div id="loadingOverlay">
+    <div style="font-size: 3.5em; margin-bottom: 14px;">🚖</div>
+    <h2 style="color: var(--primary-dark); margin-bottom: 10px; font-weight: 800;">Yasser Ride Pro</h2>
+    <div class="spinner" style="width: 28px; height: 28px; border-width: 4px; margin-top: 10px;"></div>
+    <p style="color: #555; margin-top: 16px; font-size: 0.92em;">جاري التحقق من الجلسة...</p>
+</div>
+
+<div class="app" id="mainApp" style="display: none;">
+    
+    <!-- AUTH VIEW (overlay card on map) -->
+    <div id="view-auth" class="view active">
+        <div id="authMap" style="position: absolute; inset: 0; background: linear-gradient(135deg, #E8F5E9, #F1F8E9);"></div>
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="main-logo">🚖</div>
+                <h2 class="main-title">ياسر رايد برو</h2>
+                <p class="main-subtitle">أسرع وأذكى طريقة للتنقل في مدينتك</p>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">دخول</button>
+                    <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
+                </div>
+                <div id="loginForm" class="auth-form">
+                    <input type="email" id="loginEmail" class="auth-input" placeholder="البريد الإلكتروني" autocomplete="email">
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="كلمة المرور" autocomplete="current-password">
+                    <button class="auth-btn" onclick="handleAuth('login')" id="loginBtn">🔐 تسجيل الدخول</button>
+                </div>
+                <div id="registerForm" class="auth-form" style="display:none;">
+                    <input type="email" id="regEmail" class="auth-input" placeholder="البريد الإلكتروني">
+                    <input type="password" id="regPassword" class="auth-input" placeholder="كلمة المرور (6+ أحرف)" minlength="6">
+                    <button class="auth-btn" onclick="handleAuth('register')" id="regBtn">✅ إنشاء الحساب</button>
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="panel">
-        <div class="location-box">
-            <div class="loc-row">
-                <div class="loc-header"><span class="loc-icon">🟢</span><span class="loc-label">موقع الانطلاق</span></div>
-                <div class="autocomplete">
-                    <div class="loc-input-group">
-                        <input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
-                        <button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️</button>
+    <!-- PASSENGER VIEW (map + floating button) -->
+    <div id="view-request" class="view">
+        <div id="map"></div>
+        <div class="top-overlay">
+            <div class="top-title">🚖 ياسر رايد</div>
+            <div class="top-right-btns">
+                <button class="top-btn" id="chatRestoreBtn" onclick="openChatHistorySheet()" style="display:none;">💬 المحادثات</button>
+            </div>
+        </div>
+        <button class="services-btn" id="passengerServicesBtn" onclick="togglePassengerMenu()">🎯 خدماتي</button>
+        <div class="services-menu" id="passengerMenu">
+            <button class="menu-item primary" onclick="openRideSheet()">🚕 طلب سيارة</button>
+            <button class="menu-item" onclick="openRecordsSheet()">📋 سجل الرحلات</button>
+            <button class="menu-item" id="becomeDriverBtn" onclick="openDriverSetupSheet()">🚙 تسجيل كسائق</button>
+            <button class="menu-item" onclick="openChatHistorySheet()">💬 استعادة المحادثات</button>
+            <button class="menu-item danger" onclick="logoutUser()">🚪 تسجيل الخروج</button>
+        </div>
+    </div>
+    
+    <!-- DRIVER DASHBOARD VIEW (map + status) -->
+    <div id="view-dashboard" class="view">
+        <div id="dashMap"></div>
+        <div class="top-overlay">
+            <div class="top-title">🚙 وضع السائق</div>
+            <div class="top-right-btns">
+                <button class="top-btn" onclick="openChatHistorySheet()">💬 المحادثات</button>
+            </div>
+        </div>
+        <div class="driver-status-bar">
+            <div class="status-indicator">
+                <span class="status-dot" id="driverStatusDot"></span>
+                <span id="driverStatusText" style="font-weight:600;">الحالة</span>
+            </div>
+            <button class="status-toggle" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
+        </div>
+        <button class="services-btn" id="driverServicesBtn" onclick="toggleDriverMenu()">🎯 خدماتي</button>
+        <div class="services-menu" id="driverMenu">
+            <button class="menu-item" onclick="openRecordsSheet()">📋 سجل الرحلات</button>
+            <button class="menu-item" onclick="openCarSetupSheet()">🚗 تعديل سيارتي</button>
+            <button class="menu-item" onclick="switchToPassengerMode()">👤 وضع الراكب</button>
+            <button class="menu-item" onclick="openChatHistorySheet()">💬 استعادة المحادثات</button>
+            <button class="menu-item danger" onclick="logoutUser()">🚪 تسجيل الخروج</button>
+        </div>
+        <div class="active-ride-banner" id="activeRideBanner">
+            <div class="arb-text" id="arbText">🚗 رحلة نشطة</div>
+            <div class="arb-btns">
+                <button class="arb-btn chat" onclick="reopenActiveChat()">💬 محادثة</button>
+                <button class="arb-btn nav" id="arbNavBtn" onclick="startTripNavigationFromBanner()">🗺️ ملاحة</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Sheet Overlay -->
+    <div class="sheet-overlay" id="sheetOverlay" onclick="closeAllSheets()"></div>
+    
+    <!-- Ride Request Sheet -->
+    <div class="bottom-sheet" id="rideSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <div class="sheet-title">🚕 طلب رحلة</div>
+            <div class="location-box">
+                <div class="loc-row">
+                    <div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">موقع الانطلاق</span></div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
+                            <button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️ GPS</button>
+                        </div>
+                        <div class="autocomplete-results" id="pickupResults"></div>
                     </div>
-                    <div class="autocomplete-results" id="pickupResults"></div>
+                    <div class="loc-coords" id="pickupCoords"><span class="coords-badge">📍 جاري التحديد...</span></div>
                 </div>
-                <div class="loc-coords" id="pickupCoords"><span class="coords-badge">📍 جاري التحديد...</span></div>
-            </div>
-            
-            <div class="loc-row">
-                <div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">الوجهة المطلوبة</span></div>
-                <div class="autocomplete">
-                    <div class="loc-input-group">
-                        <input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
-                        <button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
+                <div class="loc-row">
+                    <div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">الوجهة المطلوبة</span></div>
+                    <div class="autocomplete">
+                        <div class="loc-input-group">
+                            <input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
+                            <button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
+                        </div>
+                        <div class="autocomplete-results" id="destResults"></div>
                     </div>
-                    <div class="autocomplete-results" id="destResults"></div>
+                    <div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
                 </div>
-                <div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
+            </div>
+            <div class="route-info" id="routeInfo" style="opacity: 0.4; pointer-events: none;">
+                <div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
+                <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
+                <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
+            </div>
+            <div class="price-display" id="priceBox">اختر الوجهة لحساب السعر</div>
+            <div class="car-selector">
+                <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
+                <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
+                <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل</div><div class="rate">60 د.ج/كم</div></div>
+            </div>
+            <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة الآن</button>
+            <div class="driver-card" id="driverCard">
+                <div class="d-header">
+                    <div class="d-avatar">👨✈️</div>
+                    <div style="flex:1"><div class="d-name" id="dName">---</div><div class="d-meta" id="dMeta">---</div><div class="d-stars">⭐⭐⭐⭐⭐ (4.9)</div></div>
+                </div>
+                <div class="d-eta" id="dEta">جاري التحميل...</div>
+                <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
             </div>
         </div>
-
-        <div class="route-info" id="routeInfo">
-            <div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
-            <div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
-            <div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
-        </div>
-
-        <div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
-
-        <div class="car-selector">
-            <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
-            <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
-            <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة صغيرة</div><div class="rate">60 د.ج/كم</div></div>
-        </div>
-
-        <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 اطلب سيارة الآن</button>
-        
-        <div class="driver-card" id="driverCard">
-            <div class="d-header">
-                <div class="d-avatar">👨✈️</div>
-                <div style="flex:1"><div class="d-name" id="dName">---</div><div class="d-meta" id="dMeta">---</div><div style="color: #FFC107; font-size: 0.8em; margin-top: 4px;">⭐⭐⭐⭐⭐ (4.9)</div></div>
+    </div>
+    
+    <!-- Driver Setup Sheet -->
+    <div class="bottom-sheet" id="driverSetupSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <div class="sheet-title">🚙 تسجيل كسائق</div>
+            <p style="text-align:center;color:#666;font-size:0.9em;margin-bottom:14px;">أكمل بياناتك لتصبح سائقاً محترفاً</p>
+            <div class="form-group"><label>🚗 نوع المركبة</label>
+                <select id="setupCarType" class="auth-input">
+                    <option value="دراجة نارية">🏍️ دراجة نارية</option>
+                    <option value="مريحة" selected>🚙 مريحة</option>
+                    <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
+                </select>
             </div>
-            <div class="d-eta" id="dEta">جاري التحميل...</div>
-            <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
+            <div class="form-group"><label>🪪 اسم/لوحة السيارة</label>
+                <input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345">
+            </div>
+            <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn">✅ تفعيل حساب السائق</button>
         </div>
     </div>
-</div>
-
-<!-- Driver Floating Controls (Visible only for drivers) -->
-<div id="driverFab" class="driver-fab" style="display: none;">
-    <button class="fab-btn status-active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
-    <button class="fab-btn" onclick="openCarSetupModal()">⚙️ تعديل مركبتي</button>
-    <button class="fab-btn" onclick="switchToPassengerMode()">👤 وضع الراكب</button>
-</div>
-
-<!-- Car Setup Modal (Independent) -->
-<div id="carSetupModal" class="modal-overlay" onclick="if(event.target===this) closeCarSetupModal()">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">🚙 تسجيل / تعديل مركبتك</h3>
-            <button class="modal-close" onclick="closeCarSetupModal()">✕</button>
-        </div>
-        <div class="form-group">
-            <label>🚗 نوع المركبة</label>
-            <select id="setupCarType">
-                <option value="دراجة نارية">🏍️ دراجة نارية</option>
-                <option value="مريحة" selected>🚙 مريحة</option>
-                <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
-                <option value="فاخرة">✨ فاخرة</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>🪪 اسم/لوحة السيارة</label>
-            <input type="text" id="setupCarName" placeholder="مثال: سيارة أحمد - 12345" required>
-        </div>
-        <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="margin-top: 8px;">✅ حفظ البيانات والبدء</button>
-        <button class="auth-btn" onclick="skipToPassenger()" style="margin-top: 10px; background: linear-gradient(135deg, #9E9E9E, #757575); color: white;">👤 المتابعة كراكب فقط</button>
-    </div>
-</div>
-
-<!-- Incoming Driver Request Modal -->
-<div id="incomingRequestModal" class="modal-overlay" onclick="if(event.target===this) closeRequestModal()">
-    <div class="modal-content" style="border-top: 5px solid var(--primary);">
-        <div class="modal-header">
-            <h3 class="modal-title">🔔 طلب رحلة جديد!</h3>
-            <button class="modal-close" onclick="closeRequestModal()">✕</button>
-        </div>
-        <div id="requestModalContent">
-            <!-- Content injected via JS -->
-        </div>
-        <div class="req-modal-actions">
-            <button class="req-btn accept-btn" id="modalAcceptBtn" onclick="handleAcceptFromModal()">✅ قبول الرحلة</button>
-            <button class="req-btn decline-btn" id="modalDeclineBtn" onclick="handleDeclineFromModal()">❌ رفض</button>
+    
+    <!-- Car Edit Sheet (for existing drivers) -->
+    <div class="bottom-sheet" id="carSetupSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <div class="sheet-title">🚗 تعديل سيارتي</div>
+            <div class="car-setup-card">
+                <div class="car-display" id="currentCarDisplay">
+                    <div class="ico">🚙</div>
+                    <div class="info">
+                        <div class="name" id="curCarName">---</div>
+                        <div class="type" id="curCarType">---</div>
+                    </div>
+                </div>
+                <button class="edit-car-btn" onclick="toggleCarEditMode()">✏️ تعديل البيانات</button>
+            </div>
+            <div id="carEditForm" style="display:none;">
+                <div class="form-group"><label>🚗 نوع المركبة</label>
+                    <select id="editCarType" class="auth-input">
+                        <option value="دراجة نارية">🏍️ دراجة نارية</option>
+                        <option value="مريحة">🚙 مريحة</option>
+                        <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>🪪 اسم/لوحة السيارة</label>
+                    <input type="text" id="editCarName" class="auth-input" placeholder="اسم السيارة">
+                </div>
+                <button class="auth-btn" onclick="saveCarChanges()" id="saveCarBtn">💾 حفظ التغييرات</button>
+                <button class="auth-btn alt" onclick="toggleCarEditMode()" style="margin-top:8px;">❌ إلغاء</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Search/Dispatch Modal -->
-<div id="searchModal" class="search-modal" onclick="if(event.target===this) cancelRide()">
-    <div class="search-content">
-        <div id="searchMap" class="search-map-container"></div>
-        <div class="search-info">
-            <div class="spinner" style="margin: 0 auto 16px; width: 32px; height: 32px; border-width: 4px;"></div>
-            <div class="search-text" id="searchStatusText">جاري البحث عن سائقين...</div>
-            <div class="search-sub" id="searchSubText">يرجى الانتظار، نقوم بإشعار أقرب السائقين</div>
-            <button class="cancel-search-btn" onclick="cancelRide()">❌ إلغاء الطلب</button>
+    
+    <!-- Records Sheet -->
+    <div class="bottom-sheet" id="recordsSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <div class="sheet-title">📋 سجل الرحلات</div>
+            <div class="records-tabs">
+                <button class="record-tab active" onclick="switchRecordsTab('all', event)">الكل</button>
+                <button class="record-tab" onclick="switchRecordsTab('accepted', event)">✅ المقبولة</button>
+                <button class="record-tab" onclick="switchRecordsTab('rejected', event)">❌ المرفوضة</button>
+            </div>
+            <div class="records-list" id="recordsList"><div style="text-align:center;padding:24px;color:#666"><span class="spinner"></span><br>جاري التحميل...</div></div>
         </div>
     </div>
+    
+    <!-- Chat History Sheet -->
+    <div class="bottom-sheet" id="chatHistorySheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <div class="sheet-title">💬 المحادثات السابقة</div>
+            <div class="records-list" id="chatHistoryList"><div style="text-align:center;padding:24px;color:#666"><span class="spinner"></span><br>جاري التحميل...</div></div>
+        </div>
+    </div>
+    
+    <!-- Request Popup (for driver) -->
+    <div class="request-popup-overlay" id="requestPopupOverlay">
+        <div class="request-popup">
+            <div class="rp-header">
+                <div class="rp-title">🔔 طلب رحلة جديد</div>
+                <div class="rp-countdown" id="rpCountdown">30</div>
+            </div>
+            <div class="rp-body">
+                <div class="rp-info-grid">
+                    <div class="rp-info-box"><div class="val" id="rpDistance">---</div><div class="label">🚶 البعد</div></div>
+                    <div class="rp-info-box"><div class="val" id="rpTripDist">---</div><div class="label">📏 مسافة الرحلة</div></div>
+                    <div class="rp-info-box"><div class="val" id="rpPrice">---</div><div class="label">💰 السعر</div></div>
+                </div>
+                <div class="rp-route">
+                    <div class="rp-point"><div class="rp-dot pickup"></div><div><strong>📍 من:</strong> <span id="rpPickup">---</span></div></div>
+                    <div class="rp-point"><div class="rp-dot dest"></div><div><strong>🏁 إلى:</strong> <span id="rpDest">---</span></div></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.85em;color:#666;margin:8px 0;">
+                    <span id="rpCarType">🚗 ---</span>
+                    <span id="rpTime">⏱️ --- د</span>
+                </div>
+                <div class="rp-actions">
+                    <button class="rp-btn accept" onclick="acceptPopupRequest()">✅ قبول</button>
+                    <button class="rp-btn decline" onclick="declinePopupRequest()">❌ رفض</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Modal -->
+    <div id="searchModal" class="search-modal">
+        <div class="search-content">
+            <div id="searchMap" class="search-map-container"></div>
+            <div class="search-info">
+                <div class="search-spinner"></div>
+                <div class="search-text" id="searchStatusText">جاري البحث عن سائقين...</div>
+                <div class="search-sub" id="searchSubText">يرجى الانتظار، نقوم بإشعار أقرب السائقين</div>
+                <button class="cancel-search-btn" onclick="cancelRide()">❌ إلغاء الطلب</button>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
-<!-- Chat Overlay -->
-<div id="chatOverlayContainer"></div>
-
-<!-- Toast Notification -->
-<div class="toast" id="toast" onclick="this.classList.remove('show')"></div>
-
-<!-- Audio Elements -->
-<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"></audio>
+<div class="toast" id="toast"></div>
+<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
 <audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/1111.mp3" type="audio/mpeg"></audio>
 
 <script>
     let db, auth, app, currentUser = null, currentDriver = null;
     let driverLocationInterval = null, passengerLocationInterval = null, activeRequestListener = null, activeChatListener = null;
-    let map, pickupMarker, destMarker, routeControl, driverRoute, passengerRoute;
+    let map = null, dashMap = null, pickupMarker = null, destMarker = null, routeControl = null, driverRoute = null, passengerRoute = null;
     let pickupPos = null, destPos = null, myCurrentPos = null;
     let selectedRate = 10, baseFare = 50, distKm = 0, timeMin = 0, rideState = 'idle', mapClickEnabled = false;
     let driverAvailable = true, currentRideId = null, currentChatId = null, rideTimeoutId = null, previousRequestsCount = 0;
     let currentActiveRide = null, dispatchDrivers = [], dispatchIndex = 0, dispatchTimeoutId = null;
     let searchMap = null, searchMarkers = [], searchUpdateInterval = null, searchMarkerMap = {};
     let lastKnownMessageCount = 0, currentChatMyId = null, chatMiniMap = null, chatLocationUpdate = null;
-    let currentPendingRequestId = null;
+    let currentRecordsFilter = 'all', currentPulsingMarker = null;
+    let heartbeatInterval = null, offlineUpdateQueued = false, lastOnlineState = true;
+    let currentPopupRequest = null, popupCountdownTimer = null;
+    let activeRideChatId = null, activeRideRole = null;
+    let mapInitialized = false, dashMapInitialized = false;
     
     const MAP_CONFIG = {
         defaultView: [36.753, 3.058], defaultZoom: 14,
-        tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }],
+        tileLayers: [
+            { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }
+        ],
         routeStyles: { driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } },
         markerIcons: {
-            passenger: L.divIcon({ className: 'marker-base marker-passenger', html: '👤', iconSize: [40, 40], iconAnchor: [20, 40] }),
-            driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [40, 40], iconAnchor: [20, 40] }),
-            truck: L.divIcon({ className: 'marker-base marker-truck', html: '🚚', iconSize: [40, 40], iconAnchor: [20, 40] }),
-            destination: L.divIcon({ className: 'marker-destination', html: '🏁', iconSize: [36, 36], iconAnchor: [18, 36] }),
-            motorcycle: L.divIcon({ className: 'marker-base marker-driver', html: '🏍️', iconSize: [40, 40], iconAnchor: [20, 40] }),
+            passenger: L.divIcon({ className: 'marker-base marker-passenger', html: '👤', iconSize: [36, 36], iconAnchor: [18, 36] }),
+            driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [36, 36], iconAnchor: [18, 36] }),
+            truck: L.divIcon({ className: 'marker-base marker-truck', html: '🚚', iconSize: [36, 36], iconAnchor: [18, 36] }),
+            destination: L.divIcon({ className: 'marker-destination', html: '🏁', iconSize: [32, 32], iconAnchor: [16, 32] }),
+            motorcycle: L.divIcon({ className: 'marker-base marker-driver', html: '🏍️', iconSize: [36, 36], iconAnchor: [18, 36] }),
             chatPulse: L.divIcon({ className: 'pulse-marker-chat', html: '🔴', iconSize: [20, 20], iconAnchor: [10, 20] }),
             chatMe: L.divIcon({ className: 'marker-me', html: '🔵', iconSize: [20, 20], iconAnchor: [10, 20] })
         }
@@ -414,704 +594,886 @@
 
     const Utils = {
         showToast: (msg, type='success') => { 
-            const t=document.getElementById('toast'); 
-            t.textContent=msg; 
-            t.className=`toast ${type} show`; 
-            setTimeout(()=>t.classList.remove('show'), 4000); 
+            const t = document.getElementById('toast'); 
+            t.textContent = msg; 
+            t.className = `toast ${type} show`; 
+            setTimeout(() => t.classList.remove('show'), 3500); 
         },
-        calculateDistance: (lat1, lng1, lat2, lng2) => { const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLng=(lng2-lng1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); },
-        formatDistance: (km) => km<1?`${Math.round(km*1000)} م`:`${km.toFixed(1)} كم`,
-        formatTime: (min) => min<1?'أقل من دقيقة':`${Math.round(min)} دقيقة`,
-        copyToClipboard: (text) => navigator.clipboard.writeText(text).then(()=>Utils.showToast('📋 تم النسخ')),
+        calculateDistance: (lat1, lng1, lat2, lng2) => { 
+            const R = 6371; 
+            const dLat = (lat2-lat1) * Math.PI/180; 
+            const dLng = (lng2-lng1) * Math.PI/180; 
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2; 
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        },
+        formatDistance: (km) => km < 1 ? `${Math.round(km*1000)} م` : `${km.toFixed(1)} كم`,
+        formatTime: (min) => min < 1 ? 'أقل من دقيقة' : `${Math.round(min)} دقيقة`,
+        copyToClipboard: (text) => navigator.clipboard.writeText(text).then(() => Utils.showToast('📋 تم النسخ')),
         formatCoords: (lat, lng) => `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
         debounce: (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; },
         playSound: (id) => { 
-            const a=document.getElementById(id); 
-            if(a){ 
-                a.currentTime=0; 
-                a.play().catch(()=>{ 
-                    const h=()=>{a.play().catch(()=>{}); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); }; 
-                    document.addEventListener('click',h,{once:true}); 
-                    document.addEventListener('touchstart',h,{once:true}); 
+            const a = document.getElementById(id); 
+            if (a) { 
+                a.currentTime = 0; 
+                a.play().catch(() => { 
+                    const h = () => { a.play().catch(() => {}); document.removeEventListener('click', h); document.removeEventListener('touchstart', h); }; 
+                    document.addEventListener('click', h, {once:true}); 
+                    document.addEventListener('touchstart', h, {once:true}); 
                 }); 
             } 
         },
-        stopSound: (id) => { 
-            const a=document.getElementById(id); 
-            if(a){ 
-                a.pause(); 
-                a.currentTime=0; 
-            } 
-        }
+        stopSound: (id) => { const a = document.getElementById(id); if (a) { a.pause(); a.currentTime = 0; } }
     };
 
     const MapUtils = {
         initMap: (id, opts={}) => {
-            const c={...MAP_CONFIG, ...opts};
-            const m=L.map(id, {zoomControl:true, attributionControl:false, preferCanvas:true, tap: true, touchZoom: true, scrollWheelZoom: true}).setView(c.defaultView, c.defaultZoom);
-            c.tileLayers.forEach((l,i)=>{ const t=L.tileLayer(l.url, {attribution:l.attribution, maxZoom:l.maxZoom}); if(i===0)t.addTo(m); });
-            L.control.zoom({position:'topright'}).addTo(m); 
+            const c = {...MAP_CONFIG, ...opts};
+            const m = L.map(id, {zoomControl: true, attributionControl: true, preferCanvas: true, tap: true, touchExtend: true}).setView(c.defaultView, c.defaultZoom);
+            c.tileLayers.forEach((l, i) => { 
+                const t = L.tileLayer(l.url, {attribution: l.attribution, maxZoom: l.maxZoom}); 
+                if (i === 0) t.addTo(m); 
+            });
+            L.control.zoom({position: 'topright'}).addTo(m);
+            setTimeout(() => m.invalidateSize(), 200);
             return m;
         },
-        createMarker: (pos, type='passenger', popup=null) => { const i=MAP_CONFIG.markerIcons[type]||MAP_CONFIG.markerIcons.passenger; const m=L.marker(pos, {icon:i}); if(popup)m.bindPopup(`<div style="text-align:center;font-size:0.9em">${popup}</div>`); return m; },
-        drawRoute: (map, wps, style) => { if(!wps||wps.length<2)return null; return L.Routing.control({waypoints:wps.map(p=>L.latLng(p)), routeWhileDragging:false, addWaypoints:false, show:false, createMarker:()=>null, lineOptions:{styles:[style]}, router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1', profile:'driving'})}).addTo(map); },
-        drawDualRoute: (map, dPos, pPos, dest) => { if(driverRoute)map.removeControl(driverRoute); if(passengerRoute)map.removeControl(passengerRoute); driverRoute=MapUtils.drawRoute(map,[dPos,pPos],MAP_CONFIG.routeStyles.driver); passengerRoute=MapUtils.drawRoute(map,[pPos,dest],MAP_CONFIG.routeStyles.passenger); map.fitBounds(L.latLngBounds([dPos,pPos,dest]),{padding:[60,60]}); },
+        createMarker: (pos, type='passenger', popup=null) => { 
+            const i = MAP_CONFIG.markerIcons[type] || MAP_CONFIG.markerIcons.passenger; 
+            const m = L.marker(pos, {icon: i}); 
+            if (popup) m.bindPopup(`<div class="custom-popup">${popup}</div>`); 
+            return m; 
+        },
+        drawRoute: (map, wps, style) => { 
+            if (!wps || wps.length < 2) return null; 
+            return L.Routing.control({
+                waypoints: wps.map(p => L.latLng(p)), 
+                routeWhileDragging: false, addWaypoints: false, show: false, createMarker: () => null, 
+                lineOptions: {styles: [style]}, 
+                router: L.Routing.osrmv1({serviceUrl: 'https://router.project-osrm.org/route/v1', profile: 'driving'})
+            }).addTo(map); 
+        },
+        drawDualRoute: (map, dPos, pPos, dest) => { 
+            if (driverRoute) try { map.removeControl(driverRoute); } catch(e) {}
+            if (passengerRoute) try { map.removeControl(passengerRoute); } catch(e) {}
+            driverRoute = MapUtils.drawRoute(map, [dPos, pPos], MAP_CONFIG.routeStyles.driver); 
+            passengerRoute = MapUtils.drawRoute(map, [pPos, dest], MAP_CONFIG.routeStyles.passenger); 
+            try { map.fitBounds(L.latLngBounds([dPos, pPos, dest]), {padding: [50, 50]}); } catch(e) {}
+        },
         initChatMiniMap: (id, myPos, otherPos, role) => {
-            const m=L.map(id, {zoomControl:false, attributionControl:false, dragging:true, touchZoom:true, scrollWheelZoom:true}).setView(myPos||otherPos||MAP_CONFIG.defaultView, 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(m);
-            const m1=myPos?L.marker(myPos,{icon:MAP_CONFIG.markerIcons.chatMe}).addTo(m):null;
-            const m2=otherPos?L.marker(otherPos,{icon:MAP_CONFIG.markerIcons.chatPulse}).addTo(m):null;
-            let rc=null; if(myPos&&otherPos) rc=MapUtils.drawRoute(m,[myPos,otherPos],MAP_CONFIG.routeStyles.chat);
-            if(myPos&&otherPos) m.fitBounds(L.latLngBounds([myPos,otherPos]),{padding:[30,30]});
-            setTimeout(()=>m.invalidateSize(),100); return {map:m, myMarker:m1, otherMarker:m2, routeCtrl:rc};
+            const m = L.map(id, {zoomControl: true, attributionControl: false, dragging: true, touchZoom: true, scrollWheelZoom: true}).setView(myPos || otherPos || MAP_CONFIG.defaultView, 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: ''}).addTo(m);
+            const m1 = myPos ? L.marker(myPos, {icon: MAP_CONFIG.markerIcons.chatMe}).addTo(m) : null;
+            const m2 = otherPos ? L.marker(otherPos, {icon: MAP_CONFIG.markerIcons.chatPulse}).addTo(m) : null;
+            let rc = null; 
+            if (myPos && otherPos) rc = MapUtils.drawRoute(m, [myPos, otherPos], MAP_CONFIG.routeStyles.chat);
+            if (myPos && otherPos) m.fitBounds(L.latLngBounds([myPos, otherPos]), {padding: [30, 30]});
+            setTimeout(() => m.invalidateSize(), 100); 
+            return {map: m, myMarker: m1, otherMarker: m2, routeCtrl: rc};
         },
         updateChatMiniMap: (data, my, oth) => {
-            if(!data?.map)return; const {map, myMarker, otherMarker, routeCtrl}=data;
-            if(myMarker&&my)myMarker.setLatLng(my); if(otherMarker&&oth)otherMarker.setLatLng(oth);
-            if(routeCtrl&&my&&oth){map.removeControl(routeCtrl); data.routeCtrl=MapUtils.drawRoute(map,[my,oth],MAP_CONFIG.routeStyles.chat);}
-            if(my&&oth) map.fitBounds(L.latLngBounds([my,oth]),{padding:[30,30]});
+            if (!data?.map) return; 
+            const {map, myMarker, otherMarker} = data;
+            if (myMarker && my) myMarker.setLatLng(my); 
+            if (otherMarker && oth) otherMarker.setLatLng(oth);
+            if (data.routeCtrl) try { map.removeControl(data.routeCtrl); } catch(e) {}
+            if (my && oth) {
+                data.routeCtrl = MapUtils.drawRoute(map, [my, oth], MAP_CONFIG.routeStyles.chat);
+                map.fitBounds(L.latLngBounds([my, oth]), {padding: [30, 30]});
+            }
         }
     };
 
+    // === Local storage & records ===
     function saveToLocalLog(ride) {
-        try { const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; let logs = JSON.parse(localStorage.getItem(key) || '[]'); if(!logs.some(l => l.id === ride.id)) { logs.unshift(ride); if(logs.length > 50) logs.pop(); localStorage.setItem(key, JSON.stringify(logs)); } } catch(e) {}
-    }
-
-    // --- UI Toggles ---
-    function switchAuthTab(tab) { 
-        document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); 
-        document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); 
-        document.getElementById('loginForm').style.display = tab==='login'?'block':'none'; 
-        document.getElementById('registerForm').style.display = tab==='register'?'block':'none'; 
+        try { 
+            const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; 
+            let logs = JSON.parse(localStorage.getItem(key) || '[]'); 
+            if (!logs.some(l => l.id === ride.id)) { 
+                logs.unshift(ride); 
+                if (logs.length > 100) logs.pop(); 
+                localStorage.setItem(key, JSON.stringify(logs)); 
+            } 
+        } catch(e) {}
     }
     
-    function toggleBottomSheet() {
-        document.getElementById('passengerSheet').classList.toggle('collapsed');
+    function loadRecords(filter) {
+        const list = document.getElementById('recordsList'); 
+        list.innerHTML = '<div style="text-align:center;padding:24px"><span class="spinner"></span><br>جاري التحميل...</div>';
+        setTimeout(() => { 
+            try { 
+                const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; 
+                const rides = JSON.parse(localStorage.getItem(key) || '[]'); 
+                let filtered = rides; 
+                if (filter === 'accepted') filtered = rides.filter(r => r.status === 'accepted' || r.status === 'completed'); 
+                if (filter === 'rejected') filtered = rides.filter(r => r.status === 'cancelled' || r.status === 'expired' || r.status === 'declined'); 
+                if (filtered.length === 0) { 
+                    list.innerHTML = '<div style="text-align:center;padding:24px;color:#666">📭 لا توجد سجلات</div>'; 
+                    return; 
+                } 
+                list.innerHTML = filtered.map(r => { 
+                    const isAcc = r.status === 'accepted' || r.status === 'completed'; 
+                    const cr = r.createdAt ? new Date(r.createdAt) : new Date(); 
+                    return `<div class="record-card ${isAcc?'accepted':'rejected'}">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <strong>${isAcc?'✅ مقبولة':'❌ مرفوضة'}</strong>
+                            <span class="status ${isAcc?'accepted':'rejected'}">${r.status}</span>
+                        </div>
+                        <div class="route">
+                            <div>📍 من: ${r.pickup?.name||'موقع'}</div>
+                            <div>🏁 إلى: ${r.destination?.name||'موقع'}</div>
+                        </div>
+                        <div class="meta">
+                            <span>🕐 ${cr.toLocaleDateString('ar-DZ')} ${cr.toLocaleTimeString('ar-DZ','ar-DZ')}</span>
+                            <span>💰 ${r.price||'-'} د.ج</span>
+                        </div>
+                    </div>`; 
+                }).join(''); 
+            } catch(e) { 
+                list.innerHTML = '<div style="text-align:center;padding:18px;color:var(--danger)">⚠️ خطأ في تحميل السجلات</div>'; 
+            } 
+        }, 50);
     }
-
-    function openCarSetupModal() {
-        document.getElementById('carSetupModal').classList.add('active');
-        if(currentDriver) {
-            document.getElementById('setupCarType').value = currentDriver.carType || 'مريحة';
-            document.getElementById('setupCarName').value = currentDriver.carName || '';
+    
+    function saveChatToHistory(chat) {
+        try {
+            let history = JSON.parse(localStorage.getItem('yasserChatHistory') || '[]');
+            if (!history.some(c => c.chatId === chat.chatId)) {
+                history.unshift(chat);
+                if (history.length > 50) history.pop();
+                localStorage.setItem('yasserChatHistory', JSON.stringify(history));
+            }
+        } catch(e) {}
+    }
+    
+    function loadChatHistory() {
+        const list = document.getElementById('chatHistoryList');
+        list.innerHTML = '<div style="text-align:center;padding:24px"><span class="spinner"></span><br>جاري التحميل...</div>';
+        setTimeout(() => {
+            try {
+                const history = JSON.parse(localStorage.getItem('yasserChatHistory') || '[]');
+                if (history.length === 0) {
+                    list.innerHTML = '<div style="text-align:center;padding:24px;color:#666">💬 لا توجد محادثات محفوظة</div>';
+                    return;
+                }
+                list.innerHTML = history.map(c => {
+                    const d = c.createdAt ? new Date(c.createdAt) : new Date();
+                    return `<div class="record-card accepted">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <strong>💬 ${c.partnerName || 'محادثة'}</strong>
+                            <button class="auth-btn" style="padding:6px 14px;font-size:0.8em;" onclick="restoreChat('${c.chatId}', '${c.role}', '${(c.partnerName||'').replace(/'/g,'')}')">استعادة</button>
+                        </div>
+                        <div class="route">
+                            <div>👤 الدور: ${c.role === 'driver' ? 'سائق' : 'راكب'}</div>
+                            <div>🆔 رقم الرحلة: ${c.rideId || '-'}</div>
+                        </div>
+                        <div class="meta">
+                            <span>🕐 ${d.toLocaleDateString('ar-DZ')}</span>
+                            <span>📝 ${c.messageCount || 0} رسالة</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch(e) {
+                list.innerHTML = '<div style="text-align:center;padding:18px;color:var(--danger)">⚠️ خطأ</div>';
+            }
+        }, 50);
+    }
+    
+    async function restoreChat(chatId, role, partnerName) {
+        currentChatId = chatId;
+        closeAllSheets();
+        try {
+            const myId = currentDriver?.uid || currentUser.uid;
+            let rd = currentActiveRide;
+            if (!rd) {
+                // Try to fetch ride info from chat's rideId
+                const rideId = chatId.replace('chat_', '');
+                try {
+                    const rsnap = await db.collection('rideRequests').doc(rideId).get();
+                    if (rsnap.exists) rd = rsnap.data();
+                } catch(e) {}
+            }
+            showChatInterface(chatId.replace('chat_', ''), role === 'driver' ? rd?.passengerId : currentUser.uid, role === 'driver' ? currentDriver.uid : rd?.assignedDriverId, role, partnerName, rd);
+            Utils.showToast('✅ تم استعادة المحادثة');
+        } catch(e) {
+            Utils.showToast('⚠️ ' + e.message, 'error');
         }
     }
     
-    function closeCarSetupModal() {
-        document.getElementById('carSetupModal').classList.remove('active');
+    function downloadChatMessages() {
+        if (!currentChatId) return;
+        const messagesEl = document.getElementById('chatMessages');
+        if (!messagesEl) return;
+        const msgs = messagesEl.querySelectorAll('.message');
+        let text = `=== محادثة ${currentChatId} ===\nالتاريخ: ${new Date().toLocaleString('ar-DZ')}\n\n`;
+        msgs.forEach(m => {
+            const sender = m.classList.contains('me') ? 'أنا' : 'الطرف الآخر';
+            text += `[${sender}]: ${m.textContent.trim()}\n`;
+        });
+        const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_${currentChatId}_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        Utils.showToast('📥 تم تنزيل المحادثة');
     }
 
-    // --- Auth & Routing ---
+    // === Sheet management ===
+    function openSheet(sheetId) {
+        closeAllSheets();
+        document.getElementById('sheetOverlay').classList.add('show');
+        document.getElementById(sheetId).classList.add('show');
+    }
+    function closeAllSheets() {
+        document.getElementById('sheetOverlay').classList.remove('show');
+        document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.remove('show'));
+        document.querySelectorAll('.services-menu').forEach(m => m.classList.remove('show'));
+    }
+    
+    // === Menu toggles ===
+    function togglePassengerMenu() {
+        const m = document.getElementById('passengerMenu');
+        document.querySelectorAll('.services-menu').forEach(x => { if (x !== m) x.classList.remove('show'); });
+        m.classList.toggle('show');
+    }
+    function toggleDriverMenu() {
+        const m = document.getElementById('driverMenu');
+        document.querySelectorAll('.services-menu').forEach(x => { if (x !== m) x.classList.remove('show'); });
+        m.classList.toggle('show');
+    }
+    
+    function openRideSheet() {
+        closeAllSheets();
+        openSheet('rideSheet');
+        if (!mapInitialized) setTimeout(initMap, 100);
+    }
+    function openDriverSetupSheet() {
+        closeAllSheets();
+        openSheet('driverSetupSheet');
+    }
+    function openCarSetupSheet() {
+        closeAllSheets();
+        if (currentDriver) {
+            document.getElementById('curCarName').textContent = currentDriver.carName || 'سيارتي';
+            document.getElementById('curCarType').textContent = currentDriver.carType || '---';
+            document.getElementById('editCarType').value = currentDriver.carType || 'مريحة';
+            document.getElementById('editCarName').value = currentDriver.carName || '';
+            document.getElementById('carEditForm').style.display = 'none';
+        }
+        openSheet('carSetupSheet');
+    }
+    function openRecordsSheet() {
+        closeAllSheets();
+        openSheet('recordsSheet');
+        loadRecords('all');
+    }
+    function openChatHistorySheet() {
+        closeAllSheets();
+        openSheet('chatHistorySheet');
+        loadChatHistory();
+    }
+    
+    function toggleCarEditMode() {
+        const form = document.getElementById('carEditForm');
+        const card = document.querySelector('.car-setup-card');
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            card.style.display = 'none';
+        } else {
+            form.style.display = 'none';
+            card.style.display = 'block';
+        }
+    }
+    
+    async function saveCarChanges() {
+        if (!currentDriver?.uid) return;
+        const btn = document.getElementById('saveCarBtn');
+        btn.disabled = true;
+        btn.textContent = '🔄 حفظ...';
+        try {
+            const carType = document.getElementById('editCarType').value;
+            const carName = document.getElementById('editCarName').value.trim() || 'سيارتي';
+            await db.collection('drivers').doc(currentDriver.uid).update({
+                carType, carName, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            currentDriver.carType = carType;
+            currentDriver.carName = carName;
+            document.getElementById('curCarName').textContent = carName;
+            document.getElementById('curCarType').textContent = carType;
+            toggleCarEditMode();
+            Utils.showToast('✅ تم تحديث بيانات السيارة');
+        } catch(e) {
+            Utils.showToast('⚠️ ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '💾 حفظ التغييرات';
+        }
+    }
+
+    // === Auth ===
+    function switchAuthTab(tab) { 
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); 
+        document.querySelector(`.auth-tab:nth-child(${tab === 'login' ? 1 : 2})`).classList.add('active'); 
+        document.getElementById('loginForm').style.display = tab === 'login' ? 'flex' : 'none'; 
+        document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none'; 
+    }
+    
     async function handleAuth(type) { 
-        const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); 
-        btn.disabled=true; btn.innerHTML='<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-left:8px;"></span> جاري...'; 
-        const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; 
-        const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; 
+        const btn = type === 'login' ? document.getElementById('loginBtn') : document.getElementById('regBtn'); 
+        const email = type === 'login' ? document.getElementById('loginEmail').value.trim() : document.getElementById('regEmail').value.trim(); 
+        const pass = type === 'login' ? document.getElementById('loginPassword').value : document.getElementById('regPassword').value;
         
+        if (!email || !pass) {
+            Utils.showToast('⚠️ يرجى إدخال البريد وكلمة المرور', 'error');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            Utils.showToast('⚠️ البريد الإلكتروني غير صحيح', 'error');
+            return;
+        }
+        
+        btn.disabled = true; 
+        btn.textContent = '🔄 جاري...'; 
         try { 
-            if(type==='login') {
-                await auth.signInWithEmailAndPassword(email, pass); 
+            if (type === 'login') {
+                await auth.signInWithEmailAndPassword(email, pass);
             } else { 
+                if (pass.length < 6) {
+                    throw new Error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+                }
                 await auth.createUserWithEmailAndPassword(email, pass); 
                 await db.collection('users').doc(auth.currentUser.uid).set({
-                    email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()
+                    email, role: 'passenger', createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 }); 
             } 
-            Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب بنجاح'); 
+            // Save credentials for session persistence
+            try {
+                localStorage.setItem('yasserLastEmail', email);
+            } catch(e) {}
+            Utils.showToast(type === 'login' ? '✅ مرحباً بعودتك' : '✅ تم إنشاء الحساب'); 
         } catch(e) { 
-            let msg = 'حدث خطأ غير متوقع';
-            if(e.message.includes('auth/')) {
-                const code = e.message.split('auth/')[1].split(')')[0].replace(/-/g, ' ');
-                msg = code === 'user not found' ? 'البريد الإلكتروني غير مسجل' : 
-                      code === 'wrong password' ? 'كلمة المرور غير صحيحة' : 
-                      code === 'invalid email' ? 'البريد الإلكتروني غير صالح' : code;
-            }
+            let msg = 'حدث خطأ';
+            if (e.code === 'auth/user-not-found') msg = 'المستخدم غير موجود';
+            else if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'بيانات الدخول غير صحيحة';
+            else if (e.code === 'auth/email-already-in-use') msg = 'البريد مستخدم مسبقاً';
+            else if (e.code === 'auth/weak-password') msg = 'كلمة المرور ضعيفة';
+            else if (e.code === 'auth/invalid-email') msg = 'البريد الإلكتروني غير صالح';
+            else if (e.code === 'auth/network-request-failed') msg = 'تحقق من اتصال الإنترنت';
+            else if (e.message) msg = e.message;
             Utils.showToast('⚠️ ' + msg, 'error'); 
         } finally { 
-            btn.disabled=false; 
-            btn.textContent=type==='login'?'🔐 تسجيل الدخول':'✅ إنشاء الحساب'; 
+            btn.disabled = false; 
+            btn.textContent = type === 'login' ? '🔐 تسجيل الدخول' : '✅ إنشاء الحساب'; 
         } 
     }
-
+    
     async function completeDriverSetup() { 
-        const btn=document.getElementById('setupBtn'); 
-        btn.disabled=true; btn.innerHTML='<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-left:8px;"></span> حفظ...'; 
-        const carType=document.getElementById('setupCarType').value; 
-        const carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; 
-        let loc={lat:36.753, lng:3.058}; 
-        
-        if(navigator.geolocation) {
-            try{ 
-                loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); 
-            }catch(e){ console.log('GPS error, using default'); }
+        const btn = document.getElementById('setupBtn'); 
+        btn.disabled = true; 
+        btn.textContent = '🔄 حفظ...'; 
+        const carType = document.getElementById('setupCarType').value;
+        const carName = document.getElementById('setupCarName').value.trim() || 'سيارتي'; 
+        let loc = {lat: 36.753, lng: 3.058}; 
+        if (navigator.geolocation) {
+            try { 
+                loc = await new Promise((r, j) => navigator.geolocation.getCurrentPosition(p => r({lat: p.coords.latitude, lng: p.coords.longitude}), j, {enableHighAccuracy: true, timeout: 5000})); 
+            } catch(e) {}
         }
-        
         try {
-            await db.collection('users').doc(currentUser.uid).update({role:'driver'}); 
+            await db.collection('users').doc(currentUser.uid).update({role: 'driver'}); 
             await db.collection('drivers').doc(currentUser.uid).set({
-                uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, 
-                available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), 
-                lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
-            }, {merge: true}); 
-            
-            Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); 
-            closeCarSetupModal();
+                uid: currentUser.uid, email: currentUser.email, carType, carName, location: loc, 
+                available: true, rating: 5.0, trips: 0, 
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), 
+                isOnline: true, connectionStatus: 'online'
+            }); 
+            Utils.showToast('✅ تم تسجيل مركبتك! 🎉'); 
+            closeAllSheets();
             routeUserAfterAuth(currentUser); 
         } catch(e) {
-            Utils.showToast('⚠️ فشل الحفظ: ' + e.message, 'error');
+            Utils.showToast('⚠️ ' + e.message, 'error');
         } finally {
-            btn.disabled=false; btn.textContent='✅ حفظ البيانات والبدء';
+            btn.disabled = false;
+            btn.textContent = '✅ تفعيل حساب السائق';
         }
     }
-
-    async function skipToPassenger() { 
-        await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); 
-        Utils.showToast('👤 جاري التحويل كراكب...'); 
-        closeCarSetupModal();
-        switchView('passenger'); 
-    }
-
+    
     async function switchToPassengerMode() { 
-        if(!currentUser)return; 
-        try{ 
-            await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); 
-            Utils.showToast('👤 تم التبديل إلى وضع الراكب'); 
-            switchView('passenger'); 
+        if (!currentUser) return; 
+        try { 
+            await db.collection('users').doc(currentUser.uid).update({role: 'passenger'}); 
+            closeAllSheets();
+            Utils.showToast('👤 تم التبديل لوضع الراكب'); 
+            switchView('view-request'); 
             startPassengerLocationTracking(); 
-        }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
+        } catch(e) { Utils.showToast('⚠️ ' + e.message, 'error'); } 
     }
-
+    
     async function logoutUser() { 
+        if (!confirm('هل تريد تسجيل الخروج؟')) return;
         clearInterval(driverLocationInterval); 
         clearInterval(passengerLocationInterval); 
-        if(activeChatListener)activeChatListener(); 
-        if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
-        await auth.signOut(); 
+        if (heartbeatInterval) clearInterval(heartbeatInterval); 
+        if (activeChatListener) activeChatListener(); 
+        if (chatLocationUpdate) clearInterval(chatLocationUpdate); 
+        try { await auth.signOut(); } catch(e) {}
+        currentDriver = null;
+        currentUser = null;
+        closeAllSheets();
         Utils.showToast('👋 تم تسجيل الخروج'); 
-        location.reload();
     }
 
+    // === Offline handling ===
+    async function setDriverOfflineImmediately(uid) {
+        if (!uid) return;
+        driverAvailable = false;
+        offlineUpdateQueued = true;
+        try {
+            await db.collection('drivers').doc(uid).update({
+                available: false, isOnline: false, connectionStatus: 'offline',
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            offlineUpdateQueued = false;
+        } catch(e) {
+            console.log('⚠️ Firebase update failed (offline), will sync later');
+        }
+        const t = document.getElementById('statusToggle');
+        if (t) { t.textContent = '🔴 غير متصل'; t.classList.remove('active'); t.classList.add('unavailable'); }
+        updateDriverStatusUI();
+        Utils.showToast('🔴 انقطع الاتصال - الخدمة متوقفة', 'error');
+        if (driverLocationInterval) { clearInterval(driverLocationInterval); driverLocationInterval = null; }
+        if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+    }
+
+    // === Firebase init ===
+    function initFirebase() {
+        try { 
+            const config = { 
+                apiKey: "AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
+                authDomain: "birine-app.firebaseapp.com", 
+                projectId: "birine-app", 
+                storageBucket: "birine-app.firebasestorage.app", 
+                messagingSenderId: "359460161481", 
+                appId: "1:359460161481:web:5739dcc79ed79275928a18", 
+                measurementId: "G-GX972M18B4" 
+            }; 
+            app = firebase.initializeApp(config); 
+            db = firebase.firestore(app); 
+            auth = firebase.auth(app); 
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); 
+            
+            auth.onAuthStateChanged(async user => { 
+                if (user) { 
+                    currentUser = user; 
+                    routeUserAfterAuth(user); 
+                    setTimeout(showGPSReminder, 1500);
+                } else { 
+                    currentUser = null; 
+                    currentDriver = null; 
+                    switchView('view-auth'); 
+                } 
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                document.getElementById('mainApp').style.display = 'block'; 
+            }); 
+            
+            window.addEventListener('offline', () => {
+                console.log('🔴 Offline detected');
+                lastOnlineState = false;
+                if (currentDriver?.uid) setDriverOfflineImmediately(currentDriver.uid);
+            }, { passive: true });
+
+            window.addEventListener('online', async () => {
+                console.log('🟢 Back online');
+                lastOnlineState = true;
+                if (currentDriver?.uid) {
+                    if (offlineUpdateQueued) {
+                        try {
+                            await db.collection('drivers').doc(currentDriver.uid).update({
+                                isOnline: true, connectionStatus: 'online', 
+                                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+                                lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            offlineUpdateQueued = false;
+                        } catch(e) {}
+                    }
+                    if (driverAvailable) {
+                        try {
+                            await db.collection('drivers').doc(currentDriver.uid).update({
+                                available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            const t = document.getElementById('statusToggle');
+                            if (t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
+                            updateDriverStatusUI();
+                            Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
+                            startLocationUpdates(currentDriver.uid);
+                        } catch(e) {}
+                    }
+                }
+            }, { passive: true });
+
+            setInterval(() => {
+                if (currentDriver?.uid && lastOnlineState !== navigator.onLine) {
+                    if (!navigator.onLine) { setDriverOfflineImmediately(currentDriver.uid); }
+                    lastOnlineState = navigator.onLine;
+                }
+            }, 3000);
+            
+        } catch(e) { 
+            console.error(e); 
+            Utils.showToast('❌ فشل الاتصال', 'error'); 
+            setTimeout(() => { 
+                document.getElementById('loadingOverlay').classList.add('hidden'); 
+                document.getElementById('mainApp').style.display = 'block'; 
+            }, 1500); 
+        }
+    }
+    
     async function routeUserAfterAuth(user) { 
         try {
-            const ud=await db.collection('users').doc(user.uid).get(); 
-            if(!ud.exists) {
-                switchView('auth'); 
-                return;
-            }
-            const d=ud.data(); 
-            if(d.role==='driver') { 
-                const dd=await db.collection('drivers').doc(user.uid).get(); 
-                if(dd.exists) { 
-                    currentDriver=dd.data(); 
-                    document.getElementById('driverFab').style.display = 'flex';
-                    document.getElementById('passengerSheet').style.display = 'none';
+            const ud = await db.collection('users').doc(user.uid).get(); 
+            if (!ud.exists) return switchView('view-auth'); 
+            const d = ud.data(); 
+            if (d.role === 'driver') { 
+                const dd = await db.collection('drivers').doc(user.uid).get(); 
+                if (dd.exists) { 
+                    currentDriver = dd.data(); 
+                    switchView('view-dashboard'); 
                     startLocationUpdates(user.uid); 
-                    loadRequests();
+                    updateDriverStatusUI();
                 } else {
-                    openCarSetupModal();
-                } 
+                    openDriverSetupSheet();
+                    switchView('view-dashboard');
+                }
             } else { 
-                switchView('passenger'); 
+                switchView('view-request'); 
                 startPassengerLocationTracking(); 
-            }
-        } catch(e) {
-            console.error("Auth routing error:", e);
-            Utils.showToast('خطأ في تحميل البيانات', 'error');
-        }
-    }
-
-    function switchView(viewName) {
-        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-        if(viewName === 'auth') {
-            document.getElementById('view-auth').classList.add('active');
-            document.getElementById('passengerSheet').style.display = 'none';
-            document.getElementById('driverFab').style.display = 'none';
-        } else if (viewName === 'passenger') {
-            document.getElementById('passengerSheet').style.display = 'block';
-            document.getElementById('driverFab').style.display = 'none';
-            setTimeout(() => {
-                if(!map) initMap();
-                else map.invalidateSize();
-            }, 100);
-        }
-    }
-
-    // --- Map & Location ---
-    function initMap() { 
-        map=MapUtils.initMap('map'); 
-        setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); 
-        setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); 
-        
-        map.on('click', e=>{ 
-            if(mapClickEnabled && rideState==='idle') selectDestinationFromMap(e.latlng.lat,e.latlng.lng); 
-        });
-        
-        if(navigator.geolocation) useGPS(); 
-        else fallbackLocation(); 
-    }
-
-    function setLocation(m, pos, iid, cid, isP) { 
-        if(isP) pickupPos=pos; else destPos=pos; 
-        document.getElementById(iid).value = isP?'موقعي الحالي':(document.getElementById(iid).value || 'محدد'); 
-        document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋</button>`; 
-        if(m) map.removeLayer(m); 
-        m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); 
-        map.setView(pos,16); 
-        if(pickupPos && destPos) drawRoute(); 
-        return m; 
-    }
-
-    function useGPS() { 
-        const b=document.getElementById('gpsBtn'); 
-        b.disabled=true; b.textContent='🔄'; 
-        navigator.geolocation.getCurrentPosition(p=>{ 
-            pickupPos=[p.coords.latitude,p.coords.longitude]; 
-            document.getElementById('pickupInput').value='موقعي الحالي'; 
-            document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; 
-            if(pickupMarker)map.removeLayer(pickupMarker); 
-            pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); 
-            map.setView(pickupPos,16); 
-            if(destPos)drawRoute(); 
-            b.textContent='🛰️'; b.disabled=false; 
-        },()=>{
-            b.textContent='❌';
-            setTimeout(()=>{b.textContent='🛰️';b.disabled=false;},2000);
-            Utils.showToast('⚠️ تعذر الوصول للموقع', 'error');
-        },{enableHighAccuracy:true,timeout:10000}); 
-    }
-
-    function fallbackLocation() { 
-        pickupPos=MAP_CONFIG.defaultView; 
-        document.getElementById('pickupInput').value='الجزائر'; 
-        document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; 
-        pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); 
-    }
-
-    function enableMapClick() { 
-        mapClickEnabled=true; 
-        const b=document.getElementById('mapBtn'); 
-        b.textContent='✅ انقر'; b.style.background='#66BB6A'; b.style.color='#fff';
-        Utils.showToast('📍 انقر على الخريطة لتحديد الوجهة');
-        setTimeout(()=>{
-            mapClickEnabled=false;
-            b.textContent='🗺️ خريطة'; b.style.background=''; b.style.color='';
-        }, 15000); 
-    }
-
-    function selectDestinationFromMap(lat,lng) { 
-        destPos=[lat,lng]; 
-        document.getElementById('destCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(lat,lng)}</span>`; 
-        document.getElementById('destInput').value='محدد عبر الخريطة'; 
-        if(destMarker)map.removeLayer(destMarker); 
-        destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); 
-        map.setView(destPos,16); 
-        mapClickEnabled=false; 
-        document.getElementById('mapBtn').textContent='🗺️ خريطة'; 
-        document.getElementById('mapBtn').style.background=''; 
-        if(pickupPos)drawRoute(); 
-    }
-
-    function setupAutocomplete(iid, rid, cb, countryOnly=true) { 
-        const inp=document.getElementById(iid), res=document.getElementById(rid); 
-        const performSearch = async function() { 
-            const q=inp.value.trim(); 
-            if(q.length<3){res.classList.remove('show');return;} 
-            try { 
-                const cp=countryOnly?'&countrycodes=dz':'', lim=countryOnly?5:8; 
-                const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${cp}&limit=${lim}`, {headers:{'User-Agent':'YasserRidePro/1.0'}}); 
-                const d=await r.json(); 
-                if(d.length>0){ 
-                    res.innerHTML=d.map(i=>`<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">📍 ${i.display_name.length>50?i.display_name.substring(0,50)+'...':i.display_name}</div>`).join(''); 
-                    res.classList.add('show'); 
-                    res.querySelectorAll('.autocomplete-item').forEach(it=>{ 
-                        it.onclick=()=>{res.classList.remove('show'); cb(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name);}; 
-                    }); 
-                } else { 
-                    res.innerHTML='<div class="autocomplete-item">🔍 لم يتم العثور</div>'; 
-                    res.classList.add('show'); 
-                } 
-            } catch(e){ 
-                res.innerHTML='<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; 
-                res.classList.add('show'); 
             } 
-        }; 
-        inp.addEventListener('input', Utils.debounce(performSearch, 400)); 
-        document.addEventListener('click', e=>{if(e.target!==inp && !res.contains(e.target))res.classList.remove('show');},{passive:true}); 
+        } catch(e) {
+            console.error('routeUserAfterAuth error:', e);
+            switchView('view-auth');
+        }
     }
-
-    function drawRoute() { 
-        if(!pickupPos||!destPos)return; 
-        if(routeControl)map.removeControl(routeControl); 
-        routeControl=MapUtils.drawRoute(map,[pickupPos,destPos],{color:'#9ACD32',weight:5,opacity:0.85}); 
-        routeControl.on('routesfound',e=>{ 
-            const r=e.routes[0]; 
-            distKm=(r.summary.totalDistance/1000).toFixed(1); 
-            timeMin=Math.round(r.summary.totalTime/60); 
-            document.getElementById('routeInfo').classList.add('active'); 
-            document.getElementById('distVal').textContent=`${distKm} كم`; 
-            document.getElementById('timeVal').textContent=`~${timeMin} د`; 
-            document.getElementById('statusVal').textContent='جاهز'; 
-            updatePrice(); 
-            document.getElementById('bookBtn').disabled=false; 
-        }); 
-        routeControl.on('routingerror',()=>{
-            document.getElementById('statusVal').textContent='خطأ';
-            Utils.showToast('⚠️ تعذر رسم الطريق','error');
-        }); 
+    
+    function updateDriverStatusUI() {
+        const dot = document.getElementById('driverStatusDot');
+        const text = document.getElementById('driverStatusText');
+        if (!dot || !text) return;
+        if (driverAvailable) {
+            dot.className = 'status-dot online';
+            text.textContent = '🟢 متاح للطلبات';
+        } else {
+            dot.className = 'status-dot';
+            text.textContent = navigator.onLine ? '🔴 غير متاح' : '🔴 غير متصل';
+        }
     }
-
-    function updatePrice() { 
-        document.getElementById('priceBox').innerHTML=`💰 السعر التقريبي: <span style="font-size:1.2em">${baseFare+Math.round(distKm*selectedRate)}</span> د.ج`; 
-    }
-
-    function selectCar(el,n,r){ 
-        document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected')); 
-        el.classList.add('selected'); 
-        selectedRate=r; 
-        if(distKm>0)updatePrice(); 
-    }
-
-    // --- Driver Logic ---
+    
+    // === Location updates ===
     function startLocationUpdates(uid) { 
         clearInterval(driverLocationInterval); 
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = setInterval(async () => {
+            if (!currentDriver?.uid || !navigator.onLine) return;
+            try {
+                await db.collection('drivers').doc(uid).update({
+                    lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
+                });
+            } catch(e) {}
+        }, 5000);
+        
         driverLocationInterval = setInterval(async () => { 
-            if(!driverAvailable || !navigator.geolocation) return; 
+            if (!navigator.onLine) { setDriverOfflineImmediately(uid); return; }
+            if (!driverAvailable || !navigator.geolocation) return; 
             navigator.geolocation.getCurrentPosition(async p => { 
                 try { 
                     const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
                     await db.collection('drivers').doc(uid).update({
-                        location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
+                        location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), 
+                        isOnline: true, connectionStatus: 'online'
                     }); 
                     myCurrentPos = [l.lat, l.lng]; 
+                    if (chatMiniMap && currentActiveRide?.passengerId) { 
+                        const o = await getPassengerLocation(currentActiveRide.passengerId); 
+                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
+                        updateChatDistanceBadge(myCurrentPos, o); 
+                    } 
+                } catch(e) { if (!navigator.onLine) setDriverOfflineImmediately(uid); } 
+            }, null, {enableHighAccuracy: true, timeout: 5000}); 
+        }, 10000); 
+    }
+    
+    function startPassengerLocationTracking() { 
+        clearInterval(passengerLocationInterval); 
+        passengerLocationInterval = setInterval(async () => { 
+            if (!navigator.geolocation) return; 
+            navigator.geolocation.getCurrentPosition(async p => { 
+                try { 
+                    const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
+                    if (currentUser) {
+                        await db.collection('users').doc(currentUser.uid).update({
+                            lastLocation: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+                        }).catch(() => {}); 
+                    }
+                    myCurrentPos = [l.lat, l.lng]; 
+                    if (chatMiniMap && currentActiveRide?.assignedDriverId) { 
+                        const o = await getDriverLocation(currentActiveRide.assignedDriverId); 
+                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
+                        updateChatDistanceBadge(myCurrentPos, o); 
+                    } 
                 } catch(e) {} 
             }, null, {enableHighAccuracy: true, timeout: 5000}); 
         }, 10000); 
     }
+    async function getDriverLocation(id) { 
+        try { 
+            const d = await db.collection('drivers').doc(id).get(); 
+            if (d.exists && d.data().location) return [d.data().location.lat, d.data().location.lng]; 
+        } catch(e) {} 
+        return null; 
+    }
+    async function getPassengerLocation(id) { 
+        try { 
+            const u = await db.collection('users').doc(id).get(); 
+            if (u.exists && u.data().lastLocation) return [u.data().lastLocation.lat, u.data().lastLocation.lng]; 
+        } catch(e) {} 
+        return null; 
+    }
+    function updateChatDistanceBadge(my, oth) { 
+        const b = document.querySelector('.chat-mini-map .distance-badge'); 
+        if (!b || !my || !oth) return; 
+        const d = Utils.calculateDistance(my[0], my[1], oth[0], oth[1]); 
+        b.innerHTML = `📏 ${Utils.formatDistance(d)} • ⏱️ ${Utils.formatTime(Math.max(1, Math.round(d/3)))}`; 
+    }
 
+    // === Driver status toggle ===
     function toggleDriverStatus() { 
-        driverAvailable = !driverAvailable; 
-        const t = document.getElementById('statusToggle'); 
-        if(currentDriver?.uid) {
-            db.collection('drivers').doc(currentDriver.uid).update({
-                available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-            });
+        if (!navigator.onLine && !driverAvailable) { 
+            Utils.showToast('⚠️ تحقق من اتصال الإنترنت', 'error'); 
+            return; 
         }
-        if(driverAvailable) {
+        driverAvailable = !driverAvailable; 
+        if (currentDriver?.uid) {
+            db.collection('drivers').doc(currentDriver.uid).update({
+                available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), 
+                isOnline: navigator.onLine
+            }).catch(() => {});
+        }
+        const t = document.getElementById('statusToggle'); 
+        if (driverAvailable) {
             t.textContent = '🟢 متاح'; 
-            t.classList.remove('status-inactive'); 
-            t.classList.add('status-active'); 
-            Utils.showToast('✅ أنت متاح لاستقبال الطلبات'); 
-            loadRequests();
+            t.classList.add('active'); 
+            t.classList.remove('unavailable'); 
+            Utils.showToast('✅ أنت متاح الآن');
         } else { 
             t.textContent = '🔴 غير متاح'; 
-            t.classList.remove('status-active'); 
-            t.classList.add('status-inactive'); 
-            Utils.showToast('🔕 تم إيقاف استقبال الطلبات');
-            if(activeRequestListener) { activeRequestListener(); activeRequestListener = null; }
+            t.classList.remove('active'); 
+            t.classList.add('unavailable'); 
+            Utils.showToast('🔕 تم إيقاف الخدمة');
         } 
+        updateDriverStatusUI();
     }
 
-    function loadRequests() { 
-        if(!currentDriver || !driverAvailable) return; 
-        if(activeRequestListener) activeRequestListener(); 
-        
+    // === Requests for driver (popup style) ===
+    function loadRequestsForDriver() { 
+        if (!currentDriver || !driverAvailable) return;
+        if (activeRequestListener) activeRequestListener(); 
         activeRequestListener = db.collection('rideRequests')
-            .where('status','==','pending')
-            .where('carType','==',currentDriver.carType)
+            .where('status', '==', 'pending')
+            .where('carType', '==', currentDriver.carType)
             .limit(10)
-            .onSnapshot(s=>{ 
-                s.forEach(d=>{ 
-                    const x=d.data(); 
-                    if(x.skippedBy?.includes(currentDriver.uid)) return; 
-                    if(x.assignedDriverId===currentDriver.uid && x.status==='pending') {
-                        showIncomingRequestModal(d.id, x);
-                    } 
+            .onSnapshot(s => { 
+                const r = []; 
+                s.forEach(d => { 
+                    const x = d.data(); 
+                    if (x.skippedBy?.includes(currentDriver.uid)) return; 
+                    if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') {
+                        r.push({id: d.id, ...x}); 
+                    }
                 }); 
+                const n = r.length; 
+                if (n > previousRequestsCount && n > 0) { 
+                    Utils.playSound('requestSound'); 
+                    // Show first pending request as popup
+                    if (r.length > 0 && !currentPopupRequest) {
+                        showRequestPopup(r[0]);
+                    }
+                } 
+                previousRequestsCount = n; 
+                updateServicesBadge(n);
             }, e => console.error(e)); 
     }
-
-    function showIncomingRequestModal(rideId, data) {
-        if(document.getElementById('incomingRequestModal').classList.contains('active')) return;
+    
+    function updateServicesBadge(count) {
+        const btn = document.getElementById('driverServicesBtn');
+        if (!btn) return;
+        if (count > 0) {
+            btn.classList.add('pulse-alert');
+            btn.innerHTML = `🔔 ${count} طلب${count > 1 ? 'ات' : ''}`;
+        } else {
+            btn.classList.remove('pulse-alert');
+            btn.innerHTML = '🎯 خدماتي';
+        }
+    }
+    
+    function showRequestPopup(req) {
+        currentPopupRequest = req;
+        document.getElementById('rpPickup').textContent = req.pickup?.name || 'موقع';
+        document.getElementById('rpDest').textContent = req.destination?.name || 'موقع';
+        document.getElementById('rpTripDist').textContent = (req.distance || '---') + ' كم';
+        document.getElementById('rpPrice').textContent = (req.price || '---') + ' د.ج';
+        document.getElementById('rpCarType').textContent = '🚗 ' + (req.carType || '---');
+        document.getElementById('rpTime').textContent = '⏱️ ' + (req.time || '---') + ' د';
         
-        currentPendingRequestId = rideId;
+        let distToPickup = '---';
+        if (currentDriver?.location && req.pickup?.lat) {
+            distToPickup = Utils.calculateDistance(currentDriver.location.lat, currentDriver.location.lng, req.pickup.lat, req.pickup.lng).toFixed(1);
+        }
+        document.getElementById('rpDistance').textContent = distToPickup + ' كم';
+        
+        document.getElementById('requestPopupOverlay').classList.add('show');
         Utils.playSound('requestSound');
         
-        const m = Math.floor((Date.now() - (data.createdAt?.toDate?.() || new Date()).getTime())/60000);
-        let dist = '---';
-        if(currentDriver?.location && data.pickup?.lat) {
-            dist = Utils.calculateDistance(currentDriver.location.lat, currentDriver.location.lng, data.pickup.lat, data.pickup.lng).toFixed(1);
-        }
-
-        const content = document.getElementById('requestModalContent');
-        content.innerHTML = `
-            <div class="req-modal-card">
-                <div class="req-modal-header">
-                    <span>🕐 منذ ${m < 1 ? 'أقل من دقيقة' : m + ' دقائق'}</span>
-                    <span>💰 ${data.price} د.ج</span>
-                </div>
-                <div class="req-modal-route">
-                    <div class="req-modal-point">🟢 <strong>من:</strong> ${data.pickup?.name || 'موقع محدد'}</div>
-                    <div class="req-modal-point">🏁 <strong>إلى:</strong> ${data.destination?.name || 'موقع محدد'}</div>
-                </div>
-                <div style="font-size: 0.85em; color: #555; background: #fff; padding: 10px; border-radius: 8px; margin-top: 8px;">
-                    🚶 الراكب يبعد عنك تقريباً <strong>${dist} كم</strong><br>
-                    🚗 نوع السيارة: <strong>${data.carType}</strong>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('incomingRequestModal').classList.add('active');
+        // Countdown timer
+        let countdown = 30;
+        document.getElementById('rpCountdown').textContent = countdown;
+        if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+        popupCountdownTimer = setInterval(() => {
+            countdown--;
+            const cd = document.getElementById('rpCountdown');
+            if (cd) cd.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(popupCountdownTimer);
+                declinePopupRequest();
+            }
+        }, 1000);
     }
-
-    async function handleAcceptFromModal() {
-        // ✅ إيقاف الصوت فوراً عند الضغط على قبول
+    
+    function closeRequestPopup() {
+        document.getElementById('requestPopupOverlay').classList.remove('show');
+        currentPopupRequest = null;
+        if (popupCountdownTimer) { clearInterval(popupCountdownTimer); popupCountdownTimer = null; }
         Utils.stopSound('requestSound');
-        
-        if(!currentPendingRequestId || !currentDriver?.uid) return;
-        const btn = document.getElementById('modalAcceptBtn');
-        btn.disabled = true; btn.textContent = '🔄 جاري...';
+    }
+    
+    async function acceptPopupRequest() {
+        if (!currentPopupRequest || !currentDriver?.uid) return;
+        const req = currentPopupRequest;
+        closeRequestPopup();
         
         try {
-            const s = await db.collection('rideRequests').doc(currentPendingRequestId).get();
-            if(!s.exists || s.data().status !== 'pending' || s.data().assignedDriverId !== currentDriver.uid) {
-                Utils.showToast('⚠️ تم قبول الطلب من سائق آخر', 'warning');
-                closeRequestModal();
+            const s = await db.collection('rideRequests').doc(req.id).get(); 
+            if (!s.exists || s.data().status !== 'pending' || s.data().assignedDriverId !== currentDriver.uid) {
+                Utils.showToast('⚠️ الطلب لم يعد متاحاً', 'warning');
                 return;
-            }
+            } 
+            const r = s.data(); 
+            await db.collection('rideRequests').doc(req.id).update({
+                status: 'accepted', acceptedBy: currentDriver.uid, 
+                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }); 
+            await db.collection('drivers').doc(currentDriver.uid).update({
+                available: false, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+            }); 
+            driverAvailable = false;
+            const t = document.getElementById('statusToggle'); 
+            if (t) { t.textContent = '🔴 مشغول'; t.classList.remove('active'); t.classList.add('unavailable'); }
+            updateDriverStatusUI();
+            updateServicesBadge(0);
             
-            const r = s.data();
-            await db.collection('rideRequests').doc(currentPendingRequestId).update({
-                status: 'accepted', acceptedBy: currentDriver.uid, acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            await db.collection('drivers').doc(currentDriver.uid).update({available: false});
+            const cid = await createChat(req.id, r.passengerId, currentDriver.uid); 
+            const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق'; 
+            await sendMessage(cid, currentDriver.uid, 'driver', '✅ تم قبول طلبك! أنا في الطريق.');
+            currentActiveRide = {id: req.id, ...r, status: 'accepted'}; 
+            activeRideChatId = cid;
+            activeRideRole = 'driver';
+            saveToLocalLog({id: req.id, status: 'accepted', pickup: r.pickup, destination: r.destination, price: r.price, createdAt: r.createdAt?.toDate?.() || new Date().toISOString()}); 
+            saveChatToHistory({chatId: cid, rideId: req.id, partnerId: r.passengerId, partnerName: 'راكب', role: 'driver', createdAt: new Date().toISOString(), messageCount: 0});
             
-            toggleDriverStatus();
-            
-            const cid = await createChat(currentPendingRequestId, r.passengerId, currentDriver.uid);
-            const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
-            await sendMessage(cid, currentDriver.uid, 'driver', `✅ تم قبول طلبك! أنا في الطريق.`);
-            
-            currentActiveRide = {id: currentPendingRequestId, ...r, status: 'accepted'};
-            saveToLocalLog({id: currentPendingRequestId, status: 'accepted', pickup: r.pickup, destination: r.destination, price: r.price, createdAt: r.createdAt?.toDate?.() || new Date().toISOString()});
-            
-            Utils.showToast('✅ قبلت الرحلة! جاري فتح المحادثة');
-            closeRequestModal();
-            showChatInterface(currentPendingRequestId, r.passengerId, currentDriver.uid, 'driver', dn, currentActiveRide);
-            
-            if(currentDriver?.location && r.pickup?.lat) {
-                MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [r.pickup.lat, r.pickup.lng], [r.destination.lat, r.destination.lng]);
-            }
+            Utils.showToast('✅ قبلت الرحلة! افتح المحادثة 💬'); 
+            showActiveRideBanner(r);
+            showChatInterface(req.id, r.passengerId, currentDriver.uid, 'driver', 'راكب', currentActiveRide); 
         } catch(e) {
             Utils.showToast('⚠️ ' + e.message, 'error');
-        } finally {
-            btn.disabled = false; btn.textContent = '✅ قبول الرحلة';
-        }
+        } 
     }
-
-    async function handleDeclineFromModal() {
-        // ✅ إيقاف الصوت فوراً عند الضغط على رفض
+    
+    async function declinePopupRequest() {
+        if (!currentPopupRequest) return;
+        const req = currentPopupRequest;
+        closeRequestPopup();
         Utils.stopSound('requestSound');
         
-        if(!currentPendingRequestId) return;
-        const btn = document.getElementById('modalDeclineBtn');
-        btn.disabled = true; btn.textContent = '🔄...';
-        
         try {
-            const ref = db.collection('rideRequests').doc(currentPendingRequestId);
-            const snap = await ref.get();
-            if(!snap.exists) { closeRequestModal(); return; }
-            
-            const rd = snap.data(), my = currentDriver?.uid, sk = rd.skippedBy || [];
-            if(!sk.includes(my)) sk.push(my);
-            
-            const ds = await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get();
-            const nb = [];
-            for(const d of ds.docs) {
-                const x = d.data();
-                if(x.location && rd.pickup?.lat) {
-                    const dist = Utils.calculateDistance(rd.pickup.lat, rd.pickup.lng, x.location.lat, x.location.lng);
-                    if(dist <= 15 && d.id !== my && !sk.includes(d.id)) nb.push({id: d.id, ...x, distance: dist});
-                }
-            }
-            nb.sort((a,b) => a.distance - b.distance);
-            
-            if(nb.length > 0) {
-                const nx = nb[0];
+            const ref = db.collection('rideRequests').doc(req.id);
+            const snap = await ref.get(); 
+            if (!snap.exists) return; 
+            const rd = snap.data(), my = currentDriver?.uid, sk = rd.skippedBy || []; 
+            if (!sk.includes(my)) sk.push(my); 
+            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', rd.carType).get(); 
+            const nb = []; 
+            for (const d of ds.docs) { 
+                const x = d.data(); 
+                if (x.location && rd.pickup?.lat) { 
+                    const dist = Utils.calculateDistance(rd.pickup.lat, rd.pickup.lng, x.location.lat, x.location.lng); 
+                    if (dist <= 15 && d.id !== my && !sk.includes(d.id)) nb.push({id: d.id, ...x, distance: dist}); 
+                } 
+            } 
+            nb.sort((a, b) => a.distance - b.distance); 
+            if (nb.length > 0) { 
+                const nx = nb[0]; 
                 await ref.update({
-                    status: 'pending', assignedDriverId: nx.id, assignedAt: firebase.firestore.FieldValue.serverTimestamp(), skippedBy: sk
-                });
-                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي');
-            } else {
-                await ref.update({status: 'expired', skippedBy: sk});
-                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً');
-            }
-            saveToLocalLog({id: currentPendingRequestId, status: 'declined', pickup: rd.pickup, destination: rd.destination, price: rd.price});
+                    status: 'pending', assignedDriverId: nx.id, 
+                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                    skippedBy: sk, dispatchStage: firebase.firestore.FieldValue.increment(1)
+                }); 
+                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي'); 
+            } else { 
+                await ref.update({status: 'expired', skippedBy: sk}); 
+                Utils.showToast('⚠️ لا يوجد سائقون متاحون'); 
+            } 
+            saveToLocalLog({id: req.id, status: 'declined', pickup: rd.pickup, destination: rd.destination, price: rd.price, createdAt: rd.createdAt?.toDate?.() || new Date().toISOString()}); 
         } catch(e) {
             Utils.showToast('⚠️ ' + e.message, 'error');
-        } finally {
-            closeRequestModal();
-            btn.disabled = false; btn.textContent = '❌ رفض';
         }
     }
 
-    function closeRequestModal() {
-        Utils.stopSound('requestSound'); // ضمان إضافي لإيقاف الصوت عند الإغلاق
-        document.getElementById('incomingRequestModal').classList.remove('active');
-        currentPendingRequestId = null;
-    }
-
-    // --- Passenger Booking Logic ---
-    async function bookRide() {
-        if(!pickupPos || !destPos) return Utils.showToast('⚠️ حدد الانطلاق والوجهة','error');
-        
-        const selectedEl = document.querySelector('.car-opt.selected .name');
-        const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
-        
-        document.getElementById('searchModal').classList.add('active');
-        rideState = 'searching';
-        dispatchIndex = 0;
-        dispatchDrivers = [];
-        
-        document.getElementById('searchStatusText').textContent = 'جاري البحث عن سائقين...';
-        document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType}`;
-        
-        try {
-            const ref = await db.collection('rideRequests').add({
-                passengerId: currentUser.uid,
-                pickup: {lat: pickupPos[0], lng: pickupPos[1], name: document.getElementById('pickupInput').value},
-                destination: {lat: destPos[0], lng: destPos[1], name: document.getElementById('destInput').value},
-                distance: parseFloat(distKm),
-                time: timeMin,
-                carType: requestedCarType,
-                price: baseFare + Math.round(distKm * selectedRate),
-                status: 'pending',
-                assignedDriverId: null,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                skippedBy: []
-            });
-            currentRideId = ref.id;
-        } catch(e) {
-            Utils.showToast('❌ فشل إنشاء الطلب', 'error');
-            rideState = 'idle';
-            document.getElementById('searchModal').classList.remove('active');
-            return;
+    function showActiveRideBanner(ride) {
+        const banner = document.getElementById('activeRideBanner');
+        const text = document.getElementById('arbText');
+        if (banner && text) {
+            text.textContent = `🚗 رحلة إلى: ${ride.destination?.name || 'الوجهة'}`;
+            banner.classList.add('show');
+            // Hide services button
+            const sb = document.getElementById('driverServicesBtn');
+            if (sb) sb.style.display = 'none';
         }
-        
-        const ds = await db.collection('drivers').where('available','==',true).where('carType','==',requestedCarType).get();
-        ds.forEach(d => {
-            const dd = d.data();
-            if(dd.location) {
-                const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], dd.location.lat, dd.location.lng);
-                if(dist <= 20) dispatchDrivers.push({id: d.id, ...dd, distance: dist.toFixed(2)});
-            }
-        });
-        
-        dispatchDrivers.sort((a,b) => a.distance - b.distance);
-        
-        if(dispatchDrivers.length === 0) {
-            document.getElementById('searchStatusText').textContent = 'لا يوجد سائقين متاحين';
-            document.getElementById('searchSubText').innerHTML = `لم نجد سائقي <b>${requestedCarType}</b> قريبين.<br>يرجى المحاولة لاحقاً.`;
-            setTimeout(() => { rideState = 'idle'; document.getElementById('searchModal').classList.remove('active'); document.getElementById('bookBtn').disabled = false; }, 4000);
-            return;
+    }
+    
+    function hideActiveRideBanner() {
+        const banner = document.getElementById('activeRideBanner');
+        if (banner) banner.classList.remove('show');
+        const sb = document.getElementById('driverServicesBtn');
+        if (sb) sb.style.display = '';
+    }
+    
+    function reopenActiveChat() {
+        if (currentActiveRide && activeRideChatId) {
+            const role = activeRideRole || 'driver';
+            const partnerName = role === 'driver' ? 'راكب' : 'سائق';
+            showChatInterface(currentActiveRide.id, currentActiveRide.passengerId, currentActiveRide.assignedDriverId || currentDriver?.uid, role, partnerName, currentActiveRide);
         }
-        
-        dispatchNext();
-        listenForRideUpdate();
     }
-
-    function dispatchNext() {
-        if(dispatchIndex >= dispatchDrivers.length) {
-            updateRideStatus('expired');
-            document.getElementById('searchStatusText').textContent = 'انتهت المهلة';
-            document.getElementById('searchSubText').textContent = 'لم يقبل أي سائق، جرب مجدداً';
-            setTimeout(() => { rideState = 'idle'; document.getElementById('searchModal').classList.remove('active'); document.getElementById('bookBtn').disabled = false; }, 3000);
-            return;
-        }
-        
-        const target = dispatchDrivers[dispatchIndex];
-        document.getElementById('searchStatusText').textContent = `جاري الاتصال بالسائق ${dispatchIndex + 1}...`;
-        document.getElementById('searchSubText').textContent = `متبقي ${dispatchDrivers.length - dispatchIndex} سائقين`;
-        
-        db.collection('rideRequests').doc(currentRideId).update({
-            status: 'pending', assignedDriverId: target.id, assignedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        dispatchTimeoutId = setTimeout(() => {
-            db.collection('rideRequests').doc(currentRideId).get().then(doc => {
-                if(doc.exists && doc.data().status === 'pending') {
-                    db.collection('rideRequests').doc(currentRideId).update({
-                        skippedBy: firebase.firestore.FieldValue.arrayUnion(target.id)
-                    });
-                    dispatchIndex++;
-                    dispatchNext();
-                }
-            });
-        }, 30000);
-    }
-
-    function listenForRideUpdate() {
-        if(rideTimeoutId) clearTimeout(rideTimeoutId);
-        const unsub = db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap => {
-            if(!docSnap.exists) return;
-            const data = docSnap.data();
-            
-            if(data.status === 'accepted') {
-                rideState = 'matched';
-                if(dispatchTimeoutId) clearTimeout(dispatchTimeoutId);
-                document.getElementById('searchModal').classList.remove('active');
-                document.getElementById('driverCard').classList.add('show');
-                document.getElementById('bookBtn').disabled = true;
-                
-                db.collection('drivers').doc(data.acceptedBy).get().then(ds => {
-                    if(ds.exists) {
-                        const dr = ds.data(), dn = dr.carName || dr.email?.split('@')[0] || 'سائق';
-                        document.getElementById('dName').textContent = dn;
-                        document.getElementById('dMeta').textContent = dr.carType;
-                        document.getElementById('dEta').textContent = `🚗 في الطريق • ~${Math.max(2, Math.round(data.distance/3))} دقائق`;
-                        
-                        createChat(currentRideId, currentUser.uid, data.acceptedBy).then(cid => {
-                            showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', dn, data);
-                        });
-                        Utils.showToast(`✅ قبل السائق! تم فتح المحادثة 💬`);
-                        
-                        if(dr.location && pickupPos && destPos) {
-                            MapUtils.drawDualRoute(map, [dr.location.lat, dr.location.lng], pickupPos, destPos);
-                        }
-                        saveToLocalLog({id: currentRideId, status: 'accepted', pickup: data.pickup, destination: data.destination, price: data.price});
-                    }
-                });
-                unsub();
-            } else if(data.status === 'expired' || data.status === 'cancelled') {
-                rideState = 'idle';
-                document.getElementById('searchModal').classList.remove('active');
-                document.getElementById('driverCard').classList.remove('show');
-                document.getElementById('bookBtn').disabled = false;
-                unsub();
-                Utils.showToast('❌ تم إلغاء أو انتهاء الطلب', 'error');
-            }
-        });
-    }
-
-    function updateRideStatus(s) { 
-        if(currentRideId) db.collection('rideRequests').doc(currentRideId).update({status: s}).catch(()=>{}); 
-    }
-
-    function cancelRide() {
-        if(confirm('هل أنت متأكد من إلغاء الرحلة؟') && currentRideId) {
-            updateRideStatus('cancelled');
-            rideState = 'idle';
-            document.getElementById('searchModal').classList.remove('active');
-            document.getElementById('driverCard').classList.remove('show');
-            document.getElementById('bookBtn').disabled = false;
-            Utils.showToast('❌ تم الإلغاء', 'error');
-            currentRideId = null;
-            if(dispatchTimeoutId) clearTimeout(dispatchTimeoutId);
-            const c = document.getElementById('chatOverlayContainer');
-            if(c) c.innerHTML = '';
+    
+    function startTripNavigationFromBanner() {
+        if (currentActiveRide?.destination) {
+            startTripNavigation(currentActiveRide.destination.lat, currentActiveRide.destination.lng, currentActiveRide.destination.name);
         }
     }
 
-    // --- Chat System ---
     async function createChat(rid, pid, did) { 
         const cid = `chat_${rid}`; 
         await db.collection('chats').doc(cid).set({
@@ -1121,9 +1483,8 @@
         }, {merge: true}); 
         return cid; 
     }
-
     async function sendMessage(cid, sid, st, text) { 
-        if(!text.trim()) return; 
+        if (!text.trim()) return; 
         await db.collection('chats').doc(cid).collection('messages').add({
             senderId: sid, senderType: st, text: text.trim(), 
             timestamp: firebase.firestore.FieldValue.serverTimestamp(), read: false
@@ -1132,153 +1493,622 @@
             lastMessage: text.trim(), lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
         }); 
     }
-
+    
     function listenToMessages(cid, cb, uid) { 
         lastKnownMessageCount = 0; 
         currentChatMyId = uid; 
-        return db.collection('chats').doc(cid).collection('messages').orderBy('timestamp','asc').onSnapshot(s => { 
+        return db.collection('chats').doc(cid).collection('messages').orderBy('timestamp', 'asc').onSnapshot(s => { 
             const m = []; 
             s.forEach(d => m.push({id: d.id, ...d.data()})); 
-            if(m.length > 0 && lastKnownMessageCount > 0) {
+            if (m.length > 0 && lastKnownMessageCount > 0) {
                 m.slice(lastKnownMessageCount).forEach(msg => {
-                    if(msg.senderId !== uid) Utils.playSound('chatMessageSound');
+                    if (msg.senderId !== uid) Utils.playSound('chatMessageSound');
                 });
             }
             lastKnownMessageCount = m.length; 
             cb(m); 
         }); 
     }
-
-    async function showChatInterface(rid, pid, did, role, name, rd=null) {
+    
+    async function showChatInterface(rid, pid, did, role, name, rd = null) { 
         const cid = `chat_${rid}`; 
-        currentChatId = cid;
-        document.getElementById('chatOverlayContainer').innerHTML = '';
+        currentChatId = cid; 
+        const ex = document.getElementById('chatOverlay'); 
+        if (ex) ex.remove(); 
         
-        const stBtn = role === 'driver' && rd && rd.status === 'accepted' ? 
-            `<button class="loc-btn" style="background:#66BB6A;color:#fff" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء</button>` : '';
-            
-        let mp = null, op = null;
-        if(role === 'driver') {
-            mp = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
-            op = rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null;
-        } else {
-            op = rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null;
-            if(navigator.geolocation) {
-                try { mp = await new Promise((r,j) => navigator.geolocation.getCurrentPosition(p => r([p.coords.latitude, p.coords.longitude]), j, {timeout: 3000})); } catch(e) {}
+        const stBtn = role === 'driver' && rd && rd.status === 'accepted' 
+            ? `<button class="chat-action-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${(rd.destination?.name||'الوجهة').replace(/'/g,'')}')">🚀 ملاحة</button>` : ''; 
+        const cnBtn = role === 'driver' && rd && rd.status === 'accepted' 
+            ? `<button class="chat-action-btn" onclick="cancelActiveTrip('${rid}')" style="background:rgba(239,83,80,0.85);color:#fff;">❌ إلغاء</button>` : ''; 
+        
+        let mp = null, op = null, ml = ''; 
+        if (role === 'driver') { 
+            ml = '📍 موقع الراكب'; 
+            mp = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null; 
+            op = rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null; 
+        } else { 
+            ml = '🚕 موقع السائق'; 
+            op = rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null; 
+            if (navigator.geolocation) {
+                try { 
+                    mp = await new Promise((r, j) => navigator.geolocation.getCurrentPosition(p => r([p.coords.latitude, p.coords.longitude]), j, {timeout: 3000})); 
+                } catch(e) { 
+                    mp = rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null; 
+                } 
             }
-        }
-
+        } 
+        
         const cc = document.createElement('div'); 
-        cc.className = 'chat-overlay';
-        cc.innerHTML = `
-            <div class="chat-box">
-                <div class="chat-header">
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div>
-                        <span style="font-weight:600">${role === 'passenger' ? 'محادثة مع السائق' : 'محادثة مع الراكب'}</span>
-                        ${name ? `<span style="font-size:0.85em;opacity:0.9">• ${name}</span>` : ''}
-                    </div>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        ${stBtn}
-                        <button class="modal-close" style="background:rgba(255,255,255,0.3);color:#1B1B1B;width:32px;height:32px;" onclick="closeChat()">✕</button>
+        cc.id = 'chatOverlay'; 
+        cc.className = 'chat-overlay'; 
+        cc.innerHTML = `<div class="chat-box">
+            <div class="chat-header">
+                <div style="display:flex;align-items:center;gap:10px;flex:1;">
+                    <div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div>
+                    <div>
+                        <div style="font-weight:600;font-size:0.95em;">${role === 'passenger' ? 'محادثة مع السائق' : 'محادثة مع الراكب'}</div>
+                        ${name ? `<div style="font-size:0.8em;opacity:0.9;">• ${name}</div>` : ''}
                     </div>
                 </div>
-                ${mp || op ? `<div class="search-map-container" id="chatMiniMap" style="height:150px;border-bottom:1px solid var(--border);"><div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:12px;font-size:0.75em;z-index:1000;">📍 الموقع المباشر</div></div>` : ''}
-                <div id="chatMessages" class="chat-messages"></div>
-                <div class="chat-input-area">
-                    <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">
-                    <button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button>
+                <div class="chat-actions">
+                    ${cnBtn}${stBtn}
+                    <button class="chat-action-btn" onclick="downloadChatMessages()">📥 تنزيل</button>
+                    <button class="chat-close" onclick="closeChat()">×</button>
                 </div>
             </div>
-        `;
-        document.getElementById('chatOverlayContainer').appendChild(cc);
+            ${mp || op ? `<div class="chat-mini-map" id="chatMiniMap">
+                <div class="map-label">${ml}</div>
+                <div class="distance-badge">📏 جاري الحساب...</div>
+            </div>` : ''}
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid || currentUser.uid}','${role}')">
+                <button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid || currentUser.uid}','${role}')">➤</button>
+            </div>
+        </div>`; 
+        document.body.appendChild(cc); 
         
-        const uid = currentDriver?.uid || currentUser.uid;
-        if(activeChatListener) activeChatListener();
-        activeChatListener = listenToMessages(cid, msgs => {
+        if (activeChatListener) activeChatListener(); 
+        const uid = currentDriver?.uid || currentUser.uid; 
+        activeChatListener = listenToMessages(cid, msgs => { 
             const c = document.getElementById('chatMessages'); 
-            if(!c) return;
-            c.innerHTML = msgs.map(m => `<div class="message ${m.senderType === role ? 'me' : 'other'}">${m.text}</div>`).join('');
-            c.scrollTop = c.scrollHeight;
-        }, uid);
+            if (!c) return; 
+            c.innerHTML = msgs.map(m => `<div class="message ${m.senderType === role ? 'me' : 'other'}">${m.text}</div>`).join(''); 
+            c.scrollTop = c.scrollHeight; 
+            // Update chat history count
+            saveChatToHistory({chatId: cid, rideId: rid, partnerId: role === 'driver' ? pid : did, partnerName: name, role: role, createdAt: new Date().toISOString(), messageCount: msgs.length});
+        }, uid); 
         
-        if((mp || op) && document.getElementById('chatMiniMap')) {
-            chatMiniMap = MapUtils.initChatMiniMap('chatMiniMap', mp, op, role);
-            if(chatLocationUpdate) clearInterval(chatLocationUpdate);
-        }
+        if ((mp || op) && document.getElementById('chatMiniMap')) { 
+            chatMiniMap = MapUtils.initChatMiniMap('chatMiniMap', mp, op, role); 
+            if (mp && op) updateChatDistanceBadge(mp, op); 
+            if (chatLocationUpdate) clearInterval(chatLocationUpdate); 
+            chatLocationUpdate = setInterval(async () => { 
+                try { 
+                    let nm = mp, no = op; 
+                    if (role === 'driver') { 
+                        if (navigator.geolocation) {
+                            try { 
+                                nm = await new Promise((r, j) => navigator.geolocation.getCurrentPosition(p => r([p.coords.latitude, p.coords.longitude]), j, {timeout: 3000})); 
+                            } catch(e) {}
+                        }
+                        no = await getPassengerLocation(rd?.passengerId); 
+                    } else { 
+                        if (navigator.geolocation) {
+                            try { 
+                                nm = await new Promise((r, j) => navigator.geolocation.getCurrentPosition(p => r([p.coords.latitude, p.coords.longitude]), j, {timeout: 3000})); 
+                            } catch(e) {}
+                        }
+                        no = await getDriverLocation(rd?.assignedDriverId); 
+                    } 
+                    if (nm || no) { 
+                        MapUtils.updateChatMiniMap(chatMiniMap, nm || mp, no || op); 
+                        if (nm && no) updateChatDistanceBadge(nm, no); 
+                    } 
+                } catch(e) {} 
+            }, 10000); 
+        } 
     }
-
-    function closeChat() {
-        document.getElementById('chatOverlayContainer').innerHTML = '';
-        if(activeChatListener) { activeChatListener(); activeChatListener = null; }
-        if(chatLocationUpdate) { clearInterval(chatLocationUpdate); chatLocationUpdate = null; }
-        if(chatMiniMap?.map) { chatMiniMap.map.remove(); chatMiniMap = null; }
-        currentChatId = null;
-    }
-
+    
+    window.closeChat = function() { 
+        const o = document.getElementById('chatOverlay'); 
+        if (o) o.remove(); 
+        if (activeChatListener) { activeChatListener(); activeChatListener = null; } 
+        if (chatLocationUpdate) { clearInterval(chatLocationUpdate); chatLocationUpdate = null; } 
+        if (chatMiniMap?.map) { try { chatMiniMap.map.remove(); } catch(e) {} chatMiniMap = null; } 
+        currentChatId = null; 
+    };
+    
     window.sendChatMessage = async function(cid, sid, st) { 
-        const i = document.getElementById('chatInput'), t = i.value.trim(); 
-        if(!t) return; 
+        const i = document.getElementById('chatInput'); 
+        const t = i.value.trim(); 
+        if (!t) return; 
         await sendMessage(cid, sid, st, t); 
         i.value = ''; 
     };
-
+    
     window.startTripNavigation = function(lat, lng, name) { 
-        if(!lat || !lng) return Utils.showToast('⚠️ بيانات الوجهة غير متاحة', 'warning'); 
+        if (!lat || !lng) return Utils.showToast('⚠️ بيانات الوجهة غير متاحة', 'warning'); 
         Utils.showToast('🗺️ جاري فتح الخرائط...'); 
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank'); 
+        setTimeout(() => { 
+            if (confirm(`🗺️ الوجهة: ${name}\nهل تريد استخدام واز بدلاً من خرائط جوجل؟`)) {
+                window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`, '_blank'); 
+            }
+        }, 1500); 
+        if (currentActiveRide?.id) {
+            db.collection('rideRequests').doc(currentActiveRide.id).update({
+                tripStarted: true, tripStartedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(() => {}); 
+        }
+    };
+    
+    window.cancelActiveTrip = async function(rid) { 
+        if (!confirm('⚠️ هل أنت متأكد من إلغاء الرحلة؟')) return; 
+        try { 
+            await db.collection('rideRequests').doc(rid).update({
+                status: 'cancelled', 
+                cancelledBy: currentDriver?.uid || currentUser.uid, 
+                cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+            }); 
+            if (currentDriver?.uid) {
+                await db.collection('drivers').doc(currentDriver.uid).update({available: true});
+            }
+            const cid = `chat_${rid}`; 
+            await sendMessage(cid, currentDriver?.uid || currentUser.uid, 'system', '❌ تم إلغاء الرحلة.'); 
+            Utils.showToast('❌ تم إلغاء الرحلة', 'error'); 
+            closeChat(); 
+            if (currentActiveRide?.id === rid) {
+                currentActiveRide = null;
+                activeRideChatId = null;
+            }
+            hideActiveRideBanner();
+            driverAvailable = true;
+            const t = document.getElementById('statusToggle');
+            if (t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
+            updateDriverStatusUI();
+            updateServicesBadge(0);
+        } catch(e) { 
+            Utils.showToast('⚠️ ' + e.message, 'error'); 
+        } 
     };
 
-    // --- Passenger Location Tracking ---
-    function startPassengerLocationTracking() {
-        clearInterval(passengerLocationInterval);
-        passengerLocationInterval = setInterval(async () => {
-            if(!navigator.geolocation || !currentActiveRide) return;
-            navigator.geolocation.getCurrentPosition(async p => {
-                try {
-                    const l = {lat: p.coords.latitude, lng: p.coords.longitude};
-                    await db.collection('users').doc(currentUser.uid).update({
-                        lastLocation: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch(e) {}
-            }, null, {enableHighAccuracy: true, timeout: 5000});
-        }, 15000);
+    function switchView(id) { 
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); 
+        document.getElementById(id).classList.add('active'); 
+        if (id === 'view-dashboard') {
+            setTimeout(() => {
+                if (!dashMapInitialized) initDashMap();
+                loadRequestsForDriver();
+            }, 150);
+        }
+        if (id === 'view-request' && !mapInitialized) {
+            setTimeout(initMap, 150);
+        }
+        // Hide menus when switching views
+        document.querySelectorAll('.services-menu').forEach(m => m.classList.remove('show'));
     }
-
-    // --- Firebase Init ---
-    function initFirebase() {
-        try {
-            const config = {
-                apiKey: "AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY",
-                authDomain: "birine-app.firebaseapp.com",
-                projectId: "birine-app",
-                storageBucket: "birine-app.firebasestorage.app",
-                messagingSenderId: "359460161481",
-                appId: "1:359460161481:web:5739dcc79ed79275928a18",
-                measurementId: "G-GX972M18B4"
-            };
-            app = firebase.initializeApp(config);
-            db = firebase.firestore(app);
-            auth = firebase.auth(app);
-            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            
-            auth.onAuthStateChanged(async user => {
-                if(user) {
-                    currentUser = user;
-                    await routeUserAfterAuth(user);
-                } else {
-                    currentUser = null;
-                    currentDriver = null;
-                    switchView('auth');
-                }
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            });
-        } catch(e) {
-            console.error(e);
-            Utils.showToast('❌ فشل الاتصال بـ Firebase', 'error');
-            document.getElementById('loadingOverlay').classList.add('hidden');
+    
+    function initDashMap() {
+        if (dashMapInitialized) return;
+        dashMap = MapUtils.initMap('dashMap');
+        dashMapInitialized = true;
+        if (currentDriver?.location) {
+            const pos = [currentDriver.location.lat, currentDriver.location.lng];
+            MapUtils.createMarker(pos, 'driver', `${currentDriver.carName || 'سائق'}<br>⭐ ${currentDriver.rating || 5}`).addTo(dashMap);
+            dashMap.setView(pos, 15);
         }
     }
+    
+    function initMap() { 
+        if (mapInitialized) {
+            setTimeout(() => map?.invalidateSize(), 100);
+            return;
+        }
+        map = MapUtils.initMap('map'); 
+        mapInitialized = true;
+        setupAutocomplete('pickupInput', 'pickupResults', (lat, lng, name) => setLocation(pickupMarker, [lat, lng], 'pickupInput', 'pickupCoords', true), true); 
+        setupAutocomplete('destInput', 'destResults', (lat, lng, name) => setLocation(destMarker, [lat, lng], 'destInput', 'destCoords', false), true); 
+        if (navigator.geolocation) useGPS(); 
+        else fallbackLocation(); 
+        map.on('click', e => { 
+            if (mapClickEnabled && rideState === 'idle') selectDestinationFromMap(e.latlng.lat, e.latlng.lng); 
+        }); 
+    }
+    
+    function setLocation(m, pos, iid, cid, isP) { 
+        if (isP) pickupPos = pos; 
+        else destPos = pos; 
+        const inp = document.getElementById(iid);
+        if (isP) inp.value = 'موقعي الحالي';
+        document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0], pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0], pos[1])}')">📋 نسخ</button>`; 
+        if (m && map) map.removeLayer(m); 
+        m = MapUtils.createMarker(pos, isP ? 'passenger' : 'destination').addTo(map); 
+        if (isP) pickupMarker = m;
+        else destMarker = m;
+        map.setView(pos, 16); 
+        if (pickupPos && destPos) drawRoute(); 
+    }
+    
+    function useGPS() { 
+        const b = document.getElementById('gpsBtn'); 
+        b.disabled = true; 
+        b.textContent = '🔄...'; 
+        navigator.geolocation.getCurrentPosition(p => { 
+            pickupPos = [p.coords.latitude, p.coords.longitude]; 
+            document.getElementById('pickupInput').value = 'موقعي الحالي'; 
+            document.getElementById('pickupCoords').innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0], pickupPos[1])}</span>`; 
+            if (pickupMarker && map) map.removeLayer(pickupMarker); 
+            pickupMarker = MapUtils.createMarker(pickupPos, 'passenger').addTo(map); 
+            map.setView(pickupPos, 16); 
+            if (destPos) drawRoute(); 
+            b.textContent = '🛰️ GPS'; 
+            b.disabled = false; 
+        }, () => { 
+            b.textContent = '❌'; 
+            setTimeout(() => { b.textContent = '🛰️ GPS'; b.disabled = false; }, 2000); 
+        }, {enableHighAccuracy: true, timeout: 10000}); 
+    }
+    
+    function fallbackLocation() { 
+        pickupPos = MAP_CONFIG.defaultView; 
+        document.getElementById('pickupInput').value = 'الجزائر'; 
+        document.getElementById('pickupCoords').innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0], pickupPos[1])}</span>`; 
+        pickupMarker = MapUtils.createMarker(pickupPos, 'passenger').addTo(map); 
+        if (destPos) drawRoute(); 
+    }
+    
+    function enableMapClick() { 
+        mapClickEnabled = true; 
+        const b = document.getElementById('mapBtn'); 
+        b.textContent = '✅ انقر على الخريطة';
+        b.style.background = '#66BB6A';
+        b.style.color = '#fff';
+        setTimeout(() => { 
+            mapClickEnabled = false; 
+            b.textContent = '🗺️ خريطة'; 
+            b.style.background = '';
+            b.style.color = '';
+        }, 15000); 
+        Utils.showToast('📍 انقر على الخريطة لتحديد الوجهة (15 ثانية)', 'warning'); 
+    }
+    
+    function selectDestinationFromMap(lat, lng) { 
+        destPos = [lat, lng]; 
+        document.getElementById('destCoords').innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(lat, lng)}</span>`; 
+        document.getElementById('destInput').value = 'محدد عبر الخريطة'; 
+        if (destMarker && map) map.removeLayer(destMarker); 
+        destMarker = MapUtils.createMarker(destPos, 'destination').addTo(map); 
+        map.setView(destPos, 16); 
+        mapClickEnabled = false; 
+        document.getElementById('mapBtn').textContent = '🗺️ خريطة'; 
+        document.getElementById('mapBtn').style.background = '';
+        if (pickupPos) drawRoute(); 
+    }
+    
+    function setupAutocomplete(iid, rid, cb, countryOnly = true) { 
+        const inp = document.getElementById(iid);
+        const res = document.getElementById(rid); 
+        const performSearch = async function() { 
+            const q = inp.value.trim(); 
+            if (q.length < 3) { res.classList.remove('show'); return; } 
+            try { 
+                const cp = countryOnly ? '&countrycodes=dz' : '';
+                const lim = countryOnly ? 5 : 8; 
+                const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${cp}&limit=${lim}`, {headers: {'User-Agent': 'YasserRidePro/1.0'}}); 
+                const d = await r.json(); 
+                if (d.length > 0) { 
+                    res.innerHTML = d.map(i => `<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">📍 ${i.display_name.length > 50 ? i.display_name.substring(0, 50) + '...' : i.display_name}</div>`).join(''); 
+                    res.classList.add('show'); 
+                    res.querySelectorAll('.autocomplete-item').forEach(it => { 
+                        it.onclick = () => {
+                            res.classList.remove('show'); 
+                            inp.value = it.dataset.name;
+                            cb(parseFloat(it.dataset.lat), parseFloat(it.dataset.lng), it.dataset.name);
+                        }; 
+                    }); 
+                } else { 
+                    res.innerHTML = '<div class="autocomplete-item">🔍 لم يتم العثور</div>'; 
+                    res.classList.add('show'); 
+                } 
+            } catch(e) { 
+                res.innerHTML = '<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; 
+                res.classList.add('show'); 
+            } 
+        }; 
+        inp.addEventListener('input', Utils.debounce(performSearch, 400)); 
+        document.addEventListener('click', e => { 
+            if (e.target !== inp && !res.contains(e.target)) res.classList.remove('show'); 
+        }, {passive: true}); 
+    }
+    
+    function drawRoute() { 
+        if (!pickupPos || !destPos) return; 
+        if (routeControl) { try { map.removeControl(routeControl); } catch(e) {} }
+        routeControl = MapUtils.drawRoute(map, [pickupPos, destPos], {color: '#9ACD32', weight: 5, opacity: 0.85}); 
+        routeControl.on('routesfound', e => { 
+            const r = e.routes[0]; 
+            distKm = (r.summary.totalDistance / 1000).toFixed(1); 
+            timeMin = Math.round(r.summary.totalTime / 60); 
+            document.getElementById('routeInfo').style.opacity = '1'; 
+            document.getElementById('routeInfo').style.pointerEvents = 'auto'; 
+            document.getElementById('distVal').textContent = `${distKm} كم`; 
+            document.getElementById('timeVal').textContent = `~${timeMin} دقيقة`; 
+            document.getElementById('statusVal').textContent = 'جاهز'; 
+            updatePrice(); 
+            document.getElementById('bookBtn').disabled = false; 
+        }); 
+        routeControl.on('routingerror', () => { 
+            document.getElementById('statusVal').textContent = 'خطأ'; 
+            Utils.showToast('⚠️ تعذر رسم الطريق', 'error'); 
+        }); 
+    }
+    
+    function updatePrice() { 
+        document.getElementById('priceBox').innerHTML = `💰 السعر التقريبي: <span style="font-size:1.15em">${baseFare + Math.round(distKm * selectedRate)}</span> د.ج`; 
+    }
+    
+    function selectCar(el, n, r) { 
+        document.querySelectorAll('.car-opt').forEach(c => c.classList.remove('selected')); 
+        el.classList.add('selected'); 
+        selectedRate = r; 
+        if (distKm > 0) updatePrice(); 
+    }
+
+    function openSearchModal() { 
+        const m = document.getElementById('searchModal'); 
+        m.classList.add('active'); 
+        setTimeout(() => { 
+            if (!searchMap) searchMap = MapUtils.initMap('searchMap'); 
+            else { searchMap.invalidateSize(); searchMap.setView(pickupPos || MAP_CONFIG.defaultView, 14); } 
+            if (pickupPos) MapUtils.createMarker(pickupPos, 'passenger').addTo(searchMap); 
+            startSearchMapUpdates(); 
+        }, 100); 
+    }
+    function closeSearchModal() { 
+        document.getElementById('searchModal').classList.remove('active'); 
+        stopSearchMapUpdates(); 
+    }
+    function startSearchMapUpdates() { 
+        if (searchUpdateInterval) clearInterval(searchUpdateInterval); 
+        updateNearbyDriversOnSearchMap(); 
+        searchUpdateInterval = setInterval(updateNearbyDriversOnSearchMap, 5000); 
+    }
+    function stopSearchMapUpdates() { 
+        if (searchUpdateInterval) clearInterval(searchUpdateInterval); 
+    }
+    
+    async function updateNearbyDriversOnSearchMap() { 
+        if (!searchMap || !pickupPos) return; 
+        searchMarkerMap = {}; 
+        searchMarkers.forEach(m => { try { searchMap.removeLayer(m); } catch(e) {} }); 
+        searchMarkers = []; 
+        try { 
+            const selectedCarOpt = document.querySelector('.car-opt.selected');
+            const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة'; 
+            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get(); 
+            let foundCount = 0;
+            ds.forEach(doc => { 
+                const d = doc.data(); 
+                if (d.location && d.isOnline !== false) { 
+                    const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.location.lat, d.location.lng); 
+                    if (dist <= 20) { 
+                        const ic = d.carType === 'دراجة نارية' ? 'motorcycle' : (d.carType === 'شاحنة نقل صغيرة' ? 'truck' : 'driver'); 
+                        const mk = MapUtils.createMarker([d.location.lat, d.location.lng], ic, `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`).addTo(searchMap); 
+                        searchMarkers.push(mk); 
+                        searchMarkerMap[doc.id] = mk; 
+                        foundCount++;
+                    } 
+                } 
+            }); 
+            if (foundCount === 0) {
+                document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقون (${requestedType}) قريبون حالياً.`;
+            } else {
+                document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائق قريب`;
+            }
+        } catch(e) {} 
+    }
+
+    function dispatchNext() { 
+        if (dispatchIndex >= dispatchDrivers.length) { 
+            updateRideStatus('expired'); 
+            document.getElementById('searchStatusText').textContent = 'انتهت المهلة'; 
+            document.getElementById('searchSubText').textContent = 'لم يقبل أي سائق، جرب مجدداً'; 
+            stopPulseOnCurrent(); 
+            setTimeout(() => { rideState = 'idle'; closeSearchModal(); }, 3000); 
+            return; 
+        } 
+        const target = dispatchDrivers[dispatchIndex]; 
+        document.getElementById('searchStatusText').textContent = `جاري الاتصال بالسائق ${dispatchIndex + 1}...`; 
+        document.getElementById('searchSubText').textContent = `متبقي ${dispatchDrivers.length - dispatchIndex} سائق`; 
+        stopPulseOnCurrent(); 
+        const newMarker = searchMarkerMap[target.id]; 
+        if (newMarker) { 
+            const el = newMarker.getElement(); 
+            if (el) { el.classList.add('pulse-blue'); currentPulsingMarker = newMarker; } 
+        } 
+        db.collection('rideRequests').doc(currentRideId).update({
+            status: 'pending', assignedDriverId: target.id, 
+            assignedAt: firebase.firestore.FieldValue.serverTimestamp(), dispatchStage: dispatchIndex
+        }); 
+        dispatchTimeoutId = setTimeout(() => { 
+            db.collection('rideRequests').doc(currentRideId).get().then(doc => { 
+                if (doc.exists && doc.data().status === 'pending') { 
+                    stopPulseOnCurrent(); 
+                    db.collection('rideRequests').doc(currentRideId).update({skippedBy: firebase.firestore.FieldValue.arrayUnion(target.id)}); 
+                    dispatchIndex++; 
+                    dispatchNext(); 
+                } 
+            }); 
+        }, 30000); 
+    }
+    
+    function stopPulseOnCurrent() { 
+        if (currentPulsingMarker) { 
+            const el = currentPulsingMarker.getElement(); 
+            if (el) el.classList.remove('pulse-blue'); 
+            currentPulsingMarker = null; 
+        } 
+    }
+
+    async function bookRide() { 
+        if (!pickupPos || !destPos) return Utils.showToast('⚠️ حدد الانطلاق والوجهة', 'error'); 
+        const selectedEl = document.querySelector('.car-opt.selected .name');
+        const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
+        
+        closeAllSheets();
+        openSearchModal(); 
+        rideState = 'searching'; 
+        dispatchIndex = 0; 
+        dispatchDrivers = []; 
+        
+        document.getElementById('searchStatusText').textContent = 'جاري البحث عن سائقين...'; 
+        document.getElementById('searchSubText').textContent = `يتم البحث عن: ${requestedCarType}`;
+        
+        try { 
+            const ref = await db.collection('rideRequests').add({
+                passengerId: currentUser.uid, 
+                pickup: {lat: pickupPos[0], lng: pickupPos[1], name: document.getElementById('pickupInput').value}, 
+                destination: {lat: destPos[0], lng: destPos[1], name: document.getElementById('destInput').value}, 
+                distance: parseFloat(distKm), 
+                time: timeMin, 
+                carType: requestedCarType, 
+                price: baseFare + Math.round(distKm * selectedRate), 
+                status: 'pending', 
+                assignedDriverId: null, 
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                skippedBy: []
+            }); 
+            currentRideId = ref.id; 
+        } catch(e) { 
+            Utils.showToast('❌ فشل الإنشاء', 'error'); 
+            rideState = 'idle'; 
+            closeSearchModal(); 
+            return; 
+        } 
+        
+        const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedCarType).get(); 
+        ds.forEach(d => { 
+            const dd = d.data(); 
+            if (dd.location) { 
+                const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], dd.location.lat, dd.location.lng); 
+                if (dist <= 20) dispatchDrivers.push({id: d.id, ...dd, distance: dist.toFixed(2)}); 
+            }
+        }); 
+        dispatchDrivers.sort((a, b) => a.distance - b.distance); 
+        
+        if (dispatchDrivers.length === 0) { 
+            document.getElementById('searchStatusText').textContent = 'لا يوجد سائقون'; 
+            document.getElementById('searchSubText').innerHTML = `لم نجد سائقين ${requestedCarType} في منطقتك.`; 
+            setTimeout(() => { rideState = 'idle'; closeSearchModal(); }, 4000); 
+            return; 
+        } 
+        
+        dispatchNext(); 
+        listenForRideUpdate(); 
+    }
+    
+    function listenForRideUpdate() { 
+        if (rideTimeoutId) clearTimeout(rideTimeoutId); 
+        const unsub = db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap => { 
+            if (!docSnap.exists) return; 
+            const data = docSnap.data(); 
+            if (data.status === 'accepted') { 
+                rideState = 'matched'; 
+                if (dispatchTimeoutId) clearTimeout(dispatchTimeoutId); 
+                closeSearchModal(); 
+                stopPulseOnCurrent(); 
+                document.getElementById('driverCard').classList.add('show'); 
+                openSheet('rideSheet');
+                db.collection('drivers').doc(data.acceptedBy).get().then(ds => { 
+                    if (ds.exists) { 
+                        const dr = ds.data();
+                        const dn = dr.carName || dr.email?.split('@')[0] || 'سائق'; 
+                        document.getElementById('dName').textContent = dn; 
+                        document.getElementById('dMeta').textContent = dr.carType; 
+                        document.getElementById('dEta').textContent = `🚗 في الطريق • ~${Math.max(2, Math.round(data.distance / 3))} دقائق`; 
+                        createChat(currentRideId, currentUser.uid, data.acceptedBy).then(cid => { 
+                            activeRideChatId = cid;
+                            activeRideRole = 'passenger';
+                            saveChatToHistory({chatId: cid, rideId: currentRideId, partnerId: data.acceptedBy, partnerName: dn, role: 'passenger', createdAt: new Date().toISOString(), messageCount: 0});
+                            showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', dn, data); 
+                        }); 
+                        Utils.showToast(`✅ قبل السائق! 💬`); 
+                        if (dr.location && pickupPos && destPos && map) MapUtils.drawDualRoute(map, [dr.location.lat, dr.location.lng], pickupPos, destPos); 
+                        saveToLocalLog({id: currentRideId, status: 'accepted', pickup: data.pickup, destination: data.destination, price: data.price, createdAt: data.createdAt?.toDate?.() || new Date().toISOString()}); 
+                    } 
+                }); 
+                unsub(); 
+            } else if (data.status === 'expired' || data.status === 'cancelled') { 
+                rideState = 'idle'; 
+                closeSearchModal(); 
+                stopPulseOnCurrent(); 
+                document.getElementById('bookBtn').disabled = false; 
+                unsub(); 
+                saveToLocalLog({id: currentRideId, status: data.status, pickup: data.pickup, destination: data.destination, price: data.price, createdAt: data.createdAt?.toDate?.() || new Date().toISOString()}); 
+                Utils.showToast(data.status === 'expired' ? '⏱️ انتهت المهلة' : '❌ تم الإلغاء', 'error');
+            } 
+        }); 
+    }
+    
+    function updateRideStatus(s) { 
+        db.collection('rideRequests').doc(currentRideId).update({status: s}).catch(() => {}); 
+    }
+    
+    function cancelRide() { 
+        if (confirm('إلغاء الرحلة؟') && currentRideId) { 
+            updateRideStatus('cancelled'); 
+            rideState = 'idle'; 
+            closeSearchModal(); 
+            stopPulseOnCurrent(); 
+            document.getElementById('driverCard').classList.remove('show'); 
+            document.getElementById('bookBtn').disabled = false; 
+            Utils.showToast('❌ تم الإلغاء', 'error'); 
+            currentRideId = null; 
+            if (dispatchTimeoutId) clearTimeout(dispatchTimeoutId); 
+            saveToLocalLog({id: currentRideId, status: 'cancelled', pickup: null, destination: null, price: 0, createdAt: new Date().toISOString()}); 
+            closeAllSheets();
+        } 
+    }
+    
+    function switchRecordsTab(f, ev) { 
+        currentRecordsFilter = f; 
+        document.querySelectorAll('.record-tab').forEach(t => t.classList.remove('active')); 
+        ev.target.classList.add('active'); 
+        loadRecords(f); 
+    }
+    
+    function showGPSReminder() {
+        document.getElementById('gpsReminderModal').style.display = 'flex';
+    }
+    function closeGPSModal() {
+        document.getElementById('gpsReminderModal').style.display = 'none';
+    }
+    function enableGPSAndClose() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (p) => { Utils.showToast('✅ تم تفعيل الموقع'); closeGPSModal(); },
+                (err) => { Utils.showToast('⚠️ يرجى السماح بتحديد الموقع', 'error'); },
+                { enableHighAccuracy: true }
+            );
+        } else {
+            Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error');
+        }
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', (e) => {
+        const menu = document.querySelector('.services-menu.show');
+        if (menu && !menu.contains(e.target) && !e.target.closest('.services-btn')) {
+            menu.classList.remove('show');
+        }
+    }, {passive: true});
+    
+    // Handle window resize for map
+    window.addEventListener('resize', () => {
+        if (map) setTimeout(() => map.invalidateSize(), 100);
+        if (dashMap) setTimeout(() => dashMap.invalidateSize(), 100);
+    });
 
     window.onload = initFirebase;
 </script>
