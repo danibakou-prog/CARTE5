@@ -27,7 +27,6 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* تعديلات الخلفية الكاملة */
         body { 
             background: #f0f0f0; 
             height: 100vh; 
@@ -63,12 +62,10 @@
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* الهيدر الشفاف الجديد */
+        /* الهيدر الجديد مع الأيقونة */
         .header { 
-            background: rgba(255, 255, 255, 0.9); 
-            backdrop-filter: blur(10px);
-            color: #1B1B1B; 
-            padding: 12px 20px; 
+            background: transparent; 
+            padding: 15px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between;
@@ -77,61 +74,57 @@
             left: 0;
             right: 0;
             z-index: 1000; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            margin: 0 10px;
-            width: calc(100% - 20px);
-            transition: all 0.3s ease;
+            pointer-events: none; /* يسمح بالنقر على الخريطة خلف الهيدر الفارغ */
         }
         
-        /* أيقونة القائمة الجانبية */
-        .menu-icon-btn {
-            background: rgba(0,0,0,0.05);
-            border: none;
-            width: 40px;
-            height: 40px;
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            width: 45px;
+            height: 45px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.4em;
             cursor: pointer;
-            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            pointer-events: auto;
             transition: 0.2s;
+            border: none;
+            color: #1B1B1B;
         }
-        .menu-icon-btn:hover { background: rgba(0,0,0,0.1); }
+        .menu-btn:hover { transform: scale(1.05); background: #fff; }
 
-        /* القائمة المنسدلة العلوية */
-        .top-dropdown-menu {
-            position: absolute;
-            top: 60px;
-            left: 10px;
+        /* القائمة المنسدلة للهيدر */
+        .dropdown-menu {
+            position: fixed;
+            top: 70px;
+            left: 15px;
             background: white;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            width: 220px;
-            padding: 10px;
+            width: 200px;
             z-index: 1001;
             display: none;
+            overflow: hidden;
             animation: slideDown 0.2s ease;
         }
-        .top-dropdown-menu.show { display: block; }
-        @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
-        
-        .menu-item {
-            padding: 12px 16px;
-            border-radius: 10px;
-            cursor: pointer;
+        .dropdown-menu.show { display: block; }
+        .dropdown-item {
+            padding: 14px 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            cursor: pointer;
             font-weight: 600;
             font-size: 0.95em;
             transition: 0.2s;
-            color: #333;
+            border-bottom: 1px solid #f5f5f5;
         }
-        .menu-item:hover { background: #F5F5F5; color: var(--primary-dark); }
-        .menu-item.danger { color: var(--danger); }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background: #f9f9f9; color: var(--primary-dark); }
+        .dropdown-item.danger { color: var(--danger); }
 
         /* شاشات الدخول والإعداد */
         .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 2000; position: relative; }
@@ -156,7 +149,7 @@
         .pulse-blue { animation: pulse-blue 1.5s infinite; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
         
-        /* القائمة المنسدلة الجديدة (Bottom Sheet) */
+        /* القائمة المنسدلة الجديدة (Bottom Sheet للراكب) */
         .bottom-sheet-container {
             position: absolute;
             bottom: 0;
@@ -164,7 +157,7 @@
             right: 0;
             z-index: 1000;
             transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
-            pointer-events: none; /* يسمح بالنقر على الخريطة عندما تكون مخفية */
+            pointer-events: none;
         }
         
         .bottom-sheet {
@@ -174,7 +167,7 @@
             border-top-right-radius: 24px;
             box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
             padding: 20px;
-            transform: translateY(110%); /* مخفية افتراضياً */
+            transform: translateY(110%);
             transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
             max-height: 75vh;
             overflow-y: auto;
@@ -182,17 +175,8 @@
             border-top: 1px solid rgba(255,255,255,0.5);
         }
         
-        .bottom-sheet.open {
-            transform: translateY(0);
-        }
-
-        .sheet-handle {
-            width: 40px;
-            height: 5px;
-            background: #ddd;
-            border-radius: 10px;
-            margin: 0 auto 15px auto;
-        }
+        .bottom-sheet.open { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 10px; margin: 0 auto 15px auto; }
 
         /* زر الطلب العائم الكبير */
         .fab-request-btn {
@@ -216,17 +200,8 @@
             transition: all 0.3s ease;
             pointer-events: auto;
         }
-        
-        .fab-request-btn:hover {
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5);
-        }
-
-        .fab-request-btn.hidden {
-            transform: translateX(-50%) translateY(100px);
-            opacity: 0;
-            pointer-events: none;
-        }
+        .fab-request-btn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5); }
+        .fab-request-btn.hidden { transform: translateX(-50%) translateY(100px); opacity: 0; pointer-events: none; }
 
         /* محتوى القائمة */
         .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
@@ -273,52 +248,62 @@
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
         .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
         
-        /* Dashboard Styles */
-        .dashboard-header { padding: 14px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; position: relative; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.25); }
-        .driver-info { display: flex; align-items: center; gap: 12px; flex: 1; position: relative; }
-        .driver-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.35); display: flex; align-items: center; justify-content: center; font-size: 1.4em; cursor: pointer; position: relative; z-index: 1002; font-weight: 700; transition: 0.2s; } .driver-avatar:hover { transform: scale(1.05); background: rgba(255,255,255,0.5); }
-        .driver-name { font-weight: 800; font-size: 1em; color: #1B1B1B; } .driver-status { font-size: 0.82em; opacity: 0.9; font-weight: 500; }
-        .status-toggle { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; padding: 8px 16px; border-radius: 24px; font-size: 0.82em; cursor: pointer; transition: 0.25s; z-index: 1001; font-weight: 700; }
-        .status-toggle.active { background: #4CAF50; color: #fff; } .status-toggle.unavailable { background: #FF9800; color: #1B1B1B; }
-        
-        /* Driver Request Popup Style */
-        .requests-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 1500;
-            display: none;
-            align-items: center;
-            justify-content: center;
+        /* نافذة السائق المنبثقة المستقلة */
+        .driver-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); z-index: 2000;
+            display: none; align-items: flex-end; justify-content: center;
             backdrop-filter: blur(3px);
         }
-        .requests-overlay.show { display: flex; }
+        .driver-modal-overlay.active { display: flex; }
         
-        .request-popup-card {
-            background: white;
-            width: 90%;
-            max-width: 380px;
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid var(--border);
+        .driver-modal-content {
+            background: #fff; width: 100%; max-width: 500px;
+            border-radius: 24px 24px 0 0;
+            max-height: 85vh; display: flex; flex-direction: column;
+            animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
         }
-        @keyframes popIn { from {transform:scale(0.8); opacity:0;} to {transform:scale(1); opacity:1;} }
         
-        .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .popup-title { font-weight: 800; color: var(--primary-dark); font-size: 1.1em; }
-        .req-details { margin-bottom: 20px; }
-        .req-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.95em; }
-        .req-price-tag { background: #FFF9C4; color: #5D4037; padding: 8px 16px; border-radius: 12px; font-weight: 700; text-align: center; margin: 10px 0; border: 1px solid #FFECB3; }
-        .popup-actions { display: flex; gap: 10px; }
-        .popup-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; font-size: 1em; }
-        .btn-accept { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; }
-        .btn-decline { background: #F5F5F5; color: #555; }
+        .modal-header {
+            padding: 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #1B1B1B; border-radius: 24px 24px 0 0;
+        }
+        .modal-close { background: rgba(255,255,255,0.3); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        
+        .requests-list { padding: 14px 16px; overflow-y: auto; flex: 1; background: #FAFAFA; }
+        .request-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 14px; border-right: 4px solid var(--primary); transition: 0.25s; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05); } 
+        .request-card.urgent { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+        .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; } 
+        .req-time { font-size: 0.82em; color: #555; background: #E3F2FD; padding: 5px 12px; border-radius: 18px; font-weight: 600; } 
+        .req-urgent { font-size: 0.78em; color: var(--danger); font-weight: 700; }
+        .req-route { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; } 
+        .req-point { display: flex; align-items: flex-start; gap: 10px; font-size: 0.92em; }
+        .req-distance-badge { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 14px; border-radius: 24px; font-size: 0.82em; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
+        .req-actions { display: flex; gap: 10px; } 
+        .req-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.92em; cursor: pointer; transition: 0.25s; }
+        .accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } 
+        .decline-btn { background: #ECEFF1; color: #455A64; }
+        .empty-state { text-align: center; padding: 45px 24px; color: #666; } 
 
-        .empty-state { text-align: center; padding: 45px 24px; color: #666; } .empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
-        .refresh-btn { width: 100%; padding: 14px; background: #ECEFF1; color: #37474F; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: 0.2s; }
-        
+        /* Modal for Driver Registration */
+        .reg-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .reg-modal.active { display: flex; }
+        .reg-content {
+            background: #fff; width: 90%; max-width: 400px;
+            border-radius: 24px; padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
         .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
         .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 88vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
         .chat-header { padding: 18px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; border-radius: 24px 24px 0 0; flex-wrap: wrap; gap: 10px; }
@@ -339,18 +324,6 @@
         .start-trip-btn { background: linear-gradient(135deg, #66BB6A, #43A047); color: #fff; border: none; padding: 12px 24px; border-radius: 28px; font-weight: 700; font-size: 0.92em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.25s; box-shadow: 0 4px 16px rgba(67, 160, 71, 0.4); }
         .cancel-trip-btn { background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; padding: 12px 24px; border-radius: 28px; font-weight: 700; font-size: 0.92em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.25s; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.4); margin-right: 10px; }
         
-        .driver-dropdown { position: absolute; top: 100%; right: 0; left: 0; background: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.2); padding: 12px; z-index: 1003; display: none; flex-direction: column; gap: 10px; animation: slideDown 0.25s ease; border: 1px solid var(--border); margin-top: 8px; } .driver-dropdown.show { display: flex; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
-        .dropdown-btn { width: 100%; padding: 12px 18px; border: none; border-radius: 12px; background: var(--surface); color: var(--text); font-size: 0.92em; cursor: pointer; text-align: right; display: flex; align-items: center; gap: 10px; transition: 0.25s; font-weight: 600; } .dropdown-btn:hover { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); color: var(--primary-dark); } .dropdown-btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .dropdown-btn.danger { background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; }
-        
-        .records-view { padding: 18px; } .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .records-tabs { display: flex; gap: 6px; background: var(--surface); padding: 6px; border-radius: 14px; border: 1px solid var(--border); }
-        .record-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-size: 0.88em; cursor: pointer; transition: 0.25s; font-weight: 500; } .record-tab.active { background: var(--card); font-weight: 700; color: var(--primary-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .records-list { max-height: 62vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .record-card { background: var(--surface); border-radius: 14px; padding: 14px; border-right: 4px solid var(--primary); border: 1px solid var(--border); } .record-card.accepted { border-right-color: var(--primary); background: linear-gradient(135deg, #E8F5E9, #F1F8E9); } .record-card.rejected { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
-        .record-card .route { display: flex; flex-direction: column; gap: 5px; font-size: 0.88em; margin: 10px 0; } .record-card .meta { display: flex; justify-content: space-between; font-size: 0.82em; color: #555; }
-        .record-card .status { font-weight: 700; padding: 4px 12px; border-radius: 16px; font-size: 0.78em; } .record-card .status.accepted { background: #66BB6A; color: #fff; } .record-card .status.rejected { background: var(--danger); color: #fff; }
-        
         .leaflet-container { font-family: inherit; } .leaflet-control-zoom { border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
         .leaflet-control-zoom a { background: #fff !important; color: var(--text) !important; border: none !important; width: 32px !important; height: 32px !important; line-height: 32px !important; font-weight: 700; } .leaflet-control-zoom a:hover { background: var(--surface) !important; }
         .custom-popup { text-align: center; font-size: 0.92em; }
@@ -367,22 +340,6 @@
         .gps-desc { font-size: 0.9em; color: #666; margin-bottom: 20px; line-height: 1.5; }
         .gps-btn { width: 100%; padding: 12px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
         .gps-later { background: transparent; color: #666; }
-
-        /* Modal for Driver Setup */
-        .setup-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 5000;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .setup-modal.active { display: flex; }
-        .setup-content {
-            background: white; width: 90%; max-width: 380px;
-            border-radius: 24px; padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: popIn 0.3s ease;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -407,7 +364,6 @@
 
 <div class="app" id="mainApp" style="display: none;">
     <div id="view-auth" class="view active">
-        <div class="header" style="justify-content:center;"><h1>🚖 Yasser Ride Pro</h1></div>
         <div class="auth-view">
             <div class="main-logo">✨</div>
             <h2 class="main-title">مرحباً بك في ياسر رايد</h2>
@@ -431,18 +387,21 @@
 
     <!-- Passenger View with Full Screen Map -->
     <div id="view-request" class="view">
-        <!-- Header floating on map -->
+        <!-- Header with Icon Only -->
         <div class="header">
-            <button class="menu-icon-btn" onclick="toggleTopMenu()">☰</button>
-            
-            <!-- Top Dropdown Menu -->
-            <div class="top-dropdown-menu" id="passengerMenu">
-                <div class="menu-item" id="menuSetupCar" onclick="openDriverSetupModal()">
-                    <span>🚙</span> تسجيل سيارتي
-                </div>
-                <div class="menu-item danger" onclick="logoutUser()">
-                    <span>🚪</span> تسجيل الخروج
-                </div>
+            <button class="menu-btn" onclick="toggleHeaderMenu()">☰</button>
+        </div>
+        
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" id="headerDropdown">
+            <div class="dropdown-item" id="menuRegisterCar" onclick="openDriverRegModal()">
+                <span>🚙</span> تسجيل سيارتي
+            </div>
+            <div class="dropdown-item" id="menuRequests" onclick="openDriverRequests()" style="display:none;">
+                <span>📋</span> طلبات
+            </div>
+            <div class="dropdown-item danger" onclick="logoutUser()">
+                <span>🚪</span> خروج
             </div>
         </div>
         
@@ -511,55 +470,37 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Driver Dashboard View -->
-    <div id="view-dashboard" class="view">
-        <div class="dashboard-header">
-            <div class="driver-info">
-                <div class="driver-avatar" id="driverAvatarBtn" title="القائمة">👨✈️</div>
-                <div><div class="driver-name" id="dashDriverName">اسم السائق</div><div class="driver-status" id="dashDriverArea">منطقة العمل</div></div>
-                <div class="driver-dropdown" id="driverDropdown">
-                    <button class="dropdown-btn primary" onclick="openRecordsPage()">📋 سجل الرحلات</button>
-                    <button class="dropdown-btn" id="serviceToggleBtn" onclick="toggleServiceFromDropdown()">🟢 تفعيل الخدمة</button>
-                    <button class="dropdown-btn danger" onclick="switchToPassengerMode()">👤 العودة للراكب</button>
-                </div>
-            </div>
-            <button class="status-toggle active" id="statusToggle" onclick="toggleDriverStatus()">🟢 متاح</button>
+<!-- Driver Registration Modal -->
+<div id="driverRegModal" class="reg-modal">
+    <div class="reg-content">
+        <div style="text-align:center; margin-bottom:20px;">
+            <div style="font-size:3em;">🚕</div>
+            <h3 style="color:var(--primary-dark); font-weight:700;">تسجيل مركبتك</h3>
+            <p style="color:#666; font-size:0.9em;">أكمل البيانات لتبدأ العمل كسائق</p>
         </div>
-        
-        <!-- Requests Overlay (Popup Window) -->
-        <div class="requests-overlay" id="requestsOverlay">
-            <div id="requestsContainer" style="width:100%; display:flex; flex-direction:column; align-items:center; gap:15px; padding-bottom: 50px;">
-                <!-- Request Cards will be injected here via JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Records View -->
-    <div id="view-records" class="view">
-        <div class="header"><button class="back-btn" onclick="switchView('view-dashboard')">🔙 رجوع</button><h1>📋 سجل الرحلات</h1></div>
-        <div class="records-view">
-            <div class="records-header">
-                <div class="records-tabs">
-                    <button class="record-tab active" onclick="switchRecordsTab('all')">الكل</button>
-                    <button class="record-tab" onclick="switchRecordsTab('accepted')">✅ المقبولة</button>
-                    <button class="record-tab" onclick="switchRecordsTab('rejected')">❌ المرفوضة</button>
-                </div>
-            </div>
-            <div class="records-list" id="recordsList"><div style="text-align:center;padding:30px;color:#666"><span class="spinner"></span><br>جاري التحميل...</div></div>
-        </div>
+        <div class="form-group"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+        <div class="form-group"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
+        <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn">✅ تفعيل حساب السائق والبدء</button>
+        <button class="auth-btn alt" onclick="closeDriverRegModal()" style="margin-top:10px;">إلغاء</button>
     </div>
 </div>
 
-<!-- Driver Setup Modal -->
-<div id="setupModal" class="setup-modal">
-    <div class="setup-content">
-        <div style="font-size: 3em; margin-bottom: 10px;">🚕</div>
-        <h3 style="color: var(--primary-dark); margin-bottom: 15px; font-weight: 700;">تسجيل مركبة جديدة</h3>
-        <div class="form-group" style="margin-bottom: 15px;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
-        <div class="form-group" style="margin-bottom: 20px;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
-        <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="margin-bottom: 10px;">✅ تفعيل حساب السائق والبدء</button>
-        <button class="auth-btn alt" onclick="closeDriverSetupModal()">إلغاء</button>
+<!-- Driver Requests Modal (Independent Popup) -->
+<div id="driverRequestsModal" class="driver-modal-overlay">
+    <div class="driver-modal-content">
+        <div class="modal-header">
+            <div style="font-weight:700; font-size:1.1em;">📋 طلبات الرحلات الواردة</div>
+            <button class="modal-close" onclick="closeDriverRequests()">×</button>
+        </div>
+        <div style="padding:10px 16px; background:#E8F5E9; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+            <span style="font-weight:600; font-size:0.9em;">🟢 أنت متاح الآن</span>
+            <span id="modalRequestsCount" style="background:var(--primary); color:#1B1B1B; padding:2px 10px; border-radius:12px; font-size:0.8em; font-weight:700;">0</span>
+        </div>
+        <div class="requests-list" id="modalRequestsList">
+            <div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات حالياً</p></div>
+        </div>
     </div>
 </div>
 
@@ -652,23 +593,17 @@
     function saveToLocalLog(ride) {
         try { const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; let logs = JSON.parse(localStorage.getItem(key) || '[]'); if(!logs.some(l => l.id === ride.id)) { logs.unshift(ride); if(logs.length > 100) logs.pop(); localStorage.setItem(key, JSON.stringify(logs)); } } catch(e) {}
     }
-    function loadRecords(filter) {
-        const list = document.getElementById('recordsList'); list.innerHTML = '<div style="text-align:center;padding:30px"><span class="spinner"></span><br>جاري التحميل...</div>';
-        setTimeout(() => { try { const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; const rides = JSON.parse(localStorage.getItem(key) || '[]'); let filtered = rides; if(filter === 'accepted') filtered = rides.filter(r => r.status === 'accepted' || r.status === 'completed'); if(filter === 'rejected') filtered = rides.filter(r => r.status === 'cancelled' || r.status === 'expired' || r.status === 'declined'); if(filtered.length === 0) { list.innerHTML = '<div style="text-align:center;padding:30px;color:#666">📭 لا توجد سجلات</div>'; return; } list.innerHTML = filtered.map(r => { const isAcc = r.status === 'accepted' || r.status === 'completed'; const cr = r.createdAt ? new Date(r.createdAt) : new Date(); return `<div class="record-card ${isAcc?'accepted':'rejected'}"><div style="display:flex;justify-content:space-between;align-items:center"><strong>${isAcc?'✅ مقبولة':'❌ مرفوضة'}</strong><span class="status ${isAcc?'accepted':'rejected'}">${r.status}</span></div><div class="route"><div>📍 من: ${r.pickup?.name||'موقع'}</div><div>🏁 إلى: ${r.destination?.name||'موقع'}</div></div><div class="meta"><span>🕐 ${cr.toLocaleDateString('ar-DZ')} ${cr.toLocaleTimeString('ar-DZ')}</span><span>💰 ${r.price||'-'} د.ج</span></div></div>`; }).join(''); } catch(e) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--danger)">⚠️ خطأ في تحميل السجلات</div>'; } }, 50);
-    }
 
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
     
-    // Modal Logic
-    function openDriverSetupModal() {
-        document.getElementById('passengerMenu').classList.remove('show');
-        document.getElementById('setupModal').classList.add('active');
+    // Driver Registration Logic
+    function openDriverRegModal() { 
+        document.getElementById('headerDropdown').classList.remove('show');
+        document.getElementById('driverRegModal').classList.add('active'); 
     }
-    function closeDriverSetupModal() {
-        document.getElementById('setupModal').classList.remove('active');
-    }
-
+    function closeDriverRegModal() { document.getElementById('driverRegModal').classList.remove('active'); }
+    
     async function completeDriverSetup() { 
         const btn=document.getElementById('setupBtn'); 
         btn.disabled=true; btn.textContent='🔄 حفظ...'; 
@@ -677,59 +612,54 @@
         if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} 
         
         await db.collection('users').doc(currentUser.uid).update({role:'driver'}); 
-        await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}); 
+        await db.collection('drivers').doc(currentUser.uid).set({
+            uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, 
+            createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
+        }); 
         
-        Utils.showToast('✅ تم التسجيل بنجاح! أنت الآن سائق'); 
-        closeDriverSetupModal();
+        Utils.showToast('✅ تم التسجيل بنجاح! 🎉'); 
+        closeDriverRegModal();
         
-        // Update Menu immediately
-        const menuBtn = document.getElementById('menuSetupCar');
-        if(menuBtn) {
-            menuBtn.innerHTML = '<span>🚖</span> لوحة القيادة';
-            menuBtn.onclick = switchToDashboardDirectly;
-        }
+        // Update UI immediately
+        currentDriver = { carType, carName, uid: currentUser.uid };
+        document.getElementById('menuRegisterCar').style.display = 'none';
+        document.getElementById('menuRequests').style.display = 'flex';
         
-        // Switch to dashboard directly
-        switchToDashboardDirectly();
+        startLocationUpdates(currentUser.uid);
     }
 
-    async function skipToPassenger() { await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); Utils.showToast('👤 جاري التحويل كراكب...'); switchView('view-request'); }
-    
-    async function switchToPassengerMode() { 
-        if(!currentUser)return; 
-        try{ 
-            await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); 
-            document.getElementById('driverDropdown')?.classList.remove('show'); 
-            Utils.showToast('👤 تم التبديل إلى وضع الراكب'); 
-            
-            // Reset Menu Item
-            const menuBtn = document.getElementById('menuSetupCar');
-            if(menuBtn) {
-                menuBtn.innerHTML = '<span>🚙</span> تسجيل سيارتي';
-                menuBtn.onclick = openDriverSetupModal;
-            }
-            
-            switchView('view-request'); 
-            startPassengerLocationTracking(); 
-        }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
+    async function logoutUser() { 
+        document.getElementById('headerDropdown').classList.remove('show');
+        clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); 
+        if(heartbeatInterval)clearInterval(heartbeatInterval); 
+        if(activeChatListener)activeChatListener(); 
+        if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
+        await auth.signOut(); 
+        Utils.showToast('👋 تم تسجيل الخروج'); 
     }
 
-    async function switchToDashboardDirectly() {
-        if(!currentDriver) {
-             const dd=await db.collection('drivers').doc(currentUser.uid).get(); 
-             if(dd.exists) currentDriver=dd.data();
-        }
-        if(currentDriver) {
-            document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
-            document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; 
-            updateServiceToggleUI(); 
-            switchView('view-dashboard'); 
-            startLocationUpdates(currentUser.uid);
-            toggleDriverStatus(); // Auto enable
-        }
+    function toggleHeaderMenu() {
+        document.getElementById('headerDropdown').classList.toggle('show');
     }
 
-    async function logoutUser() { clearInterval(driverLocationInterval); clearInterval(passengerLocationInterval); if(heartbeatInterval)clearInterval(heartbeatInterval); if(activeChatListener)activeChatListener(); if(chatLocationUpdate)clearInterval(chatLocationUpdate); await auth.signOut(); Utils.showToast('👋 تم تسجيل الخروج'); }
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('headerDropdown');
+        const btn = document.querySelector('.menu-btn');
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+
+    // Driver Requests Modal Logic
+    function openDriverRequests() {
+        document.getElementById('headerDropdown').classList.remove('show');
+        document.getElementById('driverRequestsModal').classList.add('active');
+        loadRequests(); // Ensure requests are loaded
+    }
+    function closeDriverRequests() {
+        document.getElementById('driverRequestsModal').classList.remove('active');
+    }
 
     async function setDriverOfflineImmediately(uid) {
         if(!uid) return;
@@ -737,24 +667,12 @@
         offlineUpdateQueued = true;
         try {
             await db.collection('drivers').doc(uid).update({
-                available: false,
-                isOnline: false,
-                connectionStatus: 'offline',
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
+                available: false, isOnline: false, connectionStatus: 'offline',
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             offlineUpdateQueued = false;
-        } catch(e) {
-            console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة');
-        }
-        const t = document.getElementById('statusToggle');
-        if(t) { 
-            t.textContent = '🔴 غير متاح (غير متصل)'; 
-            t.classList.remove('active'); 
-            t.classList.add('unavailable'); 
-        }
-        updateServiceToggleUI();
-        Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
+        } catch(e) { console.log('⚠️ تحديث Firebase فشل'); }
+        Utils.showToast('🔴 انقطع الاتصال', 'error');
         if(driverLocationInterval) { clearInterval(driverLocationInterval); driverLocationInterval = null; }
         if(heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
     }
@@ -762,72 +680,53 @@
     function initFirebase() {
         try { 
             const config = { 
-                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
-                authDomain:"birine-app.firebaseapp.com", 
-                projectId:"birine-app", 
-                storageBucket:"birine-app.firebasestorage.app", 
-                messagingSenderId:"359460161481", 
-                appId:"1:359460161481:web:5739dcc79ed79275928a18", 
-                measurementId:"G-GX972M18B4" 
+                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", authDomain:"birine-app.firebaseapp.com", projectId:"birine-app", 
+                storageBucket:"birine-app.firebasestorage.app", messagingSenderId:"359460161481", appId:"1:359460161481:web:5739dcc79ed79275928a18", measurementId:"G-GX972M18B4" 
             }; 
-            app=firebase.initializeApp(config); 
-            db=firebase.firestore(app); 
-            auth=firebase.auth(app); 
+            app=firebase.initializeApp(config); db=firebase.firestore(app); auth=firebase.auth(app); 
             auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); 
             
             auth.onAuthStateChanged(async user => { 
                 if(user){ 
                     currentUser=user; 
-                    routeUserAfterAuth(user); 
+                    const ud=await db.collection('users').doc(user.uid).get(); 
+                    if(ud.exists) {
+                        const d=ud.data();
+                        if(d.role==='driver') {
+                            const dd=await db.collection('drivers').doc(user.uid).get();
+                            if(dd.exists) {
+                                currentDriver=dd.data();
+                                document.getElementById('menuRegisterCar').style.display = 'none';
+                                document.getElementById('menuRequests').style.display = 'flex';
+                                startLocationUpdates(user.uid);
+                            }
+                        }
+                    }
+                    switchView('view-request'); 
+                    startPassengerLocationTracking();
                     setTimeout(showGPSReminder, 1000);
                 } else { 
-                    currentUser=null; 
-                    currentDriver=null; 
-                    switchView('view-auth'); 
+                    currentUser=null; currentDriver=null; switchView('view-auth'); 
                 } 
                 document.getElementById('loadingOverlay').classList.add('hidden'); 
                 document.getElementById('mainApp').style.display='block'; 
             }); 
             
             window.addEventListener('offline', () => {
-                console.log('🔴 انترنت مقطوع - جاري تعيين available: false فوراً');
                 lastOnlineState = false;
                 if(currentDriver?.uid) { setDriverOfflineImmediately(currentDriver.uid); }
             }, { passive: true });
 
             window.addEventListener('online', async () => {
-                console.log('🟢 عدنا للاتصال - جاري المزامنة');
                 lastOnlineState = true;
                 if(currentDriver?.uid) {
-                    if(offlineUpdateQueued) {
-                        try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            offlineUpdateQueued = false;
-                        } catch(e) { console.log('⚠️ مزامنة فايربيس:', e); }
-                    }
-                    if(driverAvailable) {
-                        try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            const t = document.getElementById('statusToggle');
-                            if(t) { t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); }
-                            Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
-                            startLocationUpdates(currentDriver.uid);
-                            loadRequests();
-                        } catch(e) { console.log('⚠️ استعادة التوفر:', e); }
-                    }
+                    try {
+                        await db.collection('drivers').doc(currentDriver.uid).update({ isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp() });
+                        Utils.showToast('✅ عدت للاتصال');
+                        startLocationUpdates(currentDriver.uid);
+                    } catch(e) {}
                 }
             }, { passive: true });
-
-            setInterval(() => {
-                if(currentDriver?.uid && lastOnlineState !== navigator.onLine) {
-                    if(!navigator.onLine) { console.log('🔴 [فحص دوري] انقطاع مكتشف - تحديث فوري'); setDriverOfflineImmediately(currentDriver.uid); }
-                    lastOnlineState = navigator.onLine;
-                }
-            }, 3000);
             
         } catch(e) { 
             console.error(e); 
@@ -836,44 +735,12 @@
         }
     }
     
-    async function routeUserAfterAuth(user) { 
-        const ud=await db.collection('users').doc(user.uid).get(); 
-        if(!ud.exists) return switchView('view-auth'); 
-        const d=ud.data(); 
-        if(d.role==='driver') { 
-            const dd=await db.collection('drivers').doc(user.uid).get(); 
-            if(dd.exists) { 
-                currentDriver=dd.data(); 
-                document.getElementById('dashDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
-                document.getElementById('dashDriverArea').textContent=`🚗 ${currentDriver.carType}`; 
-                updateServiceToggleUI(); 
-                
-                // Update Menu to Dashboard
-                const menuBtn = document.getElementById('menuSetupCar');
-                if(menuBtn) {
-                    menuBtn.innerHTML = '<span>🚖</span> لوحة القيادة';
-                    menuBtn.onclick = switchToDashboardDirectly;
-                }
-                
-                switchView('view-dashboard'); 
-                startLocationUpdates(user.uid); 
-            } else switchView('view-request'); 
-        } else { 
-            switchView('view-request'); 
-            startPassengerLocationTracking(); 
-        } 
-    }
-    
     function startLocationUpdates(uid) { 
         clearInterval(driverLocationInterval); 
         clearInterval(heartbeatInterval);
         heartbeatInterval = setInterval(async () => {
             if(!currentDriver?.uid || !navigator.onLine) return;
-            try {
-                await db.collection('drivers').doc(uid).update({
-                    lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
-                });
-            } catch(e) { if(navigator.onLine) console.log('⚠️ نبضة قلب فشلت:', e); }
+            try { await db.collection('drivers').doc(uid).update({ lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true }); } catch(e) {}
         }, 5000);
         
         driverLocationInterval = setInterval(async () => { 
@@ -882,15 +749,8 @@
             navigator.geolocation.getCurrentPosition(async p => { 
                 try { 
                     const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
-                    await db.collection('drivers').doc(uid).update({
-                        location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online'
-                    }); 
+                    await db.collection('drivers').doc(uid).update({ location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online' }); 
                     myCurrentPos = [l.lat, l.lng]; 
-                    if(chatMiniMap && currentActiveRide?.passengerId) { 
-                        const o = await getPassengerLocation(currentActiveRide.passengerId); 
-                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
-                        updateChatDistanceBadge(myCurrentPos, o); 
-                    } 
                 } catch(e) { if(!navigator.onLine) setDriverOfflineImmediately(uid); } 
             }, null, {enableHighAccuracy: true, timeout: 5000}); 
         }, 10000); 
@@ -905,58 +765,15 @@
                     const l={lat:p.coords.latitude, lng:p.coords.longitude}; 
                     await db.collection('users').doc(currentUser.uid).update({lastLocation:l, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); 
                     myCurrentPos=[l.lat, l.lng]; 
-                    if(chatMiniMap&&currentActiveRide?.assignedDriverId){ 
-                        const o=await getDriverLocation(currentActiveRide.assignedDriverId); 
-                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
-                        updateChatDistanceBadge(myCurrentPos, o); 
-                    } 
                 }catch(e){} 
             },null,{enableHighAccuracy:true, timeout:5000}); 
         },10000); 
     }
-    async function getDriverLocation(id) { try{ const d=await db.collection('drivers').doc(id).get(); if(d.exists&&d.data().location)return [d.data().location.lat, d.data().location.lng]; }catch(e){} return null; }
-    async function getPassengerLocation(id) { try{ const u=await db.collection('users').doc(id).get(); if(u.exists&&u.data().lastLocation)return [u.data().lastLocation.lat, u.data().lastLocation.lng]; }catch(e){} return null; }
-    function updateChatDistanceBadge(my, oth) { const b=document.querySelector('.chat-mini-map .distance-badge'); if(!b||!my||!oth)return; const d=Utils.calculateDistance(my[0],my[1],oth[0],oth[1]); b.innerHTML=`📏 ${Utils.formatDistance(d)} • ⏱️ ${Utils.formatTime(Math.max(1,Math.round(d/3)))}`; }
 
-    function toggleTopMenu() {
-        document.getElementById('passengerMenu').classList.toggle('show');
-    }
-
-    function toggleDriverDropdown(e) { e?.stopPropagation(); const d=document.getElementById('driverDropdown'); const s=d.classList.contains('show'); document.querySelectorAll('.driver-dropdown').forEach(x=>x.classList.remove('show')); if(!s)d.classList.add('show'); setTimeout(()=>{ const h=(ev)=>{ if(!d.contains(ev.target)&&ev.target!==document.getElementById('driverAvatarBtn')){ d.classList.remove('show'); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); } }; document.addEventListener('click',h); document.addEventListener('touchstart',h); },100); }
-    document.addEventListener('DOMContentLoaded', ()=>{ const b=document.getElementById('driverAvatarBtn'); if(b){b.addEventListener('click',toggleDriverDropdown);b.addEventListener('touchstart',e=>{e.preventDefault();toggleDriverDropdown(e);});} });
-    function updateServiceToggleUI() { const b=document.getElementById('serviceToggleBtn'); if(b){b.textContent=driverAvailable?'🟢 الخدمة مفعلة':'🔴 الخدمة متوقفة'; driverAvailable?b.classList.add('primary'):b.classList.remove('primary');} }
-    function toggleServiceFromDropdown() { toggleDriverStatus(); updateServiceToggleUI(); document.getElementById('driverDropdown').classList.remove('show'); }
-    function openRecordsPage() { document.getElementById('driverDropdown').classList.remove('show'); switchView('view-records'); loadRecords('all'); }
-    function switchRecordsTab(f) { currentRecordsFilter=f; document.querySelectorAll('.record-tab').forEach(t=>t.classList.remove('active')); event.target.classList.add('active'); loadRecords(f); }
-    
-    function toggleDriverStatus() { 
-        if(!navigator.onLine && !driverAvailable) { Utils.showToast('⚠️ تحقق من اتصال الإنترنت أولاً', 'error'); return; }
-        driverAvailable = !driverAvailable; 
-        if(currentDriver?.uid) {
-            db.collection('drivers').doc(currentDriver.uid).update({
-                available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine
-            });
-        }
-        const t = document.getElementById('statusToggle'); 
-        if(driverAvailable) {
-            t.textContent = '🟢 متاح'; t.classList.add('active'); t.classList.remove('unavailable'); Utils.showToast('✅ أنت متاح'); loadRequests();
-        } else { 
-            t.textContent = '🔴 غير متاح'; t.classList.remove('active'); t.classList.add('unavailable'); Utils.showToast('🔕 تم إيقاف الخدمة');
-        } 
-    }
-    
     function loadRequests() { 
-        const overlay = document.getElementById('requestsOverlay');
-        const container = document.getElementById('requestsContainer');
-        
-        if(!currentDriver||!driverAvailable){ 
-            overlay.classList.remove('show');
-            return; 
-        } 
-        
-        overlay.classList.add('show');
-        container.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري البحث عن طلبات...</div>'; 
-        
+        const l=document.getElementById('modalRequestsList'), c=document.getElementById('modalRequestsCount'); 
+        if(!currentDriver){ return; } 
+        l.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; 
         if(activeRequestListener)activeRequestListener(); 
         activeRequestListener=db.collection('rideRequests').where('status','==','pending').where('carType','==',currentDriver.carType).limit(20).onSnapshot(s=>{ 
             const r=[]; 
@@ -965,42 +782,22 @@
                 if(x.skippedBy?.includes(currentDriver.uid))return; 
                 if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); 
             }); 
-            
-            renderRequestsPopup(r, container); 
+            const n=r.length; 
+            if(c) c.textContent=n; 
+            renderRequests(r,l,c); 
         },e=>console.error(e)); 
     }
     
-    function renderRequestsPopup(reqs, container){ 
-        if(reqs.length===0){
-            container.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات قريبة حالياً</p><p style="font-size:0.8em; margin-top:10px">استمر في القيادة...</p></div>';
-            return;
-        } 
-        
-        container.innerHTML = reqs.map(r=>{ 
+    function renderRequests(reqs,l,c){ 
+        if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p></div>';return;} 
+        l.innerHTML=reqs.map(r=>{ 
             const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000); 
             let d='---'; 
             if(currentDriver?.location&&r.pickup?.lat){ 
                 const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); 
                 d=ds.toFixed(1); 
             } 
-            const rej=r.skippedBy?.length||0; 
-            return `<div class="request-popup-card">
-                <div class="popup-header">
-                    <span class="popup-title">🚖 طلب جديد</span>
-                    <span class="req-time" style="background:#E3F2FD; padding:4px 10px; border-radius:12px; font-size:0.8em">🕐 منذ ${m} د</span>
-                </div>
-                <div class="req-details">
-                    <div class="req-row"><span>📍</span> <strong>من:</strong> ${r.pickup?.name||'موقع الحالي'}</div>
-                    <div class="req-row"><span>🏁</span> <strong>إلى:</strong> ${r.destination?.name||'غير محدد'}</div>
-                    <div class="req-row"><span>🚶</span> الراكب يبعد <b>${d} كم</b></div>
-                    ${rej>0?`<div style="font-size:0.8em; color:var(--danger)">🔄 رُفض ${rej} مرات</div>`:''}
-                </div>
-                <div class="req-price-tag">💰 ${r.price} د.ج</div>
-                <div class="popup-actions">
-                    <button class="popup-btn btn-decline" onclick="handleDecline('${r.id}')">❌ رفض</button>
-                    <button class="popup-btn btn-accept" onclick="handleAccept('${r.id}')">✅ قبول</button>
-                </div>
-            </div>`; 
+            return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div><div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`; 
         }).join(''); 
     }
 
@@ -1013,18 +810,16 @@
             const r=s.data(); 
             await db.collection('rideRequests').doc(rideId).update({status:'accepted', acceptedBy:currentDriver.uid, acceptedAt:firebase.firestore.FieldValue.serverTimestamp()}); 
             await db.collection('drivers').doc(currentDriver.uid).update({available:false, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); 
-            const t=document.getElementById('statusToggle'); 
-            if(t){t.textContent='🔴 غير متاح';t.classList.remove('active');t.classList.add('unavailable');driverAvailable=false;updateServiceToggleUI();} 
             const cid=await createChat(rideId,r.passengerId,currentDriver.uid); 
             const dn=currentDriver.carName||currentDriver.email?.split('@')[0]||'السائق'; 
             await sendMessage(cid,currentDriver.uid,'driver',`✅ تم قبول طلبك! أنا في الطريق.`);
             currentActiveRide={id:rideId,...r,status:'accepted'}; 
             saveToLocalLog({id:rideId, status:'accepted', pickup:r.pickup, destination:r.destination, price:r.price, createdAt:r.createdAt?.toDate?.()||new Date().toISOString()}); 
             Utils.showToast('✅ قبلت الرحلة! 💬 افتح المحادثة'); 
-            document.getElementById('requestsOverlay').classList.remove('show'); // Hide requests overlay
             showChatInterface(rideId,r.passengerId,currentDriver.uid,'driver',dn,currentActiveRide); 
             showChatButton(rideId,cid,'driver',dn,currentActiveRide); 
             if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]); 
+            closeDriverRequests(); // Close modal after accepting
         }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
         finally{b.disabled=false;b.textContent='✅ قبول';loadRequests();} 
     };
@@ -1054,7 +849,7 @@
                 Utils.showToast('⏭️ تم نقل الطلب للسائق التالي'); 
             } else { 
                 await ref.update({status:'expired',skippedBy:sk}); 
-                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً'); 
+                Utils.showToast('⚠️ لا يوجد سائقين متاحين'); 
             } 
             saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()}); 
         }catch(e){console.error(e);Utils.showToast('⚠️ '+e.message,'error');} 
@@ -1063,7 +858,6 @@
 
     async function createChat(rid, pid, did) { const cid=`chat_${rid}`; await db.collection('chats').doc(cid).set({rideId:rid, passengerId:pid, driverId:did, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastMessage:null, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}); return cid; }
     async function sendMessage(cid, sid, st, text) { if(!text.trim())return; await db.collection('chats').doc(cid).collection('messages').add({senderId:sid, senderType:st, text:text.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp(), read:false}); await db.collection('chats').doc(cid).update({lastMessage:text.trim(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); }
-    window.sendQuickMessage=async function(cid,sid,st,text){ await sendMessage(cid,sid,st,text); Utils.showToast('✅ تم الإرسال'); };
     function listenToMessages(cid, cb, uid) { lastKnownMessageCount=0; currentChatMyId=uid; return db.collection('chats').doc(cid).collection('messages').orderBy('timestamp','asc').onSnapshot(s=>{ const m=[]; s.forEach(d=>m.push({id:d.id,...d.data()})); if(m.length>0&&lastKnownMessageCount>0) m.slice(lastKnownMessageCount).forEach(msg=>{if(msg.senderId!==uid)Utils.playSound('chatMessageSound');}); lastKnownMessageCount=m.length; cb(m); }); }
     
     async function showChatInterface(rid, pid, did, role, name, rd=null) { 
@@ -1120,7 +914,7 @@
     window.cancelActiveTrip=async function(rid){ if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟'))return; try{ await db.collection('rideRequests').doc(rid).update({status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp()}); if(currentDriver?.uid) await db.collection('drivers').doc(currentDriver.uid).update({available:true}); const cid = `chat_${rid}`; await sendMessage(cid, currentDriver?.uid||currentUser.uid, 'system', '❌ تم إلغاء الرحلة من قبل السائق. جاري البحث عن سائق آخر...'); Utils.showToast('❌ تم إلغاء الرحلة','error'); closeChat(); if(currentActiveRide?.id===rid)currentActiveRide=null; loadRequests(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} };
     function showChatButton(rid, cid, role, name, rd){ const ex=document.getElementById('floatingChatBtn'); if(ex)ex.remove(); const b=document.createElement('button'); b.id='floatingChatBtn'; b.innerHTML='💬 محادثة'; b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); document.body.appendChild(b); }
 
-    function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); if(id==='view-dashboard'&&currentDriver)loadRequests(); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
+    function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
     
     // Toggle Bottom Sheet Function
     function toggleBottomSheet() {
@@ -1138,17 +932,11 @@
     document.addEventListener('click', function(event) {
         const sheet = document.getElementById('requestSheet');
         const btn = document.getElementById('mainRequestBtn');
-        const menu = document.getElementById('passengerMenu');
         
-        // Close bottom sheet
+        // إذا كانت القائمة مفتوحة والنقر لم يكن داخل القائمة ولم يكن على زر الفتح
         if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) {
             sheet.classList.remove('open');
             btn.classList.remove('hidden');
-        }
-        
-        // Close top menu
-        if (!menu.contains(event.target) && !event.target.closest('.menu-icon-btn')) {
-            menu.classList.remove('show');
         }
     });
 
@@ -1168,65 +956,30 @@
     function startSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); updateNearbyDriversOnSearchMap(); searchUpdateInterval=setInterval(updateNearbyDriversOnSearchMap,5000); }
     function stopSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); }
     
-    // ✅ تم تحسين هذه الدالة لإصلاح مشكلة عدم ظهور السائقين عند الكتابة اليدوية
     async function updateNearbyDriversOnSearchMap() { 
         if(!searchMap || !pickupPos) return; 
-        
-        // مسح العلامات القديمة بشكل آمن لتجنب التكرار أو الأخطاء
         searchMarkerMap = {}; 
-        searchMarkers.forEach(m => {
-            try { searchMap.removeLayer(m); } catch(e){}
-        }); 
+        searchMarkers.forEach(m => { try { searchMap.removeLayer(m); } catch(e){} }); 
         searchMarkers = []; 
-        
         try { 
-            // استخدام .trim() لإزالة أي مسافات زائدة قد تسبب عدم تطابق نوع السيارة
             const selectedCarOpt = document.querySelector('.car-opt.selected');
             const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة'; 
-            
-            console.log("🔍 جاري البحث عن سائقين لنوع:", requestedType, "في موقع:", pickupPos);
-
-            const ds = await db.collection('drivers')
-                .where('available', '==', true)
-                .where('carType', '==', requestedType)
-                .get(); 
-                
+            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get(); 
             let foundCount = 0;
-
             ds.forEach(doc => { 
                 const d = doc.data(); 
-                // التحقق من الموقع والاتصال
                 if(d.location && d.isOnline !== false) { 
                     const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.location.lat, d.location.lng); 
-                    
-                    // زيادة المدى إلى 20 كم لضمان العثور على سائقين حتى مع تقريب إحداثيات العنوان المكتوب
                     if(dist <= 20) { 
                         const ic = d.carType === 'دراجة نارية' ? 'motorcycle' : (d.carType === 'شاحنة نقل صغيرة' ? 'truck' : 'driver'); 
-                        
-                        const mk = MapUtils.createMarker(
-                            [d.location.lat, d.location.lng], 
-                            ic, 
-                            `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`
-                        ).addTo(searchMap); 
-                        
-                        searchMarkers.push(mk); 
-                        searchMarkerMap[doc.id] = mk; 
-                        foundCount++;
+                        const mk = MapUtils.createMarker([d.location.lat, d.location.lng], ic, `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`).addTo(searchMap); 
+                        searchMarkers.push(mk); searchMarkerMap[doc.id] = mk; foundCount++;
                     } 
                 } 
             }); 
-            
-            console.log(`✅ تم العثور على ${foundCount} سائقين قريبين`);
-            
-            if(foundCount === 0) {
-                 document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`;
-            } else {
-                 document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين`;
-            }
-
-        } catch(e) {
-            console.error("❌ خطأ في البحث:", e);
-        } 
+            if(foundCount === 0) document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`;
+            else document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين`;
+        } catch(e) { console.error("❌ خطأ في البحث:", e); } 
     }
 
     function dispatchNext() { 
@@ -1243,90 +996,55 @@
         document.getElementById('searchSubText').textContent=`متبقي ${dispatchDrivers.length-dispatchIndex} سائقين`; 
         stopPulseOnCurrent(); 
         const newMarker=searchMarkerMap[target.id]; 
-        if(newMarker){ 
-            const el=newMarker.getElement(); 
-            if(el){ el.classList.add('pulse-blue'); currentPulsingMarker=newMarker; } 
-        } 
+        if(newMarker){ const el=newMarker.getElement(); if(el){ el.classList.add('pulse-blue'); currentPulsingMarker=newMarker; } } 
         db.collection('rideRequests').doc(currentRideId).update({status:'pending',assignedDriverId:target.id,assignedAt:firebase.firestore.FieldValue.serverTimestamp(),dispatchStage:dispatchIndex}); 
         dispatchTimeoutId=setTimeout(()=>{ 
             db.collection('rideRequests').doc(currentRideId).get().then(doc=>{ 
                 if(doc.exists&&doc.data().status==='pending'){ 
                     stopPulseOnCurrent(); 
                     db.collection('rideRequests').doc(currentRideId).update({skippedBy:firebase.firestore.FieldValue.arrayUnion(target.id)}); 
-                    dispatchIndex++; 
-                    dispatchNext(); 
+                    dispatchIndex++; dispatchNext(); 
                 } 
             }); 
         },30000); 
     }
     
-    function stopPulseOnCurrent() { 
-        if(currentPulsingMarker){ 
-            const el=currentPulsingMarker.getElement(); 
-            if(el) el.classList.remove('pulse-blue'); 
-            currentPulsingMarker=null; 
-        } 
-    }
+    function stopPulseOnCurrent() { if(currentPulsingMarker){ const el=currentPulsingMarker.getElement(); if(el) el.classList.remove('pulse-blue'); currentPulsingMarker=null; } }
 
-    // ✅ تم تحسين هذه الدالة لضمان مطابقة نوع السيارة بدقة عند الطلب
     async function bookRide() { 
         if(!pickupPos||!destPos)return Utils.showToast('⚠️ حدد الانطلاق والوجهة','error'); 
-        
-        // استخدام .trim() لضمان عدم وجود مسافات زائدة في اسم النوع
         const selectedEl = document.querySelector('.car-opt.selected .name');
         const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
         
-        openSearchModal(); 
-        rideState='searching'; 
-        dispatchIndex=0; 
-        dispatchDrivers=[]; 
-        
+        openSearchModal(); rideState='searching'; dispatchIndex=0; dispatchDrivers=[]; 
         document.getElementById('searchStatusText').textContent='جاري البحث عن سائقين...'; 
         document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType}`;
         
         try { 
             const ref=await db.collection('rideRequests').add({
-                passengerId:currentUser.uid, 
-                pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, 
-                destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, 
-                distance:parseFloat(distKm), 
-                time:timeMin, 
-                carType: requestedCarType, // النوع المضمن بدقة
-                price:baseFare+Math.round(distKm*selectedRate), 
-                status:'pending', 
-                assignedDriverId:null, 
-                createdAt:firebase.firestore.FieldValue.serverTimestamp(), 
-                skippedBy:[]
+                passengerId:currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, 
+                destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, 
+                carType: requestedCarType, price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, 
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:[]
             }); 
             currentRideId=ref.id; 
-        } catch(e){ 
-            Utils.showToast('❌ فشل الإنشاء','error'); 
-            rideState='idle'; 
-            closeSearchModal(); 
-            return; 
-        } 
+        } catch(e){ Utils.showToast('❌ فشل الإنشاء','error'); rideState='idle'; closeSearchModal(); return; } 
         
         const ds=await db.collection('drivers').where('available','==',true).where('carType','==',requestedCarType).get(); 
         ds.forEach(d=>{ 
             const dd=d.data(); 
             if(dd.location){ 
                 const dist=Utils.calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); 
-                // زيادة المدى إلى 20 كم ليتوافق مع دالة العرض
                 if(dist<=20) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)}); 
             }
         }); 
-        
         dispatchDrivers.sort((a,b)=>a.distance-b.distance); 
-        
         if(dispatchDrivers.length===0){ 
             document.getElementById('searchStatusText').textContent='لا يوجد سائقين'; 
             document.getElementById('searchSubText').innerHTML = `لم نجد سائقين <b>${requestedCarType}</b> في منطقتك.<br>يرجى المحاولة لاحقاً أو تغيير النوع.`; 
-            setTimeout(()=>{rideState='idle';closeSearchModal();},4000); 
-            return; 
+            setTimeout(()=>{rideState='idle';closeSearchModal();},4000); return; 
         } 
-        
-        dispatchNext(); 
-        listenForRideUpdate(); 
+        dispatchNext(); listenForRideUpdate(); 
     }
     
     function listenForRideUpdate() { 
@@ -1337,31 +1055,24 @@
             if(data.status==='accepted'){ 
                 rideState='matched'; 
                 if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); 
-                closeSearchModal(); 
-                stopPulseOnCurrent(); 
+                closeSearchModal(); stopPulseOnCurrent(); 
                 document.getElementById('driverCard').classList.add('show'); 
                 db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{ 
                     if(ds.exists){ 
                         const dr=ds.data(), dn=dr.carName||dr.email?.split('@')[0]||'سائق'; 
-                        document.getElementById('dName').textContent=dn; 
-                        document.getElementById('dMeta').textContent=dr.carType; 
+                        document.getElementById('dName').textContent=dn; document.getElementById('dMeta').textContent=dr.carType; 
                         document.getElementById('dEta').textContent=`🚗 في الطريق • ~${Math.max(2,Math.round(data.distance/3))} دقائق`; 
                         createChat(currentRideId,currentUser.uid,data.acceptedBy).then(cid=>{ 
-                            showChatButton(currentRideId,cid,'passenger',dn,data); 
-                            showChatInterface(currentRideId,currentUser.uid,data.acceptedBy,'passenger',dn,data); 
+                            showChatButton(currentRideId,cid,'passenger',dn,data); showChatInterface(currentRideId,currentUser.uid,data.acceptedBy,'passenger',dn,data); 
                         }); 
                         Utils.showToast(`✅ قبل السائق! تم فتح المحادثة 💬`); 
                         if(dr.location&&pickupPos&&destPos) MapUtils.drawDualRoute(map,[dr.location.lat,dr.location.lng],pickupPos,destPos); 
                         saveToLocalLog({id:currentRideId, status:'accepted', pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); 
                     } 
-                }); 
-                unsub(); 
+                }); unsub(); 
             } else if(data.status==='expired'||data.status==='cancelled'){ 
-                rideState='idle'; 
-                closeSearchModal(); 
-                stopPulseOnCurrent(); 
-                document.getElementById('bookBtn').disabled=false; 
-                unsub(); 
+                rideState='idle'; closeSearchModal(); stopPulseOnCurrent(); 
+                document.getElementById('bookBtn').disabled=false; unsub(); 
                 saveToLocalLog({id:currentRideId, status:data.status, pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); 
             } 
         }); 
@@ -1370,42 +1081,21 @@
     function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
     function cancelRide(){ 
         if(confirm('إلغاء الرحلة؟')&&currentRideId){ 
-            updateRideStatus('cancelled'); 
-            rideState='idle'; 
-            closeSearchModal(); 
-            stopPulseOnCurrent(); 
-            document.getElementById('driverCard').classList.remove('show'); 
-            document.getElementById('bookBtn').disabled=false; 
-            Utils.showToast('❌ تم الإلغاء','error'); 
-            currentRideId=null; 
+            updateRideStatus('cancelled'); rideState='idle'; closeSearchModal(); stopPulseOnCurrent(); 
+            document.getElementById('driverCard').classList.remove('show'); document.getElementById('bookBtn').disabled=false; 
+            Utils.showToast('❌ تم الإلغاء','error'); currentRideId=null; 
             if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); 
-            const c=document.getElementById('floatingChatBtn'); 
-            if(c)c.remove(); 
+            const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); 
             saveToLocalLog({id:currentRideId, status:'cancelled', pickup:null, destination:null, price:0, createdAt:new Date().toISOString()}); 
         } 
     }
     
-    function showGPSReminder() {
-        document.getElementById('gpsReminderModal').style.display = 'flex';
-    }
-    function closeGPSModal() {
-        document.getElementById('gpsReminderModal').style.display = 'none';
-    }
+    function showGPSReminder() { document.getElementById('gpsReminderModal').style.display = 'flex'; }
+    function closeGPSModal() { document.getElementById('gpsReminderModal').style.display = 'none'; }
     function enableGPSAndClose() {
         if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (p) => {
-                    Utils.showToast('✅ تم تفعيل الموقع بنجاح');
-                    closeGPSModal();
-                },
-                (err) => {
-                    Utils.showToast('⚠️ يرجى السماح بتحديد الموقع من إعدادات المتصفح', 'error');
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error');
-        }
+            navigator.geolocation.getCurrentPosition((p) => { Utils.showToast('✅ تم تفعيل الموقع بنجاح'); closeGPSModal(); }, (err) => { Utils.showToast('⚠️ يرجى السماح بتحديد الموقع', 'error'); }, { enableHighAccuracy: true });
+        } else { Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error'); }
     }
 
     window.onload=initFirebase;
