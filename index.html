@@ -226,7 +226,7 @@
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
         .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
         
-        /* تصميم نافذة تسجيل السيارة المنبثقة */
+        /* تصميم النوافذ المنبثقة */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
@@ -393,29 +393,20 @@
 
     <!-- Passenger View with Full Screen Map -->
     <div id="view-request" class="view">
-        <!-- Header floating on map (Modified: Removed Logout & Title) -->
         <div class="header">
-            <!-- Empty left side for balance or future use -->
             <div style="width: 24px;"></div> 
-            
-            <!-- Driver Registration Button in Header -->
             <button class="logout-btn" id="registerCarHeaderBtn" onclick="openDriverSetupModal()" style="margin:0 auto; font-size:0.85em; padding: 8px 16px; background: rgba(255,255,255,0.8);">
                 🚙 تسجيل سيارتي
             </button>
-            
-            <!-- Empty right side -->
             <div style="width: 24px;"></div>
         </div>
         
-        <!-- Map Background -->
         <div id="map"></div>
 
-        <!-- Floating Action Button (Main Trigger) -->
         <button id="mainRequestBtn" class="fab-request-btn" onclick="toggleBottomSheet()">
             <span>🚖</span> اطلب سيارة الآن
         </button>
 
-        <!-- Bottom Sheet (The Dropdown Menu) -->
         <div class="bottom-sheet-container">
             <div class="bottom-sheet" id="requestSheet">
                 <div class="sheet-handle"></div>
@@ -461,7 +452,6 @@
 
                 <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 تأكيد الطلب</button>
                 
-                <!-- This card is now hidden by default and shown via Modal logic if needed, but we will use the new Modal -->
                 <div class="driver-card" id="driverCard" style="display:none;">
                     <div class="d-header">
                         <div class="d-avatar">👨✈️</div>
@@ -518,6 +508,55 @@
         </div>
     </div>
 
+    <!-- NEW: Request Details Modal for Driver -->
+    <div id="requestDetailsModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: right; max-width: 450px;">
+            <button class="close-modal" onclick="closeRequestDetailsModal()">×</button>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 3em; margin-bottom: 10px;">🚖</div>
+                <h3 style="color: var(--primary-dark); margin-bottom: 5px;">تفاصيل طلب جديد</h3>
+                <span id="reqDetailTime" style="background: #E3F2FD; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 600;"></span>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start;">
+                    <span style="font-size: 1.2em;">📍</span>
+                    <div>
+                        <div style="font-size: 0.8em; color: #666;">موقع الانطلاق:</div>
+                        <div style="font-weight: 600;" id="reqDetailPickup">---</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: flex-start;">
+                    <span style="font-size: 1.2em;">🏁</span>
+                    <div>
+                        <div style="font-size: 0.8em; color: #666;">الوجهة المطلوبة:</div>
+                        <div style="font-weight: 600;" id="reqDetailDest">---</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div style="background: #E8F5E9; padding: 10px; border-radius: 10px; text-align: center;">
+                    <div style="font-weight: 700; color: var(--primary-dark);" id="reqDetailDist">---</div>
+                    <div style="font-size: 0.75em; color: #555;">المسافة</div>
+                </div>
+                <div style="background: #FFF9C4; padding: 10px; border-radius: 10px; text-align: center;">
+                    <div style="font-weight: 700; color: #5D4037;" id="reqDetailPrice">---</div>
+                    <div style="font-size: 0.75em; color: #555;">السعر</div>
+                </div>
+                <div style="background: #E3F2FD; padding: 10px; border-radius: 10px; text-align: center;">
+                    <div style="font-weight: 700; color: #1565C0;" id="reqDetailCar">---</div>
+                    <div style="font-size: 0.75em; color: #555;">المركبة</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="auth-btn" onclick="handleAcceptFromModal()" style="flex: 1; margin: 0;">✅ قبول الطلب</button>
+                <button class="auth-btn" onclick="handleDeclineFromModal()" style="flex: 1; margin: 0; background: linear-gradient(135deg, #EF5350, #C62828); color: white;">❌ رفض</button>
+            </div>
+        </div>
+    </div>
+
     <!-- NEW: Passenger Active Ride Modal -->
     <div id="passengerRideModal" class="passenger-ride-overlay">
         <div class="passenger-ride-box">
@@ -533,7 +572,6 @@
             </div>
             
             <div class="popup-body" style="padding:0;">
-                <!-- Driver Info Section (Hidden if no driver) -->
                 <div id="passengerDriverSection" style="display:none; padding: 20px; background: #fff; border-bottom: 1px solid var(--border);">
                     <div class="ride-driver-info" style="padding:0; background:transparent;">
                         <div class="ride-driver-avatar">👨✈️</div>
@@ -549,7 +587,6 @@
                     </div>
                 </div>
 
-                <!-- Route Details -->
                 <div style="padding: 20px;">
                     <div class="ride-details-grid">
                         <div class="ride-detail-item">
@@ -616,7 +653,10 @@
     let lastKnownMessageCount = 0, currentChatMyId = null, chatMiniMap = null, chatLocationUpdate = null;
     let currentRecordsFilter = 'all', currentPulsingMarker = null;
     let heartbeatInterval = null, offlineUpdateQueued = false, lastOnlineState = true;
+    let currentRequestModalId = null;
     
+    window.requestsData = window.requestsData || {};
+
     const MAP_CONFIG = {
         defaultView: [36.753, 3.058], defaultZoom: 14,
         tileLayers: [
@@ -679,25 +719,36 @@
     }
     
     // Modal Functions
-    function openDriverSetupModal() {
-        document.getElementById('driverSetupModal').classList.add('active');
-    }
-    function closeDriverSetupModal() {
-        document.getElementById('driverSetupModal').classList.remove('active');
-    }
-    function openDriverRequestsModal() {
-        document.getElementById('driverRequestsModal').classList.add('active');
-        loadRequests();
-    }
-    function closeDriverRequestsModal() {
-        document.getElementById('driverRequestsModal').classList.remove('active');
+    function openDriverSetupModal() { document.getElementById('driverSetupModal').classList.add('active'); }
+    function closeDriverSetupModal() { document.getElementById('driverSetupModal').classList.remove('active'); }
+    function openDriverRequestsModal() { document.getElementById('driverRequestsModal').classList.add('active'); loadRequests(); }
+    function closeDriverRequestsModal() { document.getElementById('driverRequestsModal').classList.remove('active'); }
+
+    function openRequestDetailsModal(id) {
+        const r = window.requestsData[id];
+        if (!r) return;
+        currentRequestModalId = id;
+
+        const cr = r.createdAt?.toDate?.() || new Date();
+        const m = Math.floor((Date.now() - cr) / 60000);
+        
+        document.getElementById('reqDetailTime').textContent = `🕐 منذ ${m} دقيقة`;
+        document.getElementById('reqDetailPickup').textContent = r.pickup?.name || 'غير محدد';
+        document.getElementById('reqDetailDest').textContent = r.destination?.name || 'غير محدد';
+        document.getElementById('reqDetailDist').textContent = r.distance ? `${r.distance} كم` : '---';
+        document.getElementById('reqDetailPrice').textContent = r.price ? `${r.price} د.ج` : '---';
+        document.getElementById('reqDetailCar').textContent = r.carType || '---';
+
+        document.getElementById('requestDetailsModal').classList.add('active');
     }
 
-    // New Passenger Modal Functions
+    function closeRequestDetailsModal() {
+        document.getElementById('requestDetailsModal').classList.remove('active');
+        currentRequestModalId = null;
+    }
+
     function openPassengerRideModal() {
         if(!currentActiveRide) return;
-        
-        // Populate Data
         document.getElementById('pPickupName').textContent = currentActiveRide.pickup?.name || '---';
         document.getElementById('pDestName').textContent = currentActiveRide.destination?.name || '---';
         document.getElementById('pDistVal').textContent = currentActiveRide.distance ? `${currentActiveRide.distance} كم` : '---';
@@ -712,8 +763,6 @@
             statusEl.style.color = '#4CAF50';
             driverSec.style.display = 'block';
             cancelBtn.style.display = 'block';
-            
-            // Fetch Driver Info if not already fully loaded in UI
             if(currentActiveRide.assignedDriverId) {
                  db.collection('drivers').doc(currentActiveRide.assignedDriverId).get().then(ds=>{ 
                     if(ds.exists){ 
@@ -735,14 +784,10 @@
              driverSec.style.display = 'none';
              cancelBtn.style.display = 'none';
         }
-
         document.getElementById('passengerRideModal').classList.add('active');
     }
 
-    function closePassengerRideModal() {
-        document.getElementById('passengerRideModal').classList.remove('active');
-    }
-
+    function closePassengerRideModal() { document.getElementById('passengerRideModal').classList.remove('active'); }
     function openChatFromModal() {
         closePassengerRideModal();
         if(currentActiveRide && currentActiveRide.assignedDriverId) {
@@ -755,28 +800,16 @@
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
     
     async function completeDriverSetup() { 
-        const btn=document.getElementById('setupBtn'); 
-        btn.disabled=true; 
-        btn.textContent='🔄 حفظ...'; 
+        const btn=document.getElementById('setupBtn'); btn.disabled=true; btn.textContent='🔄 حفظ...'; 
         const carType=document.getElementById('setupCarType').value, carName=document.getElementById('setupCarName').value.trim()||'سيارتي'; 
         let loc={lat:36.753, lng:3.058}; 
         if(navigator.geolocation) try{ loc=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude, lng:p.coords.longitude}),j,{enableHighAccuracy:true,timeout:5000})); }catch(e){} 
-        
         await db.collection('users').doc(currentUser.uid).update({role:'driver'}); 
         await db.collection('drivers').doc(currentUser.uid).set({uid:currentUser.uid, email:currentUser.email, carType, carName, location:loc, available:true, rating:5.0, trips:0, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp(), isOnline: true}); 
-        
         Utils.showToast('✅ تم تسجيل مركبتك بنجاح! 🎉'); 
         closeDriverSetupModal();
-        
-        // Update UI to reflect driver status but stay on map
         const regBtn = document.getElementById('registerCarHeaderBtn');
-        if(regBtn) {
-            regBtn.textContent = '🚙 أنت سائق الآن';
-            regBtn.onclick = openDriverRequestsModal; // Change click action to open requests
-            regBtn.style.background = 'var(--primary)';
-            regBtn.style.color = '#1B1B1B';
-        }
-        
+        if(regBtn) { regBtn.textContent = '🚙 أنت سائق الآن'; regBtn.onclick = openDriverRequestsModal; regBtn.style.background = 'var(--primary)'; regBtn.style.color = '#1B1B1B'; }
         routeUserAfterAuth(currentUser); 
     }
 
@@ -786,20 +819,11 @@
 
     async function setDriverOfflineImmediately(uid) {
         if(!uid) return;
-        driverAvailable = false;
-        offlineUpdateQueued = true;
+        driverAvailable = false; offlineUpdateQueued = true;
         try {
-            await db.collection('drivers').doc(uid).update({
-                available: false,
-                isOnline: false,
-                connectionStatus: 'offline',
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            await db.collection('drivers').doc(uid).update({ available: false, isOnline: false, connectionStatus: 'offline', lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOfflineAt: firebase.firestore.FieldValue.serverTimestamp() });
             offlineUpdateQueued = false;
-        } catch(e) {
-            console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة');
-        }
+        } catch(e) { console.log('⚠️ تحديث Firebase فشل (غير متصل)، سيتم المزامنة عند العودة'); }
         Utils.showToast('🔴 انقطع الاتصال - تم إيقاف الخدمة تلقائياً', 'error');
         if(driverLocationInterval) { clearInterval(driverLocationInterval); driverLocationInterval = null; }
         if(heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
@@ -807,139 +831,56 @@
 
     function initFirebase() {
         try { 
-            const config = { 
-                apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", 
-                authDomain:"birine-app.firebaseapp.com", 
-                projectId:"birine-app", 
-                storageBucket:"birine-app.firebasestorage.app", 
-                messagingSenderId:"359460161481", 
-                appId:"1:359460161481:web:5739dcc79ed79275928a18", 
-                measurementId:"G-GX972M18B4" 
-            }; 
-            app=firebase.initializeApp(config); 
-            db=firebase.firestore(app); 
-            auth=firebase.auth(app); 
-            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); 
-            
+            const config = { apiKey:"AIzaSyBZ7BaQgQiBg4tnrPSx-k61o3_I0kTEjbY", authDomain:"birine-app.firebaseapp.com", projectId:"birine-app", storageBucket:"birine-app.firebasestorage.app", messagingSenderId:"359460161481", appId:"1:359460161481:web:5739dcc79ed79275928a18", measurementId:"G-GX972M18B4" }; 
+            app=firebase.initializeApp(config); db=firebase.firestore(app); auth=firebase.auth(app); auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); 
             auth.onAuthStateChanged(async user => { 
-                if(user){ 
-                    currentUser=user; 
-                    routeUserAfterAuth(user); 
-                    setTimeout(showGPSReminder, 1000);
-                } else { 
-                    currentUser=null; 
-                    currentDriver=null; 
-                    switchView('view-auth'); 
-                } 
-                document.getElementById('loadingOverlay').classList.add('hidden'); 
-                document.getElementById('mainApp').style.display='block'; 
+                if(user){ currentUser=user; routeUserAfterAuth(user); setTimeout(showGPSReminder, 1000); } 
+                else { currentUser=null; currentDriver=null; switchView('view-auth'); } 
+                document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; 
             }); 
-            
-            window.addEventListener('offline', () => {
-                console.log('🔴 انترنت مقطوع - جاري تعيين available: false فوراً');
-                lastOnlineState = false;
-                if(currentDriver?.uid) { setDriverOfflineImmediately(currentDriver.uid); }
-            }, { passive: true });
-
+            window.addEventListener('offline', () => { lastOnlineState = false; if(currentDriver?.uid) { setDriverOfflineImmediately(currentDriver.uid); } }, { passive: true });
             window.addEventListener('online', async () => {
-                console.log('🟢 عدنا للاتصال - جاري المزامنة');
                 lastOnlineState = true;
                 if(currentDriver?.uid) {
                     if(offlineUpdateQueued) {
-                        try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            offlineUpdateQueued = false;
-                        } catch(e) { console.log('⚠️ مزامنة فايربيس:', e); }
+                        try { await db.collection('drivers').doc(currentDriver.uid).update({ isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), lastOnlineAt: firebase.firestore.FieldValue.serverTimestamp() }); offlineUpdateQueued = false; } catch(e) {}
                     }
                     if(driverAvailable) {
-                        try {
-                            await db.collection('drivers').doc(currentDriver.uid).update({
-                                available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة');
-                            startLocationUpdates(currentDriver.uid);
-                            loadRequests();
-                        } catch(e) { console.log('⚠️ استعادة التوفر:', e); }
+                        try { await db.collection('drivers').doc(currentDriver.uid).update({ available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); Utils.showToast('✅ عدت للاتصال - الخدمة مفعلة'); startLocationUpdates(currentDriver.uid); loadRequests(); } catch(e) {}
                     }
                 }
             }, { passive: true });
-
-            setInterval(() => {
-                if(currentDriver?.uid && lastOnlineState !== navigator.onLine) {
-                    if(!navigator.onLine) { console.log('🔴 [فحص دوري] انقطاع مكتشف - تحديث فوري'); setDriverOfflineImmediately(currentDriver.uid); }
-                    lastOnlineState = navigator.onLine;
-                }
-            }, 3000);
-            
-        } catch(e) { 
-            console.error(e); 
-            Utils.showToast('❌ فشل الاتصال','error'); 
-            setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }, 1500); 
-        }
+            setInterval(() => { if(currentDriver?.uid && lastOnlineState !== navigator.onLine) { if(!navigator.onLine) { setDriverOfflineImmediately(currentDriver.uid); } lastOnlineState = navigator.onLine; } }, 3000);
+        } catch(e) { console.error(e); Utils.showToast('❌ فشل الاتصال','error'); setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }, 1500); }
     }
     
     async function routeUserAfterAuth(user) { 
-        const ud=await db.collection('users').doc(user.uid).get(); 
-        if(!ud.exists) return switchView('view-auth'); 
-        const d=ud.data(); 
+        const ud=await db.collection('users').doc(user.uid).get(); if(!ud.exists) return switchView('view-auth'); const d=ud.data(); 
         if(d.role==='driver') { 
             const dd=await db.collection('drivers').doc(user.uid).get(); 
             if(dd.exists) { 
                 currentDriver=dd.data(); 
-                // Update Header Button for Driver
                 const regBtn = document.getElementById('registerCarHeaderBtn');
-                if(regBtn) {
-                    regBtn.textContent = '🚙 استقبال الطلبات';
-                    regBtn.onclick = openDriverRequestsModal;
-                    regBtn.style.background = 'var(--primary)';
-                    regBtn.style.color = '#1B1B1B';
-                }
-                
-                // Update Popup Info
+                if(regBtn) { regBtn.textContent = '🚙 استقبال الطلبات'; regBtn.onclick = openDriverRequestsModal; regBtn.style.background = 'var(--primary)'; regBtn.style.color = '#1B1B1B'; }
                 document.getElementById('popupDriverName').textContent=`${currentDriver.carName||currentDriver.email?.split('@')[0]||'سائق'} | ${currentDriver.carType}`; 
                 document.getElementById('popupDriverArea').textContent=`🚗 ${currentDriver.carType}`; 
-                
-                startLocationUpdates(user.uid); 
-                // Stay on map view, don't switch to dashboard
-                switchView('view-request');
-            } else {
-                openDriverSetupModal();
-            }
-        } else { 
-            switchView('view-request'); 
-            startPassengerLocationTracking(); 
-        } 
+                startLocationUpdates(user.uid); switchView('view-request');
+            } else { openDriverSetupModal(); }
+        } else { switchView('view-request'); startPassengerLocationTracking(); } 
     }
     
     function startLocationUpdates(uid) { 
-        clearInterval(driverLocationInterval); 
-        clearInterval(heartbeatInterval);
-        heartbeatInterval = setInterval(async () => {
-            if(!currentDriver?.uid || !navigator.onLine) return;
-            try {
-                await db.collection('drivers').doc(uid).update({
-                    lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true
-                });
-            } catch(e) { if(navigator.onLine) console.log('⚠️ نبضة قلب فشلت:', e); }
-        }, 5000);
-        
+        clearInterval(driverLocationInterval); clearInterval(heartbeatInterval);
+        heartbeatInterval = setInterval(async () => { if(!currentDriver?.uid || !navigator.onLine) return; try { await db.collection('drivers').doc(uid).update({ lastHeartbeat: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true }); } catch(e) {} }, 5000);
         driverLocationInterval = setInterval(async () => { 
             if(!navigator.onLine) { setDriverOfflineImmediately(uid); return; }
             if(!driverAvailable || !navigator.geolocation) return; 
             navigator.geolocation.getCurrentPosition(async p => { 
                 try { 
                     const l = {lat: p.coords.latitude, lng: p.coords.longitude}; 
-                    await db.collection('drivers').doc(uid).update({
-                        location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online'
-                    }); 
+                    await db.collection('drivers').doc(uid).update({ location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online' }); 
                     myCurrentPos = [l.lat, l.lng]; 
-                    if(chatMiniMap && currentActiveRide?.passengerId) { 
-                        const o = await getPassengerLocation(currentActiveRide.passengerId); 
-                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
-                        updateChatDistanceBadge(myCurrentPos, o); 
-                    } 
+                    if(chatMiniMap && currentActiveRide?.passengerId) { const o = await getPassengerLocation(currentActiveRide.passengerId); MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); updateChatDistanceBadge(myCurrentPos, o); } 
                 } catch(e) { if(!navigator.onLine) setDriverOfflineImmediately(uid); } 
             }, null, {enableHighAccuracy: true, timeout: 5000}); 
         }, 10000); 
@@ -954,11 +895,7 @@
                     const l={lat:p.coords.latitude, lng:p.coords.longitude}; 
                     await db.collection('users').doc(currentUser.uid).update({lastLocation:l, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); 
                     myCurrentPos=[l.lat, l.lng]; 
-                    if(chatMiniMap&&currentActiveRide?.assignedDriverId){ 
-                        const o=await getDriverLocation(currentActiveRide.assignedDriverId); 
-                        MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); 
-                        updateChatDistanceBadge(myCurrentPos, o); 
-                    } 
+                    if(chatMiniMap&&currentActiveRide?.assignedDriverId){ const o=await getDriverLocation(currentActiveRide.assignedDriverId); MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); updateChatDistanceBadge(myCurrentPos, o); } 
                 }catch(e){} 
             },null,{enableHighAccuracy:true, timeout:5000}); 
         },10000); 
@@ -967,45 +904,21 @@
     async function getPassengerLocation(id) { try{ const u=await db.collection('users').doc(id).get(); if(u.exists&&u.data().lastLocation)return [u.data().lastLocation.lat, u.data().lastLocation.lng]; }catch(e){} return null; }
     function updateChatDistanceBadge(my, oth) { const b=document.querySelector('.chat-mini-map .distance-badge'); if(!b||!my||!oth)return; const d=Utils.calculateDistance(my[0],my[1],oth[0],oth[1]); b.innerHTML=`📏 ${Utils.formatDistance(d)} • ⏱️ ${Utils.formatTime(Math.max(1,Math.round(d/3)))}`; }
 
-    function toggleDriverDropdown(e) { e?.stopPropagation(); const d=document.getElementById('driverDropdown'); const s=d.classList.contains('show'); document.querySelectorAll('.driver-dropdown').forEach(x=>x.classList.remove('show')); if(!s)d.classList.add('show'); setTimeout(()=>{ const h=(ev)=>{ if(!d.contains(ev.target)&&ev.target!==document.getElementById('driverAvatarBtn')){ d.classList.remove('show'); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); } }; document.addEventListener('click',h); document.addEventListener('touchstart',h); },100); }
-    
     function toggleDriverStatus() { 
         if(!navigator.onLine && !driverAvailable) { Utils.showToast('⚠️ تحقق من اتصال الإنترنت أولاً', 'error'); return; }
         driverAvailable = !driverAvailable; 
-        if(currentDriver?.uid) {
-            db.collection('drivers').doc(currentDriver.uid).update({
-                available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine
-            });
-        }
-        if(driverAvailable) {
-            Utils.showToast('✅ أنت متاح'); loadRequests();
-        } else { 
-            Utils.showToast('🔕 تم إيقاف الخدمة');
-        } 
+        if(currentDriver?.uid) { db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine }); }
+        if(driverAvailable) { Utils.showToast('✅ أنت متاح'); loadRequests(); } else { Utils.showToast('🔕 تم إيقاف الخدمة'); } 
     }
     
     function loadRequests() { 
-        // Use the popup list ID
         const l=document.getElementById('popupRequestsList'), c=document.getElementById('popupRequestsCount'); 
-        if(!currentDriver||!driverAvailable){ 
-            l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; 
-            return; 
-        } 
+        if(!currentDriver||!driverAvailable){ l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; return; } 
         l.innerHTML='<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>'; 
         if(activeRequestListener)activeRequestListener(); 
         activeRequestListener=db.collection('rideRequests').where('status','==','pending').where('carType','==',currentDriver.carType).limit(20).onSnapshot(s=>{ 
-            const r=[]; 
-            s.forEach(d=>{ 
-                const x=d.data(); 
-                if(x.skippedBy?.includes(currentDriver.uid))return; 
-                if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); 
-            }); 
-            const n=r.length; 
-            if(n>previousRequestsCount&&n>0){ 
-                Utils.playSound('requestSound'); 
-            } 
-            previousRequestsCount=n; 
-            renderRequests(r,l,c); 
+            const r=[]; s.forEach(d=>{ const x=d.data(); if(x.skippedBy?.includes(currentDriver.uid))return; if(x.assignedDriverId===currentDriver.uid&&x.status==='pending')r.push({id:d.id,...x}); }); 
+            const n=r.length; if(n>previousRequestsCount&&n>0){ Utils.playSound('requestSound'); } previousRequestsCount=n; renderRequests(r,l,c); 
         },e=>console.error(e)); 
     }
     
@@ -1013,21 +926,34 @@
         c.textContent=reqs.length; 
         if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';return;} 
         l.innerHTML=reqs.map(r=>{ 
+            window.requestsData[r.id] = r;
             const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000); 
-            let d='---'; 
-            if(currentDriver?.location&&r.pickup?.lat){ 
-                const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); 
-                d=ds.toFixed(1); 
-            } 
+            let d='---'; if(currentDriver?.location&&r.pickup?.lat){ const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); d=ds.toFixed(1); } 
             const rej=r.skippedBy?.length||0; 
-            return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`; 
+            return `<div class="request-card ${u?'urgent':''}">
+                <div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div>
+                <div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div>
+                <div class="req-route">
+                    <div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div>
+                    <div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div>
+                </div>
+                <div style="text-align: center; margin: 10px 0;">
+                    <button class="loc-btn" style="background: var(--secondary); color: #1B1B1B; width: 100%; font-weight: 700;" onclick="openRequestDetailsModal('${r.id}')">
+                        👁️ عرض تفاصيل الرحلة الكاملة
+                    </button>
+                </div>
+                ${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}
+                <div class="req-actions">
+                    <button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button>
+                    <button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button>
+                </div>
+            </div>`; 
         }).join(''); 
     }
 
-    window.handleAccept=async function(rideId){ 
-        if(!currentDriver?.uid)return Utils.showToast('⚠️ سجل الدخول أولاً','error'); 
-        const b=event.target; b.disabled=true; b.textContent='🔄 جاري...'; Utils.stopSound('requestSound'); 
-        try{ 
+    async function processAccept(rideId) {
+        if(!currentDriver?.uid) return Utils.showToast('⚠️ سجل الدخول أولاً','error'); 
+        try { 
             const s=await db.collection('rideRequests').doc(rideId).get(); 
             if(!s.exists||s.data().status!=='pending'||s.data().assignedDriverId!==currentDriver.uid){Utils.showToast('⚠️ الطلب موجه لسائق آخر أو منتهي','warning');return;} 
             const r=s.data(); 
@@ -1043,41 +969,47 @@
             showChatInterface(rideId,r.passengerId,currentDriver.uid,'driver',dn,currentActiveRide); 
             showChatButton(rideId,cid,'driver',dn,currentActiveRide); 
             if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]); 
+            loadRequests();
         }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
-        finally{b.disabled=false;b.textContent='✅ قبول';loadRequests();} 
-    };
-    
-    window.handleDecline=async function(rideId){ 
+    }
+
+    window.handleAccept = async function(rideId) { 
+        const b = event ? event.target : null;
+        if(b) { b.disabled = true; b.textContent = '🔄 جاري...'; }
         Utils.stopSound('requestSound'); 
-        const b=event?.target; 
-        if(b){b.disabled=true;b.textContent='🔄 جاري...';} 
-        try{ 
-            const ref=db.collection('rideRequests').doc(rideId), snap=await ref.get(); 
-            if(!snap.exists)return; 
-            const rd=snap.data(), my=currentDriver?.uid, sk=rd.skippedBy||[]; 
-            if(!sk.includes(my))sk.push(my); 
-            const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get(); 
-            const nb=[]; 
-            for(const d of ds.docs){ 
-                const x=d.data(); 
-                if(x.location&&rd.pickup?.lat){ 
-                    const dist=Utils.calculateDistance(rd.pickup.lat,rd.pickup.lng,x.location.lat,x.location.lng); 
-                    if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist}); 
-                } 
-            } 
-            nb.sort((a,b)=>a.distance-b.distance); 
-            if(nb.length>0){ 
-                const nx=nb[0]; 
-                await ref.update({status:'pending', assignedDriverId:nx.id, assignedAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:sk, dispatchStage:firebase.firestore.FieldValue.increment(1)}); 
-                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي مباشرة'); 
-            } else { 
-                await ref.update({status:'expired',skippedBy:sk}); 
-                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً'); 
-            } 
-            saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()}); 
-        }catch(e){console.error(e);Utils.showToast('⚠️ '+e.message,'error');} 
-        finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadRequests();} 
+        await processAccept(rideId);
+        if(b) { b.disabled = false; b.textContent = '✅ قبول'; }
     };
+
+    function handleAcceptFromModal() {
+        if(currentRequestModalId) { processAccept(currentRequestModalId); closeRequestDetailsModal(); }
+    }
+
+    async function processDecline(rideId) {
+        Utils.stopSound('requestSound'); 
+        try { 
+            const ref=db.collection('rideRequests').doc(rideId), snap=await ref.get(); if(!snap.exists)return; 
+            const rd=snap.data(), my=currentDriver?.uid, sk=rd.skippedBy||[]; if(!sk.includes(my))sk.push(my); 
+            const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get(); 
+            const nb=[]; for(const d of ds.docs){ const x=d.data(); if(x.location&&rd.pickup?.lat){ const dist=Utils.calculateDistance(rd.pickup.lat,rd.pickup.lng,x.location.lat,x.location.lng); if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist}); } } 
+            nb.sort((a,b)=>a.distance-b.distance); 
+            if(nb.length>0){ const nx=nb[0]; await ref.update({status:'pending', assignedDriverId:nx.id, assignedAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:sk, dispatchStage:firebase.firestore.FieldValue.increment(1)}); Utils.showToast('⏭️ تم نقل الطلب للسائق التالي مباشرة'); } 
+            else { await ref.update({status:'expired',skippedBy:sk}); Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً'); } 
+            saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()}); 
+            loadRequests();
+        }catch(e){console.error(e);Utils.showToast('⚠️ '+e.message,'error');} 
+    }
+
+    window.handleDecline = async function(rideId) { 
+        const b = event ? event.target : null;
+        if(b) { b.disabled = true; b.textContent = '🔄 جاري...'; } 
+        await processDecline(rideId);
+        if(b) { b.disabled = false; b.textContent = '❌ رفض'; }
+    };
+
+    function handleDeclineFromModal() {
+        if(currentRequestModalId) { processDecline(currentRequestModalId); closeRequestDetailsModal(); }
+    }
 
     async function createChat(rid, pid, did) { const cid=`chat_${rid}`; await db.collection('chats').doc(cid).set({rideId:rid, passengerId:pid, driverId:did, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastMessage:null, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}); return cid; }
     async function sendMessage(cid, sid, st, text) { if(!text.trim())return; await db.collection('chats').doc(cid).collection('messages').add({senderId:sid, senderType:st, text:text.trim(), timestamp:firebase.firestore.FieldValue.serverTimestamp(), read:false}); await db.collection('chats').doc(cid).update({lastMessage:text.trim(), lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}); }
@@ -1085,54 +1017,23 @@
     function listenToMessages(cid, cb, uid) { lastKnownMessageCount=0; currentChatMyId=uid; return db.collection('chats').doc(cid).collection('messages').orderBy('timestamp','asc').onSnapshot(s=>{ const m=[]; s.forEach(d=>m.push({id:d.id,...d.data()})); if(m.length>0&&lastKnownMessageCount>0) m.slice(lastKnownMessageCount).forEach(msg=>{if(msg.senderId!==uid)Utils.playSound('chatMessageSound');}); lastKnownMessageCount=m.length; cb(m); }); }
     
     async function showChatInterface(rid, pid, did, role, name, rd=null) { 
-        const cid=`chat_${rid}`; currentChatId=cid; 
-        const ex=document.getElementById('chatOverlay'); if(ex)ex.remove(); 
+        const cid=`chat_${rid}`; currentChatId=cid; const ex=document.getElementById('chatOverlay'); if(ex)ex.remove(); 
         const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:''; 
         const cnBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:''; 
         let mp=null, op=null, ml=''; 
-        if(role==='driver'){ 
-            ml='📍 موقع الراكب'; mp=currentDriver?.location?[currentDriver.location.lat,currentDriver.location.lng]:null; op=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; 
-        } else { 
-            ml='🚕 موقع السائق'; op=rd?.driverLocation?[rd.driverLocation.lat,rd.driverLocation.lng]:null; 
-            if(navigator.geolocation) try{ mp=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){ mp=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } 
-        } 
+        if(role==='driver'){ ml='📍 موقع الراكب'; mp=currentDriver?.location?[currentDriver.location.lat,currentDriver.location.lng]:null; op=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } 
+        else { ml='🚕 موقع السائق'; op=rd?.driverLocation?[rd.driverLocation.lat,rd.driverLocation.lng]:null; if(navigator.geolocation) try{ mp=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){ mp=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } } 
         const cc=document.createElement('div'); cc.id='chatOverlay'; cc.className='chat-overlay'; 
         cc.innerHTML=`<div class="chat-box"><div class="chat-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div><span style="font-weight:600">${role==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>${name?`<span style="font-size:0.85em;opacity:0.9">• ${name}</span>`:''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cnBtn}${stBtn}<button class="chat-close" onclick="closeChat()">×</button></div></div>${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}<div id="chatMessages" class="chat-messages"></div><div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')"><button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button></div></div>`; 
-        document.body.appendChild(cc); 
-        if(activeChatListener)activeChatListener(); 
-        const uid=currentDriver?.uid||currentUser.uid; 
-        activeChatListener=listenToMessages(cid, msgs=>{ 
-            const c=document.getElementById('chatMessages'); if(!c)return; 
-            c.innerHTML=msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join(''); 
-            c.scrollTop=c.scrollHeight; 
-        }, uid); 
+        document.body.appendChild(cc); if(activeChatListener)activeChatListener(); const uid=currentDriver?.uid||currentUser.uid; 
+        activeChatListener=listenToMessages(cid, msgs=>{ const c=document.getElementById('chatMessages'); if(!c)return; c.innerHTML=msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join(''); c.scrollTop=c.scrollHeight; }, uid); 
         if((mp||op)&&document.getElementById('chatMiniMap')) { 
-            chatMiniMap=MapUtils.initChatMiniMap('chatMiniMap', mp, op, role); 
-            if(mp&&op)updateChatDistanceBadge(mp,op); 
-            if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
-            chatLocationUpdate=setInterval(async()=>{ 
-                try{ 
-                    let nm=mp, no=op; 
-                    if(role==='driver'){ 
-                        if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} 
-                        no=await getPassengerLocation(rd?.passengerId); 
-                    } else { 
-                        if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} 
-                        no=await getDriverLocation(rd?.assignedDriverId); 
-                    } 
-                    if(nm||no){ MapUtils.updateChatMiniMap(chatMiniMap, nm||mp, no||op); if(nm&&no)updateChatDistanceBadge(nm,no); } 
-                }catch(e){} 
-            },10000); 
+            chatMiniMap=MapUtils.initChatMiniMap('chatMiniMap', mp, op, role); if(mp&&op)updateChatDistanceBadge(mp,op); if(chatLocationUpdate)clearInterval(chatLocationUpdate); 
+            chatLocationUpdate=setInterval(async()=>{ try{ let nm=mp, no=op; if(role==='driver'){ if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getPassengerLocation(rd?.passengerId); } else { if(navigator.geolocation) try{ nm=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){} no=await getDriverLocation(rd?.assignedDriverId); } if(nm||no){ MapUtils.updateChatMiniMap(chatMiniMap, nm||mp, no||op); if(nm&&no)updateChatDistanceBadge(nm,no); } }catch(e){} },10000); 
         } 
     }
     
-    window.closeChat=function(){ 
-        const o=document.getElementById('chatOverlay'); if(o)o.remove(); 
-        if(activeChatListener){activeChatListener();activeChatListener=null;} 
-        if(chatLocationUpdate){clearInterval(chatLocationUpdate);chatLocationUpdate=null;} 
-        if(chatMiniMap?.map){chatMiniMap.map.remove();chatMiniMap=null;} 
-        currentChatId=null; 
-    };
+    window.closeChat=function(){ const o=document.getElementById('chatOverlay'); if(o)o.remove(); if(activeChatListener){activeChatListener();activeChatListener=null;} if(chatLocationUpdate){clearInterval(chatLocationUpdate);chatLocationUpdate=null;} if(chatMiniMap?.map){chatMiniMap.map.remove();chatMiniMap=null;} currentChatId=null; };
     window.sendChatMessage=async function(cid,sid,st){ const i=document.getElementById('chatInput'), t=i.value.trim(); if(!t)return; await sendMessage(cid,sid,st,t); i.value=''; };
     window.startTripNavigation=function(lat,lng,name){ if(!lat||!lng)return Utils.showToast('⚠️ بيانات الوجهة غير متاحة','warning'); Utils.showToast('🗺️ جاري فتح الخرائط...'); window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank'); setTimeout(()=>{ if(confirm(`🗺️ الوجهة: ${name}\nهل تريد استخدام واز بدلاً من خرائط جوجل؟`)) window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,'_blank'); },1500); if(currentActiveRide?.id) db.collection('rideRequests').doc(currentActiveRide.id).update({tripStarted:true,tripStartedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{}); };
     window.cancelActiveTrip=async function(rid){ if(!confirm('⚠️ هل أنت متأكد من إلغاء هذه الرحلة؟'))return; try{ await db.collection('rideRequests').doc(rid).update({status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp()}); if(currentDriver?.uid) await db.collection('drivers').doc(currentDriver.uid).update({available:true}); const cid = `chat_${rid}`; await sendMessage(cid, currentDriver?.uid||currentUser.uid, 'system', '❌ تم إلغاء الرحلة من قبل السائق. جاري البحث عن سائق آخر...'); Utils.showToast('❌ تم إلغاء الرحلة','error'); closeChat(); if(currentActiveRide?.id===rid)currentActiveRide=null; loadRequests(); }catch(e){Utils.showToast('⚠️ '+e.message,'error');} };
@@ -1140,28 +1041,15 @@
 
     function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
     
-    // Toggle Bottom Sheet Function
     function toggleBottomSheet() {
-        const sheet = document.getElementById('requestSheet');
-        const btn = document.getElementById('mainRequestBtn');
+        const sheet = document.getElementById('requestSheet'); const btn = document.getElementById('mainRequestBtn');
         sheet.classList.toggle('open');
-        if(sheet.classList.contains('open')) {
-            btn.classList.add('hidden');
-        } else {
-            btn.classList.remove('hidden');
-        }
+        if(sheet.classList.contains('open')) { btn.classList.add('hidden'); } else { btn.classList.remove('hidden'); }
     }
 
-    // إغلاق القائمة عند النقر خارجها
     document.addEventListener('click', function(event) {
-        const sheet = document.getElementById('requestSheet');
-        const btn = document.getElementById('mainRequestBtn');
-        
-        // إذا كانت القائمة مفتوحة والنقر لم يكن داخل القائمة ولم يكن على زر الفتح
-        if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) {
-            sheet.classList.remove('open');
-            btn.classList.remove('hidden');
-        }
+        const sheet = document.getElementById('requestSheet'); const btn = document.getElementById('mainRequestBtn');
+        if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) { sheet.classList.remove('open'); btn.classList.remove('hidden'); }
     });
 
     function initMap() { map=MapUtils.initMap('map'); setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); if(navigator.geolocation) useGPS(); else fallbackLocation(); map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); }); }
@@ -1180,202 +1068,68 @@
     function startSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); updateNearbyDriversOnSearchMap(); searchUpdateInterval=setInterval(updateNearbyDriversOnSearchMap,5000); }
     function stopSearchMapUpdates() { if(searchUpdateInterval)clearInterval(searchUpdateInterval); }
     
-    // ✅ تم تحسين هذه الدالة لإصلاح مشكلة عدم ظهور السائقين عند الكتابة اليدوية
     async function updateNearbyDriversOnSearchMap() { 
         if(!searchMap || !pickupPos) return; 
-        
-        // مسح العلامات القديمة بشكل آمن لتجنب التكرار أو الأخطاء
-        searchMarkerMap = {}; 
-        searchMarkers.forEach(m => {
-            try { searchMap.removeLayer(m); } catch(e){}
-        }); 
-        searchMarkers = []; 
-        
+        searchMarkerMap = {}; searchMarkers.forEach(m => { try { searchMap.removeLayer(m); } catch(e){} }); searchMarkers = []; 
         try { 
-            // استخدام .trim() لإزالة أي مسافات زائدة قد تسبب عدم تطابق نوع السيارة
             const selectedCarOpt = document.querySelector('.car-opt.selected');
             const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة'; 
-            
-            console.log("🔍 جاري البحث عن سائقين لنوع:", requestedType, "في موقع:", pickupPos);
-
-            const ds = await db.collection('drivers')
-                .where('available', '==', true)
-                .where('carType', '==', requestedType)
-                .get(); 
-                
+            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get(); 
             let foundCount = 0;
-
             ds.forEach(doc => { 
                 const d = doc.data(); 
-                // التحقق من الموقع والاتصال
                 if(d.location && d.isOnline !== false) { 
                     const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.location.lat, d.location.lng); 
-                    
-                    // زيادة المدى إلى 20 كم لضمان العثور على سائقين حتى مع تقريب إحداثيات العنوان المكتوب
                     if(dist <= 20) { 
                         const ic = d.carType === 'دراجة نارية' ? 'motorcycle' : (d.carType === 'شاحنة نقل صغيرة' ? 'truck' : 'driver'); 
-                        
-                        const mk = MapUtils.createMarker(
-                            [d.location.lat, d.location.lng], 
-                            ic, 
-                            `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`
-                        ).addTo(searchMap); 
-                        
-                        searchMarkers.push(mk); 
-                        searchMarkerMap[doc.id] = mk; 
-                        foundCount++;
+                        const mk = MapUtils.createMarker([d.location.lat, d.location.lng], ic, `<div class="custom-popup"><b>${d.carName || 'سائق'}</b><br>⭐ ${d.rating}<br>📏 ${dist.toFixed(1)} كم</div>`).addTo(searchMap); 
+                        searchMarkers.push(mk); searchMarkerMap[doc.id] = mk; foundCount++;
                     } 
                 } 
             }); 
-            
-            console.log(`✅ تم العثور على ${foundCount} سائقين قريبين`);
-            
-            if(foundCount === 0) {
-                 document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`;
-            } else {
-                 document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين`;
-            }
-
-        } catch(e) {
-            console.error("❌ خطأ في البحث:", e);
-        } 
+            if(foundCount === 0) { document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`; } 
+            else { document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين`; }
+        } catch(e) { console.error("❌ خطأ في البحث:", e); } 
     }
 
     function dispatchNext() { 
-        if(dispatchIndex>=dispatchDrivers.length){ 
-            updateRideStatus('expired'); 
-            document.getElementById('searchStatusText').textContent='انتهت المهلة'; 
-            document.getElementById('searchSubText').textContent='لم يقبل أي سائق، جرب مجدداً'; 
-            stopPulseOnCurrent(); 
-            setTimeout(()=>{rideState='idle';closeSearchModal();},3000); 
-            return; 
-        } 
-        const target=dispatchDrivers[dispatchIndex]; 
-        document.getElementById('searchStatusText').textContent=`جاري الاتصال بالسائق ${dispatchIndex+1}...`; 
-        document.getElementById('searchSubText').textContent=`متبقي ${dispatchDrivers.length-dispatchIndex} سائقين`; 
-        stopPulseOnCurrent(); 
-        const newMarker=searchMarkerMap[target.id]; 
-        if(newMarker){ 
-            const el=newMarker.getElement(); 
-            if(el){ el.classList.add('pulse-blue'); currentPulsingMarker=newMarker; } 
-        } 
+        if(dispatchIndex>=dispatchDrivers.length){ updateRideStatus('expired'); document.getElementById('searchStatusText').textContent='انتهت المهلة'; document.getElementById('searchSubText').textContent='لم يقبل أي سائق، جرب مجدداً'; stopPulseOnCurrent(); setTimeout(()=>{rideState='idle';closeSearchModal();},3000); return; } 
+        const target=dispatchDrivers[dispatchIndex]; document.getElementById('searchStatusText').textContent=`جاري الاتصال بالسائق ${dispatchIndex+1}...`; document.getElementById('searchSubText').textContent=`متبقي ${dispatchDrivers.length-dispatchIndex} سائقين`; stopPulseOnCurrent(); 
+        const newMarker=searchMarkerMap[target.id]; if(newMarker){ const el=newMarker.getElement(); if(el){ el.classList.add('pulse-blue'); currentPulsingMarker=newMarker; } } 
         db.collection('rideRequests').doc(currentRideId).update({status:'pending',assignedDriverId:target.id,assignedAt:firebase.firestore.FieldValue.serverTimestamp(),dispatchStage:dispatchIndex}); 
-        dispatchTimeoutId=setTimeout(()=>{ 
-            db.collection('rideRequests').doc(currentRideId).get().then(doc=>{ 
-                if(doc.exists&&doc.data().status==='pending'){ 
-                    stopPulseOnCurrent(); 
-                    db.collection('rideRequests').doc(currentRideId).update({skippedBy:firebase.firestore.FieldValue.arrayUnion(target.id)}); 
-                    dispatchIndex++; 
-                    dispatchNext(); 
-                } 
-            }); 
-        },30000); 
+        dispatchTimeoutId=setTimeout(()=>{ db.collection('rideRequests').doc(currentRideId).get().then(doc=>{ if(doc.exists&&doc.data().status==='pending'){ stopPulseOnCurrent(); db.collection('rideRequests').doc(currentRideId).update({skippedBy:firebase.firestore.FieldValue.arrayUnion(target.id)}); dispatchIndex++; dispatchNext(); } }); },30000); 
     }
     
-    function stopPulseOnCurrent() { 
-        if(currentPulsingMarker){ 
-            const el=currentPulsingMarker.getElement(); 
-            if(el) el.classList.remove('pulse-blue'); 
-            currentPulsingMarker=null; 
-        } 
-    }
+    function stopPulseOnCurrent() { if(currentPulsingMarker){ const el=currentPulsingMarker.getElement(); if(el) el.classList.remove('pulse-blue'); currentPulsingMarker=null; } }
 
-    // ✅ تم تحسين هذه الدالة لضمان مطابقة نوع السيارة بدقة عند الطلب
     async function bookRide() { 
         if(!pickupPos||!destPos)return Utils.showToast('⚠️ حدد الانطلاق والوجهة','error'); 
-        
-        // استخدام .trim() لضمان عدم وجود مسافات زائدة في اسم النوع
         const selectedEl = document.querySelector('.car-opt.selected .name');
         const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
-        
-        openSearchModal(); 
-        rideState='searching'; 
-        dispatchIndex=0; 
-        dispatchDrivers=[]; 
-        
-        document.getElementById('searchStatusText').textContent='جاري البحث عن سائقين...'; 
-        document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType}`;
-        
+        openSearchModal(); rideState='searching'; dispatchIndex=0; dispatchDrivers=[]; 
+        document.getElementById('searchStatusText').textContent='جاري البحث عن سائقين...'; document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType}`;
         try { 
-            const ref=await db.collection('rideRequests').add({
-                passengerId:currentUser.uid, 
-                pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, 
-                destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, 
-                distance:parseFloat(distKm), 
-                time:timeMin, 
-                carType: requestedCarType, // النوع المضمن بدقة
-                price:baseFare+Math.round(distKm*selectedRate), 
-                status:'pending', 
-                assignedDriverId:null, 
-                createdAt:firebase.firestore.FieldValue.serverTimestamp(), 
-                skippedBy:[]
-            }); 
+            const ref=await db.collection('rideRequests').add({ passengerId:currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value}, destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType: requestedCarType, price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:[] }); 
             currentRideId=ref.id; 
-        } catch(e){ 
-            Utils.showToast('❌ فشل الإنشاء','error'); 
-            rideState='idle'; 
-            closeSearchModal(); 
-            return; 
-        } 
-        
+        } catch(e){ Utils.showToast('❌ فشل الإنشاء','error'); rideState='idle'; closeSearchModal(); return; } 
         const ds=await db.collection('drivers').where('available','==',true).where('carType','==',requestedCarType).get(); 
-        ds.forEach(d=>{ 
-            const dd=d.data(); 
-            if(dd.location){ 
-                const dist=Utils.calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); 
-                // زيادة المدى إلى 20 كم ليتوافق مع دالة العرض
-                if(dist<=20) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)}); 
-            }
-        }); 
-        
+        ds.forEach(d=>{ const dd=d.data(); if(dd.location){ const dist=Utils.calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); if(dist<=20) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)}); } }); 
         dispatchDrivers.sort((a,b)=>a.distance-b.distance); 
-        
-        if(dispatchDrivers.length===0){ 
-            document.getElementById('searchStatusText').textContent='لا يوجد سائقين'; 
-            document.getElementById('searchSubText').innerHTML = `لم نجد سائقين <b>${requestedCarType}</b> في منطقتك.<br>يرجى المحاولة لاحقاً أو تغيير النوع.`; 
-            setTimeout(()=>{rideState='idle';closeSearchModal();},4000); 
-            return; 
-        } 
-        
-        dispatchNext(); 
-        listenForRideUpdate(); 
+        if(dispatchDrivers.length===0){ document.getElementById('searchStatusText').textContent='لا يوجد سائقين'; document.getElementById('searchSubText').innerHTML = `لم نجد سائقين <b>${requestedCarType}</b> في منطقتك.<br>يرجى المحاولة لاحقاً أو تغيير النوع.`; setTimeout(()=>{rideState='idle';closeSearchModal();},4000); return; } 
+        dispatchNext(); listenForRideUpdate(); 
     }
     
     function listenForRideUpdate() { 
         if(rideTimeoutId)clearTimeout(rideTimeoutId); 
         const unsub=db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap=>{ 
-            if(!docSnap.exists)return; 
-            const data=docSnap.data(); 
+            if(!docSnap.exists)return; const data=docSnap.data(); 
             if(data.status==='accepted'){ 
-                rideState='matched'; 
-                if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); 
-                closeSearchModal(); 
-                stopPulseOnCurrent(); 
-                
-                // Show the NEW Passenger Modal instead of the old card
-                currentActiveRide = {id: currentRideId, ...data};
-                openPassengerRideModal();
-
-                db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{ 
-                    if(ds.exists){ 
-                        const dr=ds.data(), dn=dr.carName||dr.email?.split('@')[0]||'سائق'; 
-                        createChat(currentRideId,currentUser.uid,data.acceptedBy).then(cid=>{ 
-                            showChatButton(currentRideId,cid,'passenger',dn,data); 
-                            // We don't auto-open chat anymore, user clicks button in modal
-                        }); 
-                        Utils.showToast(`✅ قبل السائق! اضغط على "طلباتي" للتفاصيل`); 
-                        if(dr.location&&pickupPos&&destPos) MapUtils.drawDualRoute(map,[dr.location.lat,dr.location.lng],pickupPos,destPos); 
-                        saveToLocalLog({id:currentRideId, status:'accepted', pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); 
-                    } 
-                }); 
+                rideState='matched'; if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); closeSearchModal(); stopPulseOnCurrent(); 
+                currentActiveRide = {id: currentRideId, ...data}; openPassengerRideModal();
+                db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{ if(ds.exists){ const dr=ds.data(), dn=dr.carName||dr.email?.split('@')[0]||'سائق'; createChat(currentRideId,currentUser.uid,data.acceptedBy).then(cid=>{ showChatButton(currentRideId,cid,'passenger',dn,data); }); Utils.showToast(`✅ قبل السائق! اضغط على "طلباتي" للتفاصيل`); if(dr.location&&pickupPos&&destPos) MapUtils.drawDualRoute(map,[dr.location.lat,dr.location.lng],pickupPos,destPos); saveToLocalLog({id:currentRideId, status:'accepted', pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); } }); 
                 unsub(); 
             } else if(data.status==='expired'||data.status==='cancelled'){ 
-                rideState='idle'; 
-                closeSearchModal(); 
-                stopPulseOnCurrent(); 
-                document.getElementById('bookBtn').disabled=false; 
-                unsub(); 
-                saveToLocalLog({id:currentRideId, status:data.status, pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); 
+                rideState='idle'; closeSearchModal(); stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false; unsub(); saveToLocalLog({id:currentRideId, status:data.status, pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()}); 
             } 
         }); 
     }
@@ -1383,43 +1137,17 @@
     function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
     function cancelRide(){ 
         if(confirm('إلغاء الرحلة؟')&&currentRideId){ 
-            updateRideStatus('cancelled'); 
-            rideState='idle'; 
-            closeSearchModal(); 
-            closePassengerRideModal(); // Close new modal
-            stopPulseOnCurrent(); 
-            document.getElementById('bookBtn').disabled=false; 
-            Utils.showToast('❌ تم الإلغاء','error'); 
-            currentRideId=null; 
-            currentActiveRide = null;
-            if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); 
-            const c=document.getElementById('floatingChatBtn'); 
-            if(c)c.remove(); 
-            saveToLocalLog({id:currentRideId, status:'cancelled', pickup:null, destination:null, price:0, createdAt:new Date().toISOString()}); 
+            updateRideStatus('cancelled'); rideState='idle'; closeSearchModal(); closePassengerRideModal(); stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false; Utils.showToast('❌ تم الإلغاء','error'); currentRideId=null; currentActiveRide = null;
+            if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); saveToLocalLog({id:currentRideId, status:'cancelled', pickup:null, destination:null, price:0, createdAt:new Date().toISOString()}); 
         } 
     }
     
-    function showGPSReminder() {
-        document.getElementById('gpsReminderModal').style.display = 'flex';
-    }
-    function closeGPSModal() {
-        document.getElementById('gpsReminderModal').style.display = 'none';
-    }
+    function showGPSReminder() { document.getElementById('gpsReminderModal').style.display = 'flex'; }
+    function closeGPSModal() { document.getElementById('gpsReminderModal').style.display = 'none'; }
     function enableGPSAndClose() {
         if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (p) => {
-                    Utils.showToast('✅ تم تفعيل الموقع بنجاح');
-                    closeGPSModal();
-                },
-                (err) => {
-                    Utils.showToast('⚠️ يرجى السماح بتحديد الموقع من إعدادات المتصفح', 'error');
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error');
-        }
+            navigator.geolocation.getCurrentPosition((p) => { Utils.showToast('✅ تم تفعيل الموقع بنجاح'); closeGPSModal(); }, (err) => { Utils.showToast('⚠️ يرجى السماح بتحديد الموقع من إعدادات المتصفح', 'error'); }, { enableHighAccuracy: true });
+        } else { Utils.showToast('⚠️ جهازك لا يدعم GPS', 'error'); }
     }
 
     window.onload=initFirebase;
