@@ -939,6 +939,18 @@
         }
     }
 
+    // إغلاق القائمة عند النقر خارجها
+    document.addEventListener('click', function(event) {
+        const sheet = document.getElementById('requestSheet');
+        const btn = document.getElementById('mainRequestBtn');
+        
+        // إذا كانت القائمة مفتوحة والنقر لم يكن داخل القائمة ولم يكن على زر الفتح
+        if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) {
+            sheet.classList.remove('open');
+            btn.classList.remove('hidden');
+        }
+    });
+
     function initMap() { map=MapUtils.initMap('map'); setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); if(navigator.geolocation) useGPS(); else fallbackLocation(); map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); }); }
     function setLocation(m, pos, iid, cid, isP) { if(isP) pickupPos=pos; else destPos=pos; document.getElementById(iid).value = isP?'موقعي الحالي':document.getElementById(iid).value||'محدد'; document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋 نسخ</button>`; if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16); if(pickupPos&&destPos) drawRoute(); return m; }
     function useGPS() { const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...'; navigator.geolocation.getCurrentPosition(p=>{ pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('pickupInput').value='موقعي الحالي'; document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; if(pickupMarker)map.removeLayer(pickupMarker); pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); map.setView(pickupPos,16); if(destPos)drawRoute(); b.textContent='🛰️ GPS';b.disabled=false; },()=>{b.textContent='❌';setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);},{enableHighAccuracy:true,timeout:10000}); }
