@@ -244,7 +244,7 @@
             display: flex; align-items: center; justify-content: center; color: #555;
         }
 
-        /* تصميم نافذة طلبات السائق المنبثقة (القائمة) */
+        /* تصميم نافذة طلبات السائق المنبثقة (القائمة الرئيسية) */
         .driver-popup-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
@@ -301,41 +301,45 @@
         .ride-detail-label { font-size: 0.8em; color: #666; }
         .ride-actions-footer { padding: 20px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-direction: column; }
 
-        /* NEW: Driver Incoming Request Popup Styles */
+        /* NEW: Incoming Request Popup Style */
         .incoming-request-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
             z-index: 6000; display: none; align-items: center; justify-content: center;
             animation: fadeIn 0.3s;
         }
         .incoming-request-overlay.active { display: flex; }
         .incoming-request-box {
-            background: white; width: 92%; max-width: 380px;
-            border-radius: 24px; overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-            animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            position: relative;
+            background: white; width: 90%; max-width: 380px;
+            border-radius: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            overflow: hidden; position: relative;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid var(--primary);
         }
-        .ir-header {
+        .incoming-header {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             padding: 20px; text-align: center; color: #1B1B1B;
         }
-        .ir-title { font-size: 1.3em; font-weight: 800; margin-bottom: 5px; }
-        .ir-subtitle { font-size: 0.9em; opacity: 0.9; }
-        .ir-body { padding: 20px; }
-        .ir-route { margin-bottom: 20px; }
-        .ir-point { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px; background: #f9f9f9; border-radius: 12px; }
-        .ir-icon { font-size: 1.2em; width: 30px; text-align: center; }
-        .ir-text strong { display: block; font-size: 0.8em; color: #666; }
-        .ir-text span { font-weight: 600; color: #333; }
-        .ir-stats { display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-        .ir-stat { text-align: center; }
-        .ir-stat-val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); }
-        .ir-stat-label { font-size: 0.75em; color: #666; }
-        .ir-actions { display: flex; gap: 12px; padding: 0 20px 20px 20px; }
-        .ir-btn { flex: 1; padding: 14px; border: none; border-radius: 14px; font-weight: 700; font-size: 1em; cursor: pointer; transition: 0.2s; }
-        .ir-accept { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; box-shadow: 0 4px 15px rgba(124, 179, 66, 0.4); }
-        .ir-decline { background: #f5f5f5; color: #666; }
+        .incoming-title { font-size: 1.3em; font-weight: 800; margin-bottom: 5px; }
+        .incoming-subtitle { font-size: 0.9em; opacity: 0.9; }
+        .incoming-body { padding: 20px; }
+        .incoming-price-tag {
+            background: #FFF9C4; color: #5D4037; padding: 10px; border-radius: 12px;
+            text-align: center; font-weight: 800; font-size: 1.2em; margin-bottom: 15px;
+            border: 1px solid #FFECB3;
+        }
+        .incoming-route { margin-bottom: 20px; }
+        .incoming-point { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+        .incoming-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+        .dot-pickup { background: var(--primary); border: 2px solid var(--primary-dark); }
+        .dot-dest { background: var(--danger); border: 2px solid #C62828; }
+        .incoming-text { font-size: 0.95em; color: #333; line-height: 1.4; }
+        .incoming-meta { display: flex; justify-content: space-between; font-size: 0.85em; color: #666; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ddd; }
+        .incoming-actions { display: flex; gap: 10px; padding: 0 20px 20px 20px; }
+        .btn-large { flex: 1; padding: 15px; border: none; border-radius: 14px; font-weight: 700; font-size: 1em; cursor: pointer; transition: 0.2s; }
+        .btn-accept { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; box-shadow: 0 4px 15px rgba(124, 179, 66, 0.4); }
+        .btn-decline { background: #ECEFF1; color: #455A64; }
+        .btn-large:active { transform: scale(0.98); }
 
         .chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
         .chat-box { background: #fff; width: 100%; max-width: 440px; max-height: 88vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: 1px solid var(--border); }
@@ -540,7 +544,7 @@
             </div>
             <div class="popup-body">
                 <div style="padding: 10px; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px;">
-                    <span style="font-weight: 600;">📋 طلبات جديدة</span>
+                    <span style="font-weight: 600;">📋 سجل الطلبات</span>
                     <span id="popupRequestsCount" style="background: var(--primary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
                 </div>
                 <div class="requests-list" id="popupRequestsList">
@@ -550,6 +554,40 @@
                     <button class="refresh-btn" onclick="loadRequests()" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">🔄 تحديث الطلبات</button>
                     <button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">👤 العودة لوضع الراكب</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Incoming Request Popup (Single Request View) -->
+    <div id="incomingRequestModal" class="incoming-request-overlay">
+        <div class="incoming-request-box">
+            <div class="incoming-header">
+                <div class="incoming-title">🔔 طلب رحلة جديد!</div>
+                <div class="incoming-subtitle">راكب بانتظارك قريباً</div>
+            </div>
+            <div class="incoming-body">
+                <div class="incoming-price-tag" id="incPrice">--- د.ج</div>
+                
+                <div class="incoming-route">
+                    <div class="incoming-point">
+                        <div class="incoming-dot dot-pickup"></div>
+                        <div class="incoming-text" id="incPickup">جاري التحميل...</div>
+                    </div>
+                    <div class="incoming-point">
+                        <div class="incoming-dot dot-dest"></div>
+                        <div class="incoming-text" id="incDest">جاري التحميل...</div>
+                    </div>
+                </div>
+
+                <div class="incoming-meta">
+                    <span id="incDist">📏 --- كم</span>
+                    <span id="incTime">⏱️ --- دقيقة</span>
+                    <span id="incType">🚗 ---</span>
+                </div>
+            </div>
+            <div class="incoming-actions">
+                <button class="btn-large btn-decline" onclick="handleIncomingDecline()">❌ رفض</button>
+                <button class="btn-large btn-accept" id="incAcceptBtn" onclick="handleIncomingAccept()">✅ قبول الطلب</button>
             </div>
         </div>
     </div>
@@ -618,52 +656,6 @@
 
             <div class="ride-actions-footer">
                 <button id="pCancelBtn" class="cancel-btn" onclick="cancelRide()" style="margin:0;">❌ إلغاء الرحلة</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NEW: Driver Incoming Request Popup (Single Request View) -->
-    <div id="incomingRequestModal" class="incoming-request-overlay">
-        <div class="incoming-request-box">
-            <div class="ir-header">
-                <div class="ir-title">🔔 طلب رحلة جديد!</div>
-                <div class="ir-subtitle">هل تريد قبول هذه الرحلة؟</div>
-            </div>
-            <div class="ir-body">
-                <div class="ir-route">
-                    <div class="ir-point">
-                        <div class="ir-icon">📍</div>
-                        <div class="ir-text">
-                            <strong>نقطة الانطلاق</strong>
-                            <span id="irPickup">جاري التحميل...</span>
-                        </div>
-                    </div>
-                    <div class="ir-point">
-                        <div class="ir-icon">🏁</div>
-                        <div class="ir-text">
-                            <strong>الوجهة</strong>
-                            <span id="irDest">جاري التحميل...</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="ir-stats">
-                    <div class="ir-stat">
-                        <div class="ir-stat-val" id="irDist">---</div>
-                        <div class="ir-stat-label">المسافة</div>
-                    </div>
-                    <div class="ir-stat">
-                        <div class="ir-stat-val" id="irTime">---</div>
-                        <div class="ir-stat-label">الوقت</div>
-                    </div>
-                    <div class="ir-stat">
-                        <div class="ir-stat-val" id="irPrice" style="color:var(--primary-dark)">---</div>
-                        <div class="ir-stat-label">السعر</div>
-                    </div>
-                </div>
-            </div>
-            <div class="ir-actions">
-                <button class="ir-btn ir-decline" onclick="closeIncomingRequest()">❌ رفض الطلب</button>
-                <button class="ir-btn ir-accept" id="irAcceptBtn" onclick="">✅ قبول الرحلة</button>
             </div>
         </div>
     </div>
@@ -833,25 +825,45 @@
         }
     }
 
-    // Driver Incoming Request Modal Functions
+    // Incoming Request Modal Logic
+    let pendingIncomingRide = null;
+
     function showIncomingRequest(ride) {
-        const modal = document.getElementById('incomingRequestModal');
-        document.getElementById('irPickup').textContent = ride.pickup?.name || 'موقع غير محدد';
-        document.getElementById('irDest').textContent = ride.destination?.name || 'موقع غير محدد';
-        document.getElementById('irDist').textContent = ride.distance ? `${ride.distance} كم` : '---';
-        document.getElementById('irTime').textContent = ride.time ? `${ride.time} د` : '---';
-        document.getElementById('irPrice').textContent = ride.price ? `${ride.price} د.ج` : '---';
+        pendingIncomingRide = ride;
         
-        // Set accept button action
-        const btn = document.getElementById('irAcceptBtn');
-        btn.onclick = function() { handleAccept(ride.id); closeIncomingRequest(); };
+        // Populate Data
+        document.getElementById('incPickup').textContent = ride.pickup?.name || 'موقع غير محدد';
+        document.getElementById('incDest').textContent = ride.destination?.name || 'وجهة غير محددة';
+        document.getElementById('incPrice').textContent = `${ride.price} د.ج`;
+        document.getElementById('incDist').textContent = `📏 ${ride.distance || '---'} كم`;
+        document.getElementById('incTime').textContent = `⏱️ ${ride.time || '---'} دقيقة`;
+        document.getElementById('incType').textContent = `🚗 ${ride.carType}`;
         
-        modal.classList.add('active');
+        document.getElementById('incomingRequestModal').classList.add('active');
         Utils.playSound('requestSound');
     }
 
     function closeIncomingRequest() {
         document.getElementById('incomingRequestModal').classList.remove('active');
+        pendingIncomingRide = null;
+    }
+
+    window.handleIncomingAccept = async function() {
+        if(!pendingIncomingRide) return;
+        const btn = document.getElementById('incAcceptBtn');
+        btn.disabled = true;
+        btn.textContent = '🔄 جاري...';
+        
+        await handleAccept(pendingIncomingRide.id);
+        closeIncomingRequest();
+        btn.disabled = false;
+        btn.textContent = '✅ قبول الطلب';
+    }
+
+    window.handleIncomingDecline = async function() {
+        if(!pendingIncomingRide) return;
+        await handleDecline(pendingIncomingRide.id);
+        closeIncomingRequest();
     }
 
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
@@ -1106,14 +1118,13 @@
             const n=r.length; 
             if(n>previousRequestsCount&&n>0){ 
                 Utils.playSound('requestSound'); 
+                // Show incoming popup for the first/newest request if not already showing one
+                if(r.length > 0 && !document.getElementById('incomingRequestModal').classList.contains('active')) {
+                     showIncomingRequest(r[0]);
+                }
             } 
             previousRequestsCount=n; 
             renderRequests(r,l,c); 
-            
-            // Show Popup for the first request if modal is closed
-            if(r.length > 0 && !document.getElementById('incomingRequestModal').classList.contains('active')) {
-                showIncomingRequest(r[0]);
-            }
         },e=>console.error(e)); 
     }
     
@@ -1134,8 +1145,10 @@
 
     window.handleAccept=async function(rideId){ 
         if(!currentDriver?.uid)return Utils.showToast('⚠️ سجل الدخول أولاً','error'); 
-        // Note: If called from popup, event might be undefined, so we find button differently or just proceed
-        const b = event ? event.target : document.getElementById('irAcceptBtn'); 
+        // If called from popup, find button there, else generic
+        let b = event?.target;
+        if(!b) b = document.getElementById('incAcceptBtn'); // Fallback
+        
         if(b) { b.disabled=true; b.textContent='🔄 جاري...'; }
         Utils.stopSound('requestSound'); 
         try{ 
@@ -1155,7 +1168,7 @@
             showChatButton(rideId,cid,'driver',dn,currentActiveRide); 
             if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]); 
         }catch(e){Utils.showToast('⚠️ '+e.message,'error');} 
-        finally{if(b){b.disabled=false;b.textContent='✅ قبول';} loadRequests();} 
+        finally{if(b){b.disabled=false;b.textContent=b.id==='incAcceptBtn'?'✅ قبول الطلب':'✅ قبول';}loadRequests();} 
     };
     
     window.handleDecline=async function(rideId){ 
