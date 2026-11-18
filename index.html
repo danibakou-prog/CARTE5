@@ -953,154 +953,6 @@
         pendingIncomingRide = null;
     }
 
-    // ==========================================
-    // تصحيح دوال قبول ورفض الطلب من النافذة المنبثقة
-    // ==========================================
-
-    window.handleIncomingAccept = async function() {
-        if (!pendingIncomingRide || !currentDriver?.uid) {
-            Utils.showToast('⚠️ خطأ في البيانات أو تسجيل الدخول', 'error');
-            return;
-        }
-        
-        const rideId = pendingIncomingRide.id;
-        const btn = document.getElementById('incAcceptBtn');
-
-        // 1. تعطيل الزر وإظهار حالة التحميل
-        btn.disabled = true;
-        btn.textContent = '🔄 جاري...';
-        Utils.stopSound('requestSound');
-
-        try {
-            // 2. التحقق من أن الطلب لا يزال متاحاً وموجهاً لهذا السائق
-            const s = await db.collection('rideRequests').doc(rideId).get();
-            if (!s.exists || s.data().status !== 'pending' || s.data().assignedDriverId !== currentDriver.uid) {
-                Utils.showToast('⚠️ الطلب موجه لسائق آخر أو منتهي', 'warning');
-                closeIncomingRequest();
-                return;
-            }
-
-            const r = s.data();
-
-            // 3. تحديث حالة الطلب إلى "مقبول"
-            await db.collection('rideRequests').doc(rideId).update({
-                status: 'accepted',
-                acceptedBy: currentDriver.uid,
-                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            // 4. تحديث حالة السائق إلى غير متاح
-            await db.collection('drivers').doc(currentDriver.uid).update({
-                available: false,
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            driverAvailable = false;
-
-            // 5. إنشاء المحادثة وإرسال رسالة ترحيب
-            const cid = await createChat(rideId, r.passengerId, currentDriver.uid);
-            const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
-            await sendMessage(cid, currentDriver.uid, 'driver', `✅ تم قبول طلبك! أنا في الطريق.`);
-
-            // 6. تحديث البيانات المحلية
-            currentActiveRide = { id: rideId, ...r, status: 'accepted' };
-            saveToLocalLog({ id: rideId, status: 'accepted', pickup: r.pickup, destination: r.destination, price: r.price, createdAt: r.createdAt?.toDate?.() || new Date().toISOString() });
-
-            Utils.showToast('✅ قبلت الرحلة! 💬 افتح المحادثة');
-
-            // 7. تحديث واجهة المستخدم
-            closeIncomingRequest();
-            showChatInterface(rideId, r.passengerId, currentDriver.uid, 'driver', dn, currentActiveRide);
-            showChatButton(rideId, cid, 'driver', dn, currentActiveRide);
-
-            if (currentDriver?.location && r.pickup?.lat) {
-                MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [r.pickup.lat, r.pickup.lng], [r.destination.lat, r.destination.lng]);
-            }
-
-        } catch (e) {
-            console.error(e);
-            Utils.showToast('⚠️ ' + e.message, 'error');
-        } finally {
-            // 8. إعادة الزر لحالته الطبيعية وتحديث القائمة
-            btn.disabled = false;
-            btn.textContent = '✅ قبول الطلب';
-            loadRequests(); 
-        }
-    };
-
-    window.handleIncomingDecline = async function() {
-        if (!pendingIncomingRide || !currentDriver?.uid) return;
-
-        const rideId = pendingIncomingRide.id;
-        const btn = document.querySelector('.incoming-actions .btn-decline'); 
-        
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = '🔄 جاري...';
-        }
-        Utils.stopSound('requestSound');
-
-        try {
-            const ref = db.collection('rideRequests').doc(rideId);
-            const snap = await ref.get();
-            if (!snap.exists) {
-                closeIncomingRequest();
-                return;
-            }
-
-            const rd = snap.data();
-            const my = currentDriver.uid;
-            const sk = rd.skippedBy || [];
-
-            // إضافة هذا السائق لقائمة من رفضوا الطلب
-            if (!sk.includes(my)) sk.push(my);
-
-            // البحث عن أقرب سائق متاح آخر من نفس نوع السيارة
-            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', rd.carType).get();
-            const nb = [];
-
-            for (const d of ds.docs) {
-                const x = d.data();
-                if (x.location && rd.pickup?.lat) {
-                    const dist = Utils.calculateDistance(rd.pickup.lat, rd.pickup.lng, x.location.lat, x.location.lng);
-                    if (dist <= 15 && d.id !== my && !sk.includes(d.id)) {
-                        nb.push({ id: d.id, ...x, distance: dist });
-                    }
-                }
-            }
-
-            // ترتيب السائقين حسب الأقرب
-            nb.sort((a, b) => a.distance - b.distance);
-
-            if (nb.length > 0) {
-                const nx = nb[0];
-                await ref.update({
-                    status: 'pending',
-                    assignedDriverId: nx.id,
-                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    skippedBy: sk,
-                    dispatchStage: firebase.firestore.FieldValue.increment(1)
-                });
-                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي مباشرة');
-            } else {
-                await ref.update({ status: 'expired', skippedBy: sk });
-                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً');
-            }
-
-            saveToLocalLog({ id: rideId, status: 'declined', pickup: rd.pickup, destination: rd.destination, price: rd.price, createdAt: rd.createdAt?.toDate?.() || new Date().toISOString() });
-
-        } catch (e) {
-            console.error(e);
-            Utils.showToast('⚠️ ' + e.message, 'error');
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = '❌ رفض';
-            }
-            closeIncomingRequest();
-            loadRequests();
-        }
-    };
-
     function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.auth-tab:nth-child(${tab==='login'?1:2})`).classList.add('active'); document.getElementById('loginForm').style.display = tab==='login'?'flex':'none'; document.getElementById('registerForm').style.display = tab==='register'?'flex':'none'; }
     async function handleAuth(type) { const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn'); btn.disabled=true; btn.textContent='🔄 جاري...'; const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value; const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value; try { if(type==='login') await auth.signInWithEmailAndPassword(email, pass); else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); } Utils.showToast(type==='login'?'✅ مرحباً بعودتك':'✅ تم إنشاء الحساب'); } catch(e) { Utils.showToast('⚠️ '+(e.message.includes('auth/')?e.message.split('auth/')[1].replace(/-/g,' '):'حدث خطأ'), 'error'); } finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } }
     
@@ -1967,6 +1819,154 @@
             menu.classList.remove('show');
         }
     });
+
+    // ==========================================
+    // تصحيح دوال قبول ورفض الطلب من النافذة المنبثقة
+    // ==========================================
+
+    window.handleIncomingAccept = async function() {
+        if (!pendingIncomingRide || !currentDriver?.uid) {
+            Utils.showToast('⚠️ خطأ في البيانات أو تسجيل الدخول', 'error');
+            return;
+        }
+        
+        const rideId = pendingIncomingRide.id;
+        const btn = document.getElementById('incAcceptBtn');
+
+        // 1. تعطيل الزر وإظهار حالة التحميل
+        btn.disabled = true;
+        btn.textContent = '🔄 جاري...';
+        Utils.stopSound('requestSound');
+
+        try {
+            // 2. التحقق من أن الطلب لا يزال متاحاً وموجهاً لهذا السائق
+            const s = await db.collection('rideRequests').doc(rideId).get();
+            if (!s.exists || s.data().status !== 'pending' || s.data().assignedDriverId !== currentDriver.uid) {
+                Utils.showToast('⚠️ الطلب موجه لسائق آخر أو منتهي', 'warning');
+                closeIncomingRequest();
+                return;
+            }
+
+            const r = s.data();
+
+            // 3. تحديث حالة الطلب إلى "مقبول"
+            await db.collection('rideRequests').doc(rideId).update({
+                status: 'accepted',
+                acceptedBy: currentDriver.uid,
+                acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // 4. تحديث حالة السائق إلى غير متاح
+            await db.collection('drivers').doc(currentDriver.uid).update({
+                available: false,
+                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            driverAvailable = false;
+
+            // 5. إنشاء المحادثة وإرسال رسالة ترحيب
+            const cid = await createChat(rideId, r.passengerId, currentDriver.uid);
+            const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
+            await sendMessage(cid, currentDriver.uid, 'driver', `✅ تم قبول طلبك! أنا في الطريق.`);
+
+            // 6. تحديث البيانات المحلية
+            currentActiveRide = { id: rideId, ...r, status: 'accepted' };
+            saveToLocalLog({ id: rideId, status: 'accepted', pickup: r.pickup, destination: r.destination, price: r.price, createdAt: r.createdAt?.toDate?.() || new Date().toISOString() });
+
+            Utils.showToast('✅ قبلت الرحلة! 💬 افتح المحادثة');
+
+            // 7. تحديث واجهة المستخدم
+            closeIncomingRequest();
+            showChatInterface(rideId, r.passengerId, currentDriver.uid, 'driver', dn, currentActiveRide);
+            showChatButton(rideId, cid, 'driver', dn, currentActiveRide);
+
+            if (currentDriver?.location && r.pickup?.lat) {
+                MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [r.pickup.lat, r.pickup.lng], [r.destination.lat, r.destination.lng]);
+            }
+
+        } catch (e) {
+            console.error(e);
+            Utils.showToast('⚠️ ' + e.message, 'error');
+        } finally {
+            // 8. إعادة الزر لحالته الطبيعية وتحديث القائمة
+            btn.disabled = false;
+            btn.textContent = '✅ قبول الطلب';
+            loadRequests(); 
+        }
+    };
+
+    window.handleIncomingDecline = async function() {
+        if (!pendingIncomingRide || !currentDriver?.uid) return;
+
+        const rideId = pendingIncomingRide.id;
+        const btn = document.querySelector('.incoming-actions .btn-decline'); 
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '🔄 جاري...';
+        }
+        Utils.stopSound('requestSound');
+
+        try {
+            const ref = db.collection('rideRequests').doc(rideId);
+            const snap = await ref.get();
+            if (!snap.exists) {
+                closeIncomingRequest();
+                return;
+            }
+
+            const rd = snap.data();
+            const my = currentDriver.uid;
+            const sk = rd.skippedBy || [];
+
+            // إضافة هذا السائق لقائمة من رفضوا الطلب
+            if (!sk.includes(my)) sk.push(my);
+
+            // البحث عن أقرب سائق متاح آخر من نفس نوع السيارة
+            const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', rd.carType).get();
+            const nb = [];
+
+            for (const d of ds.docs) {
+                const x = d.data();
+                if (x.location && rd.pickup?.lat) {
+                    const dist = Utils.calculateDistance(rd.pickup.lat, rd.pickup.lng, x.location.lat, x.location.lng);
+                    if (dist <= 15 && d.id !== my && !sk.includes(d.id)) {
+                        nb.push({ id: d.id, ...x, distance: dist });
+                    }
+                }
+            }
+
+            // ترتيب السائقين حسب الأقرب
+            nb.sort((a, b) => a.distance - b.distance);
+
+            if (nb.length > 0) {
+                const nx = nb[0];
+                await ref.update({
+                    status: 'pending',
+                    assignedDriverId: nx.id,
+                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    skippedBy: sk,
+                    dispatchStage: firebase.firestore.FieldValue.increment(1)
+                });
+                Utils.showToast('⏭️ تم نقل الطلب للسائق التالي مباشرة');
+            } else {
+                await ref.update({ status: 'expired', skippedBy: sk });
+                Utils.showToast('⚠️ لا يوجد سائقين متاحين حالياً');
+            }
+
+            saveToLocalLog({ id: rideId, status: 'declined', pickup: rd.pickup, destination: rd.destination, price: rd.price, createdAt: rd.createdAt?.toDate?.() || new Date().toISOString() });
+
+        } catch (e) {
+            console.error(e);
+            Utils.showToast('⚠️ ' + e.message, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '❌ رفض';
+            }
+            closeIncomingRequest();
+            loadRequests();
+        }
+    };
 
     window.onload=initFirebase;
 </script>
