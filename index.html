@@ -855,7 +855,7 @@ if(!navigator.onLine && !driverAvailable) { Utils.showToast('⚠️ تحقق م�
 driverAvailable = !driverAvailable;
 db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine });
 updateAvailabilityButton();
-if(driverAvailable) { Utils.showToast('✅ أنت متاح'); loadRequests(); } else { Utils.showToast('🔕 تم إيقاف الخدمة'); }
+if(driverAvailable) { Utils.showToast('✅ أنت متاح'); } else { Utils.showToast('🔕 تم إيقاف الخدمة'); }
 }
 function startDriverRequestListener() {
 if (!currentDriver || !currentDriver.uid || !currentDriver.carType) return;
@@ -877,7 +877,17 @@ if(!currentDriver||!driverAvailable){
 l.innerHTML='<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>';
 return;
 }
-openDriverRequestsModal();
+if (document.getElementById('driverRequestsModal').classList.contains('active')) {
+activeRequestListener = db.collection('rideRequests').where('status', '==', 'pending').where('carType', '==', currentDriver.carType).limit(20).onSnapshot(s => {
+const r = [];
+s.forEach(d => {
+const x = d.data();
+if (x.skippedBy?.includes(currentDriver.uid)) return;
+if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') { r.push({ id: d.id, ...x }); }
+});
+renderRequests(r, l, c);
+});
+}
 }
 function renderRequests(reqs,l,c){
 c.textContent=reqs.length;
