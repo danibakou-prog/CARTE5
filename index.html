@@ -201,11 +201,11 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; } 
 .chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
 
-/* ✅ تعديل: الإشعارات تظهر في أعلى الشاشة */
+/* ✅ تعديل: الإشعارات تظهر في أعلى الشاشة وتختفي عند الضغط */
 .toast { 
     position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-120px); 
     background: #1B1B1B; color: #fff; padding: 14px 28px; border-radius: 16px; 
-    font-size: 0.92em; z-index: 9999; transition: transform 0.35s ease; 
+    font-size: 0.92em; z-index: 9999; transition: transform 0.35s ease; cursor: pointer;
     box-shadow: 0 6px 28px rgba(0,0,0,0.35); font-weight: 500; 
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
@@ -304,6 +304,20 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
           <span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
         </div>
+        
+        <!-- ✅ أزرار أعلى القائمة -->
+        <div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+          <button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);">
+            📜 طلباتي
+          </button>
+        </div>
+
+        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+          <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(156, 205, 50, 0.3);">
+            🚙 استقبال الطلبات
+          </button>
+        </div>
+
         <div class="dropdown-tabs">
           <button class="dropdown-tab active" onclick="switchMenuTab('history')">📜 سجل الطلبات</button>
           <button class="dropdown-tab" id="settingsTabBtn" onclick="switchMenuTab('settings')" style="display:none;">⚙️ إعدادات المركبة</button>
@@ -329,20 +343,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
             <input type="text" id="menuCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345">
           </div>
           <button class="auth-btn" onclick="saveDriverProfileFromMenu()" style="padding:10px; font-size:0.9em; margin-top:5px;">💾 حفظ التغيرات</button>
-        </div>
-        
-        <!-- ✅ زر استقبال الطلبات للسائق داخل القائمة -->
-        <div class="dropdown-footer" id="driverReceiveRequestsFooter" style="display:none; border-top: 1px solid var(--border); padding: 12px; background: #f9f9f9;">
-          <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.9em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B;">
-            🚙 استقبال الطلبات
-          </button>
-        </div>
-        
-        <!-- ✅ زر طلباتي للراكب داخل القائمة -->
-        <div class="dropdown-footer" id="passengerMyRequestsFooter" style="display:none; border-top: 1px solid var(--border); padding: 12px; background: #f9f9f9;">
-          <button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.9em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B;">
-            📜 طلباتي
-          </button>
         </div>
       </div>
     </div>
@@ -545,7 +545,8 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 </div>
 </div>
 </div>
-<div class="toast" id="toast"></div>
+<!-- ✅ تمت إضافة onclick لإخفاء الإشعار عند الضغط عليه -->
+<div class="toast" id="toast" onclick="this.classList.remove('show')"></div>
 <audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
 <audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/2947.mp3" type="audio/mpeg"></audio>
 <script>
@@ -590,9 +591,9 @@ stopSound: (id) => { const a=document.getElementById(id); if(a){a.pause(); a.cur
 const MapUtils = {
 initMap: (id, opts={}) => {
 const c={...MAP_CONFIG, ...opts};
+// ✅ تم إزالة أيقونة طبقات الخريطة (خريطة 1)
 const m=L.map(id, {zoomControl:false, attributionControl:true, preferCanvas:true}).setView(c.defaultView, c.defaultZoom);
-L.control.layers({}, {}, {position:'topright'}).addTo(m);
-c.tileLayers.forEach((l,i)=>{ const t=L.tileLayer(l.url, {attribution:l.attribution, maxZoom:l.maxZoom}); if(i===0)t.addTo(m); L.control.layers().addBaseLayer(t, `خريطة ${i+1}`).addTo(m); });
+c.tileLayers.forEach((l,i)=>{ const t=L.tileLayer(l.url, {attribution:l.attribution, maxZoom:l.maxZoom}); if(i===0)t.addTo(m); });
 L.control.zoom({position:'topright'}).addTo(m); return m;
 },
 createMarker: (pos, type='passenger', popup=null) => { const i=MAP_CONFIG.markerIcons[type]||MAP_CONFIG.markerIcons.passenger; const m=L.marker(pos, {icon:i}); if(popup)m.bindPopup(`<div class="custom-popup">${popup}</div>`); return m; },
@@ -775,18 +776,19 @@ async function completeDriverSetup() {
     driverAvailable = true; updateAvailabilityButton();
     
     const switchModeBtn = document.getElementById('switchModeHeaderBtn');
-    const driverReceiveFooter = document.getElementById('driverReceiveRequestsFooter');
-    const passengerMyRequestsFooter = document.getElementById('passengerMyRequestsFooter');
-    const settingsTabBtn = document.getElementById('settingsTabBtn');
     const driverAvailabilityBtn = document.getElementById('driverAvailabilityBtn');
     const userIconBtn = document.getElementById('userIconBtn');
     const menuUserName = document.getElementById('menuUserName');
+    const mainRequestBtn = document.getElementById('mainRequestBtn');
+    const passengerMyRequestsTop = document.getElementById('passengerMyRequestsTop');
+    const driverReceiveRequestsTop = document.getElementById('driverReceiveRequestsTop');
 
     userIconBtn.textContent = '🚕'; menuUserName.textContent = carName;
-    settingsTabBtn.style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
+    document.getElementById('settingsTabBtn').style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
     
     switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب';
-    driverReceiveFooter.style.display = 'block'; passengerMyRequestsFooter.style.display = 'none';
+    driverReceiveRequestsTop.style.display = 'block'; passengerMyRequestsTop.style.display = 'none';
+    mainRequestBtn.style.display = 'none'; // ✅ إخفاء زر الطلب للسائق
     
     document.getElementById('popupDriverName').textContent = `${carName} | ${carType}`;
     document.getElementById('popupDriverArea').textContent = `🚗 ${carType}`;
@@ -844,12 +846,13 @@ async function routeUserAfterAuth(user) {
     const d = ud.data(); 
     
     const switchModeBtn = document.getElementById('switchModeHeaderBtn');
-    const driverReceiveFooter = document.getElementById('driverReceiveRequestsFooter');
-    const passengerMyRequestsFooter = document.getElementById('passengerMyRequestsFooter');
     const settingsTabBtn = document.getElementById('settingsTabBtn');
     const driverAvailabilityBtn = document.getElementById('driverAvailabilityBtn');
     const userIconBtn = document.getElementById('userIconBtn');
     const menuUserName = document.getElementById('menuUserName');
+    const mainRequestBtn = document.getElementById('mainRequestBtn');
+    const passengerMyRequestsTop = document.getElementById('passengerMyRequestsTop');
+    const driverReceiveRequestsTop = document.getElementById('driverReceiveRequestsTop');
 
     if(d.role === 'driver') {
         const dd = await db.collection('drivers').doc(user.uid).get();
@@ -866,8 +869,9 @@ async function routeUserAfterAuth(user) {
             switchModeBtn.style.display = 'block';
             switchModeBtn.innerHTML = '👤 التبديل لراكب';
             
-            driverReceiveFooter.style.display = 'block';
-            passengerMyRequestsFooter.style.display = 'none';
+            driverReceiveRequestsTop.style.display = 'block';
+            passengerMyRequestsTop.style.display = 'none';
+            mainRequestBtn.style.display = 'none'; // ✅ إخفاء زر الطلب للسائق
             
             document.getElementById('popupDriverName').textContent = `${currentDriver.carName || currentDriver.email?.split('@')[0] || 'سائق'} | ${currentDriver.carType}`;
             document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
@@ -894,8 +898,9 @@ async function routeUserAfterAuth(user) {
             switchModeBtn.style.display = 'none'; 
         }
         
-        passengerMyRequestsFooter.style.display = 'block';
-        driverReceiveFooter.style.display = 'none';
+        passengerMyRequestsTop.style.display = 'block';
+        driverReceiveRequestsTop.style.display = 'none';
+        mainRequestBtn.style.display = 'flex'; // ✅ إظهار زر الطلب للراكب
         
         switchView('view-request'); 
         startPassengerLocationTracking(); 
@@ -1329,15 +1334,35 @@ rides.forEach(r => {
 const date = r.createdAt ? r.createdAt.toDate().toLocaleDateString('ar-DZ') : '';
 const statusColor = r.status === 'accepted' ? '#66BB6A' : (r.status === 'cancelled' ? '#EF5350' : '#FFA726');
 const statusText = r.status === 'accepted' ? 'مكتملة' : (r.status === 'cancelled' ? 'ملغية' : 'قيد الانتظار');
-html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}">
-<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-weight:700; font-size:0.9em;">${date}</span><span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.75em;">${statusText}</span></div>
-<div style="font-size:0.85em; color:#555; margin-bottom:5px;">📍 من: ${r.pickup?.name || 'غير محدد'}</div>
-<div style="font-size:0.85em; color:#555; margin-bottom:8px;">🏁 إلى: ${r.destination?.name || 'غير محدد'}</div>
-<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:8px;"><span style="font-weight:700; color:var(--primary-dark);">${r.price} د.ج</span><span style="font-size:0.8em;">${r.carType}</span></div></div>`;
+// ✅ إضافة زر الحذف مع padding-left لتجنب تداخل النص
+html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}; position: relative;">
+<button onclick="deleteRideRecord('${r.id}', this)" style="position: absolute; top: 8px; left: 8px; background: #EF5350; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.75em; cursor: pointer; z-index: 10;">🗑️ حذف</button>
+<div style="display:flex; justify-content:space-between; margin-bottom:8px; padding-left: 50px;"><span style="font-weight:700; font-size:0.9em;">${date}</span><span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.75em;">${statusText}</span></div>
+<div style="font-size:0.85em; color:#555; margin-bottom:5px; padding-left: 50px;">📍 من: ${r.pickup?.name || 'غير محدد'}</div>
+<div style="font-size:0.85em; color:#555; margin-bottom:8px; padding-left: 50px;">🏁 إلى: ${r.destination?.name || 'غير محدد'}</div>
+<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding-top:8px; padding-left: 50px;"><span style="font-weight:700; color:var(--primary-dark);">${r.price} د.ج</span><span style="font-size:0.8em;">${r.carType}</span></div></div>`;
 });
 container.innerHTML = html;
 } catch (e) { console.error("History load error:", e); container.innerHTML = `<div style="text-align:center;color:red; padding:20px;">حدث خطأ في تحميل السجل: ${e.message}</div>`; }
 }
+
+// ✅ دالة حذف السجل من قاعدة البيانات والواجهة
+window.deleteRideRecord = async function(rideId, btnElement) {
+    if(!confirm('هل أنت متأكد من حذف هذا السجل نهائياً؟')) return;
+    try {
+        await db.collection('rideRequests').doc(rideId).delete();
+        const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs';
+        let logs = JSON.parse(localStorage.getItem(key) || '[]');
+        logs = logs.filter(l => l.id !== rideId);
+        localStorage.setItem(key, JSON.stringify(logs));
+        
+        btnElement.closest('.record-card').remove();
+        Utils.showToast('✅ تم حذف السجل بنجاح');
+    } catch (e) { 
+        Utils.showToast('⚠️ فشل حذف السجل: ' + e.message, 'error'); 
+    }
+}
+
 async function saveDriverProfileFromMenu() {
 const btn = event.target; const originalText = btn.textContent; btn.disabled = true; btn.textContent = '🔄 جاري الحفظ...';
 try {
@@ -1356,12 +1381,13 @@ async function toggleUserRole() {
     document.getElementById('userDropdownMenu').classList.remove('show');
     
     const switchModeBtn = document.getElementById('switchModeHeaderBtn');
-    const driverReceiveFooter = document.getElementById('driverReceiveRequestsFooter');
-    const passengerMyRequestsFooter = document.getElementById('passengerMyRequestsFooter');
     const settingsTabBtn = document.getElementById('settingsTabBtn');
     const driverAvailabilityBtn = document.getElementById('driverAvailabilityBtn');
     const userIconBtn = document.getElementById('userIconBtn');
     const menuUserName = document.getElementById('menuUserName');
+    const mainRequestBtn = document.getElementById('mainRequestBtn');
+    const passengerMyRequestsTop = document.getElementById('passengerMyRequestsTop');
+    const driverReceiveRequestsTop = document.getElementById('driverReceiveRequestsTop');
 
     if (currentDriver) {
         await db.collection('users').doc(currentUser.uid).update({ role: 'passenger' });
@@ -1378,7 +1404,10 @@ async function toggleUserRole() {
             switchModeBtn.style.display = 'none';
         }
         
-        passengerMyRequestsFooter.style.display = 'block'; driverReceiveFooter.style.display = 'none';
+        passengerMyRequestsTop.style.display = 'block';
+        driverReceiveRequestsTop.style.display = 'none';
+        mainRequestBtn.style.display = 'flex'; // ✅ إظهار زر الطلب عند العودة للراكب
+        
         startPassengerLocationTracking(); Utils.showToast('✅ تم التبديل إلى وضع الراكب');
     } else {
         const dd = await db.collection('drivers').doc(currentUser.uid).get();
@@ -1390,7 +1419,10 @@ async function toggleUserRole() {
             settingsTabBtn.style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
             
             switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب';
-            driverReceiveFooter.style.display = 'block'; passengerMyRequestsFooter.style.display = 'none';
+            
+            driverReceiveRequestsTop.style.display = 'block';
+            passengerMyRequestsTop.style.display = 'none';
+            mainRequestBtn.style.display = 'none'; // ✅ إخفاء زر الطلب عند التحويل لسائق
             
             document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`;
             document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
