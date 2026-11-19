@@ -23,135 +23,37 @@
 --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-body {
-background: #f0f0f0;
-height: 100vh;
-width: 100vw;
-overflow: hidden;
-color: var(--text);
-}
-.app {
-max-width: 100%;
-width: 100%;
-height: 100%;
-margin: 0;
-background: transparent;
-box-shadow: none;
-position: relative;
-overflow: hidden;
-border: none;
-}
-#map {
-height: 100vh !important;
-width: 100% !important;
-position: absolute !important;
-top: 0;
-left: 0;
-z-index: 1;
-border-radius: 0;
-}
+body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color: var(--text); }
+.app { max-width: 100%; width: 100%; height: 100%; margin: 0; background: transparent; box-shadow: none; position: relative; overflow: hidden; border: none; }
+#map { height: 100vh !important; width: 100% !important; position: absolute !important; top: 0; left: 0; z-index: 1; border-radius: 0; }
 .view { display: none; animation: fadeIn 0.35s ease; height: 100%; }
 .view.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.header {
-background: rgba(255, 255, 255, 0.9);
-backdrop-filter: blur(10px);
-color: #1B1B1B;
-padding: 12px 20px;
-display: flex;
-align-items: center;
-gap: 12px;
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-z-index: 1000;
-box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-border-bottom-left-radius: 20px;
-border-bottom-right-radius: 20px;
-margin: 0 10px;
-width: calc(100% - 20px);
-justify-content: space-between;
-}
+.header { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); color: #1B1B1B; padding: 12px 20px; display: flex; align-items: center; gap: 12px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin: 0 10px; width: calc(100% - 20px); justify-content: space-between; }
 .header h1 { font-size: 1.1em; font-weight: 800; flex: 1; text-align: center; }
 .user-menu-container { position: relative; }
-.user-icon-btn {
-background: rgba(0,0,0,0.05); border: none;
-width: 40px; height: 40px; border-radius: 50%;
-cursor: pointer; font-size: 1.4em;
-display: flex; align-items: center; justify-content: center;
-transition: 0.2s;
-}
+.user-icon-btn { background: rgba(0,0,0,0.05); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.4em; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
 .user-icon-btn:hover { background: rgba(0,0,0,0.1); transform: scale(1.05); }
-.register-car-btn {
-background: rgba(255,255,255,0.8); border: 1px solid var(--border);
-color: #1B1B1B; padding: 8px 16px; border-radius: 20px;
-font-size: 0.85em; cursor: pointer; font-weight: 600;
-transition: 0.2s; white-space: nowrap;
-}
+.register-car-btn { background: rgba(255,255,255,0.8); border: 1px solid var(--border); color: #1B1B1B; padding: 8px 16px; border-radius: 20px; font-size: 0.85em; cursor: pointer; font-weight: 600; transition: 0.2s; white-space: nowrap; }
 .register-car-btn:hover { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.register-car-btn.active-driver {
-background: var(--primary); color: #1B1B1B; border: none;
-font-weight: 700;
-}
-.availability-btn {
-padding: 8px 14px;
-border-radius: 20px;
-font-size: 0.82em;
-cursor: pointer;
-font-weight: 700;
-border: none;
-transition: all 0.25s ease;
-white-space: nowrap;
-display: flex;
-align-items: center;
-gap: 6px;
-box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.availability-btn.available {
-background: linear-gradient(135deg, #66BB6A, #43A047);
-color: #fff;
-box-shadow: 0 3px 12px rgba(67, 160, 71, 0.4);
-}
-.availability-btn.unavailable {
-background: linear-gradient(135deg, #EF5350, #C62828);
-color: #fff;
-box-shadow: 0 3px 12px rgba(239, 83, 80, 0.4);
-}
+.register-car-btn.active-driver { background: var(--primary); color: #1B1B1B; border: none; font-weight: 700; }
+.availability-btn { padding: 8px 14px; border-radius: 20px; font-size: 0.82em; cursor: pointer; font-weight: 700; border: none; transition: all 0.25s ease; white-space: nowrap; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.availability-btn.available { background: linear-gradient(135deg, #66BB6A, #43A047); color: #fff; box-shadow: 0 3px 12px rgba(67, 160, 71, 0.4); }
+.availability-btn.unavailable { background: linear-gradient(135deg, #EF5350, #C62828); color: #fff; box-shadow: 0 3px 12px rgba(239, 83, 80, 0.4); }
 .availability-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .availability-btn:active { transform: scale(0.97); }
 .availability-btn .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: pulse-dot 1.5s infinite; }
 .availability-btn.unavailable .status-dot { animation: none; background: rgba(255,255,255,0.6); }
 @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 50% { box-shadow: 0 0 0 6px rgba(255,255,255,0); } }
-.dropdown-menu {
-position: absolute; top: 55px; left: 0;
-width: 320px; background: #fff;
-border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-z-index: 2000; overflow: hidden;
-transform-origin: top left;
-transform: scale(0.95); opacity: 0; visibility: hidden;
-transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
-border: 1px solid var(--border);
-}
+.dropdown-menu { position: absolute; top: 55px; left: 0; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; transform-origin: top left; transform: scale(0.95); opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid var(--border); }
 .dropdown-menu.show { transform: scale(1); opacity: 1; visibility: visible; }
-.dropdown-header {
-padding: 15px; background: linear-gradient(135deg, #f9f9f9, #fff);
-border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-}
+.dropdown-header { padding: 15px; background: linear-gradient(135deg, #f9f9f9, #fff); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .dropdown-tabs { display: flex; border-bottom: 1px solid var(--border); }
-.dropdown-tab {
-flex: 1; padding: 12px; text-align: center; cursor: pointer;
-font-size: 0.9em; font-weight: 600; color: #666;
-background: transparent; border: none; border-bottom: 3px solid transparent;
-transition: 0.2s;
-}
+.dropdown-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 0.9em; font-weight: 600; color: #666; background: transparent; border: none; border-bottom: 3px solid transparent; transition: 0.2s; }
 .dropdown-tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); background: #f0fdf4; }
 .dropdown-content { max-height: 400px; overflow-y: auto; padding: 10px; background: #fff; }
 .dropdown-footer { padding: 10px; border-top: 1px solid var(--border); background: #f9f9f9; text-align: center; }
-.logout-link {
-color: var(--danger); text-decoration: none; font-size: 0.9em; font-weight: 600;
-display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
-}
+.logout-link { color: var(--danger); text-decoration: none; font-size: 0.9em; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 2000; position: relative; }
 .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
 .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
@@ -172,52 +74,11 @@ display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
 @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 var(--pulse-green); } 70% { box-shadow: 0 0 0 20px rgba(102, 187, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0); } }
 .pulse-blue { animation: pulse-blue 1.5s infinite; }
 @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 var(--pulse-blue); } 70% { box-shadow: 0 0 0 20px rgba(66, 165, 245, 0); } 100% { box-shadow: 0 0 0 0 rgba(66, 165, 245, 0); } }
-.bottom-sheet-container {
-position: absolute;
-bottom: 0;
-left: 0;
-right: 0;
-z-index: 1000;
-transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
-pointer-events: none;
-}
-.bottom-sheet {
-background: rgba(255, 255, 255, 0.95);
-backdrop-filter: blur(15px);
-border-top-left-radius: 24px;
-border-top-right-radius: 24px;
-box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
-padding: 20px;
-transform: translateY(110%);
-transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-max-height: 75vh;
-overflow-y: auto;
-pointer-events: auto;
-border-top: 1px solid rgba(255,255,255,0.5);
-}
+.bottom-sheet-container { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); pointer-events: none; }
+.bottom-sheet { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-top-left-radius: 24px; border-top-right-radius: 24px; box-shadow: 0 -5px 30px rgba(0,0,0,0.15); padding: 20px; transform: translateY(110%); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); max-height: 75vh; overflow-y: auto; pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.5); }
 .bottom-sheet.open { transform: translateY(0); }
 .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 10px; margin: 0 auto 15px auto; }
-.fab-request-btn {
-position: absolute;
-bottom: 30px;
-left: 50%;
-transform: translateX(-50%);
-background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-color: #1B1B1B;
-border: none;
-padding: 16px 32px;
-border-radius: 50px;
-font-size: 1.1em;
-font-weight: 800;
-cursor: pointer;
-z-index: 999;
-box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4);
-display: flex;
-align-items: center;
-gap: 10px;
-transition: all 0.3s ease;
-pointer-events: auto;
-}
+.fab-request-btn { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; padding: 16px 32px; border-radius: 50px; font-size: 1.1em; font-weight: 800; cursor: pointer; z-index: 999; box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; pointer-events: auto; }
 .fab-request-btn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5); }
 .fab-request-btn.hidden { transform: translateX(-50%) translateY(100px); opacity: 0; pointer-events: none; }
 .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
@@ -256,38 +117,14 @@ pointer-events: auto;
 .form-group { margin-bottom: 18px; text-align: right; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
 .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
 .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
-.modal-overlay {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-z-index: 5000; display: none; align-items: center; justify-content: center;
-}
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 5000; display: none; align-items: center; justify-content: center; }
 .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
-.modal-content {
-background: white; width: 90%; max-width: 400px; padding: 24px;
-border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-text-align: center; position: relative;
-}
-.close-modal {
-position: absolute; top: 15px; left: 15px; background: #f0f0f0; border: none;
-width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2em;
-display: flex; align-items: center; justify-content: center; color: #555;
-}
-.driver-popup-overlay {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-z-index: 4000; display: none; align-items: center; justify-content: center;
-}
+.modal-content { background: white; width: 90%; max-width: 400px; padding: 24px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; position: relative; }
+.close-modal { position: absolute; top: 15px; left: 15px; background: #f0f0f0; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center; color: #555; }
+.driver-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 4000; display: none; align-items: center; justify-content: center; }
 .driver-popup-overlay.active { display: flex; }
-.driver-popup-box {
-background: rgba(255, 255, 255, 0.98); width: 95%; max-width: 420px;
-height: 80vh; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-display: flex; flex-direction: column; overflow: hidden; position: relative;
-animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-}
-.popup-header {
-padding: 16px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-color: #1B1B1B; display: flex; justify-content: space-between; align-items: center;
-}
+.driver-popup-box { background: rgba(255, 255, 255, 0.98); width: 95%; max-width: 420px; height: 80vh; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; position: relative; animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
+.popup-header { padding: 16px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; justify-content: space-between; align-items: center; }
 .popup-close { background: rgba(255,255,255,0.3); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #1B1B1B; font-weight: bold; }
 .popup-body { flex: 1; overflow-y: auto; padding: 16px; background: #f9f9f9; }
 .requests-list { padding: 0; max-height: 100%; overflow-y: visible; }
@@ -300,22 +137,10 @@ color: #1B1B1B; display: flex; justify-content: space-between; align-items: cent
 .accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .decline-btn { background: #ECEFF1; color: #455A64; }
 .empty-state { text-align: center; padding: 45px 24px; color: #666; } .empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
 .refresh-btn { width: 100%; padding: 14px; background: #ECEFF1; color: #37474F; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: 0.2s; }
-.passenger-ride-overlay {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-z-index: 4000; display: none; align-items: center; justify-content: center;
-}
+.passenger-ride-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 4000; display: none; align-items: center; justify-content: center; }
 .passenger-ride-overlay.active { display: flex; }
-.passenger-ride-box {
-background: rgba(255, 255, 255, 0.98); width: 95%; max-width: 420px;
-max-height: 85vh; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);
-display: flex; flex-direction: column; overflow: hidden; position: relative;
-animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-}
-.ride-status-header {
-padding: 20px; background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
-text-align: center; border-bottom: 1px solid var(--border);
-}
+.passenger-ride-box { background: rgba(255, 255, 255, 0.98); width: 95%; max-width: 420px; max-height: 85vh; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; position: relative; animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
+.ride-status-header { padding: 20px; background: linear-gradient(135deg, #E3F2FD, #BBDEFB); text-align: center; border-bottom: 1px solid var(--border); }
 .ride-status-title { font-size: 1.2em; font-weight: 800; color: #1565C0; margin-bottom: 5px; }
 .ride-driver-info { display: flex; align-items: center; gap: 15px; padding: 20px; background: #fff; }
 .ride-driver-avatar { width: 60px; height: 60px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 2em; }
@@ -324,32 +149,14 @@ text-align: center; border-bottom: 1px solid var(--border);
 .ride-detail-val { font-weight: 700; color: var(--text); font-size: 1.1em; }
 .ride-detail-label { font-size: 0.8em; color: #666; }
 .ride-actions-footer { padding: 20px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-direction: column; }
-.incoming-request-overlay {
-position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-z-index: 6000; display: none; align-items: center; justify-content: center;
-animation: fadeIn 0.3s;
-}
+.incoming-request-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 6000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
 .incoming-request-overlay.active { display: flex; }
-.incoming-request-box {
-background: white; width: 90%; max-width: 380px;
-border-radius: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-overflow: hidden; position: relative;
-animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-border: 2px solid var(--primary);
-}
-.incoming-header {
-background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-padding: 20px; text-align: center; color: #1B1B1B;
-}
+.incoming-request-box { background: white; width: 90%; max-width: 380px; border-radius: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); overflow: hidden; position: relative; animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); border: 2px solid var(--primary); }
+.incoming-header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 20px; text-align: center; color: #1B1B1B; }
 .incoming-title { font-size: 1.3em; font-weight: 800; margin-bottom: 5px; }
 .incoming-subtitle { font-size: 0.9em; opacity: 0.9; }
 .incoming-body { padding: 20px; }
-.incoming-price-tag {
-background: #FFF9C4; color: #5D4037; padding: 10px; border-radius: 12px;
-text-align: center; font-weight: 800; font-size: 1.2em; margin-bottom: 15px;
-border: 1px solid #FFECB3;
-}
+.incoming-price-tag { background: #FFF9C4; color: #5D4037; padding: 10px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 1.2em; margin-bottom: 15px; border: 1px solid #FFECB3; }
 .incoming-route { margin-bottom: 20px; }
 .incoming-point { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
 .incoming-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
@@ -364,25 +171,35 @@ border: 1px solid #FFECB3;
 .btn-large:active { transform: scale(0.98); }
 
 /* ✅ تعديل: المحادثة بملء الشاشة */
-.chat-overlay { 
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-    background: rgba(0,0,0,0.6); z-index: 5000; 
-    display: flex; align-items: stretch; justify-content: center; 
-    backdrop-filter: blur(4px); 
-}
-.chat-box { 
-    background: #fff; width: 100%; height: 100vh; max-width: 100%; max-height: 100vh; 
-    border-radius: 0; display: flex; flex-direction: column; 
-    animation: slideUp 0.35s ease; border: none; 
-}
+.chat-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 5000; display: flex; align-items: stretch; justify-content: center; backdrop-filter: blur(4px); }
+.chat-box { background: #fff; width: 100%; height: 100vh; max-width: 100%; max-height: 100vh; border-radius: 0; display: flex; flex-direction: column; animation: slideUp 0.35s ease; border: none; }
 .chat-header { padding: 18px 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .chat-close { background: rgba(255,255,255,0.3); border: none; color: #1B1B1B; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; transition: 0.2s; }
 .chat-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #FAFAFA; min-height: 220px; }
 .chat-input-area { padding: 14px 18px; background: #fff; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .chat-input { flex: 1; min-width: 150px; padding: 14px 18px; border: 2px solid var(--border); border-radius: 28px; outline: none; font-size: 0.95em; transition: 0.25s; }
 .chat-send-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.3em; font-weight: bold; transition: 0.25s; }
-.message { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.92em; line-height: 1.45; } .message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; } .message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; }
-.chat-mini-map { height: 160px; width: 100%; border-bottom: 1px solid var(--border); background: #F5F5F5; position: relative; } .chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; } .chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
+.message { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 0.92em; line-height: 1.45; } 
+.message.me { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-bottom-right-radius: 6px; margin-right: auto; } 
+.message.other { background: #E3F2FD; color: #1565C0; border-bottom-left-radius: 6px; margin-left: auto; }
+
+/* ✅ رسالة النظام (تفاصيل الرحلة) داخل المحادثة */
+.message.system {
+    background: #f0fdf4;
+    color: #1B1B1B;
+    border: 1px solid var(--primary-light);
+    border-radius: 16px;
+    margin: 0 auto 12px auto;
+    max-width: 90%;
+    font-size: 0.85em;
+    line-height: 1.6;
+    text-align: right;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.chat-mini-map { height: 160px; width: 100%; border-bottom: 1px solid var(--border); background: #F5F5F5; position: relative; } 
+.chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; } 
+.chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
 
 /* ✅ تعديل: الإشعارات تظهر في أعلى الشاشة */
 .toast { 
@@ -1138,23 +955,29 @@ const ex=document.getElementById('chatOverlay'); if(ex)ex.remove();
 const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:'';
 const cnBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:'';
 
-// ✅ إضافة تفاصيل الطلب في أعلى المحادثة للسائق والراكب
-const rideSummary = rd ? `
-<div style="padding: 12px 16px; background: #f0fdf4; border-bottom: 1px solid var(--border); font-size: 0.85em; flex-shrink: 0;">
-    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-weight:700; color:var(--primary-dark);">
-        <span>📋 تفاصيل الرحلة</span>
-        <span style="background:var(--secondary); color:#1B1B1B; padding:2px 8px; border-radius:8px; font-size:0.9em;">${rd.price ? rd.price + ' د.ج' : ''}</span>
+// ✅ حساب المسافة بين السائق والراكب
+let distBetween = "جاري التحديد...";
+let driverPos = role === 'driver' ? (currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null) : (rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null);
+let passengerPos = role === 'passenger' ? myCurrentPos : (rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null);
+
+if (driverPos && passengerPos) {
+    let d = Utils.calculateDistance(driverPos[0], driverPos[1], passengerPos[0], passengerPos[1]);
+    distBetween = Utils.formatDistance(d);
+}
+
+// ✅ إنشاء رسالة النظام التي تحتوي على جميع التفاصيل
+const systemMsgHtml = rd ? `
+    <div class="message system">
+        <div style="font-weight:700; margin-bottom:8px; color:var(--primary-dark); border-bottom:1px dashed #ccc; padding-bottom:6px;">📋 تفاصيل الرحلة</div>
+        <div style="margin-bottom:4px;">📍 <b>الانطلاق:</b> ${rd.pickup?.name || 'غير محدد'}</div>
+        <div style="margin-bottom:4px;">🏁 <b>الوجهة:</b> ${rd.destination?.name || 'غير محدد'}</div>
+        <div style="margin-bottom:4px;">💰 <b>السعر:</b> ${rd.price || 0} د.ج</div>
+        <div style="margin-bottom:8px;">📏 <b>مسافة الرحلة:</b> ${rd.distance || 0} كم • ⏱️ <b>الوقت:</b> ${rd.time || 0} دقيقة</div>
+        <div style="background:#fff3e0; padding:8px; border-radius:8px; color:#e65100; font-weight:700; text-align:center; border:1px solid #ffe0b2;">
+            🚗 بعد السائق عن الراكب حالياً: ${distBetween}
+        </div>
     </div>
-    <div style="display:flex; gap:8px; margin-bottom:6px; align-items:flex-start;">
-        <span style="font-size:1.1em;">📍</span>
-        <div style="flex:1;"><div style="font-size:0.8em; color:#666;">من:</div><div style="font-weight:600; color:#333;">${rd.pickup?.name || 'موقع الانطلاق'}</div></div>
-    </div>
-    <div style="display:flex; gap:8px; align-items:flex-start;">
-        <span style="font-size:1.1em;">🏁</span>
-        <div style="flex:1;"><div style="font-size:0.8em; color:#666;">إلى:</div><div style="font-weight:600; color:#333;">${rd.destination?.name || 'الوجهة'}</div></div>
-    </div>
-    ${rd.distance ? `<div style="margin-top:8px; font-size:0.85em; color:#666; text-align:center; background:#fff; padding:6px; border-radius:8px; border:1px solid var(--border);">📏 ${rd.distance} كم • ⏱️ ${rd.time} دقيقة • 🚗 ${rd.carType || ''}</div>` : ''}
-</div>` : '';
+` : '';
 
 let mp=null, op=null, ml='';
 if(role==='driver'){
@@ -1176,9 +999,8 @@ cc.innerHTML=`<div class="chat-box">
             <button class="chat-close" onclick="closeChat()">×</button>
         </div>
     </div>
-    ${rideSummary}
-    ${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}
     <div id="chatMessages" class="chat-messages"></div>
+    ${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}
     <div class="chat-input-area">
         <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">
         <button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button>
@@ -1189,7 +1011,10 @@ if(activeChatListener)activeChatListener();
 const uid=currentDriver?.uid||currentUser.uid;
 activeChatListener=listenToMessages(cid, msgs=>{
 const c=document.getElementById('chatMessages'); if(!c)return;
-c.innerHTML=msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join('');
+// ✅ دمج رسالة النظام مع الرسائل العادية
+let html = systemMsgHtml;
+html += msgs.map(m=>`<div class="message ${m.senderType===role?'me':'other'}">${m.text}</div>`).join('');
+c.innerHTML = html;
 c.scrollTop=c.scrollHeight;
 }, uid);
 if((mp||op)&&document.getElementById('chatMiniMap')) {
@@ -1356,7 +1181,7 @@ function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).
 function cancelRide(){
 if(confirm('إلغاء الرحلة؟')&&currentRideId){
 updateRideStatus('cancelled'); rideState='idle';
-closeSearchModal(); closePassengerRideModal(); closeChat(); // ✅ إغلاق المحادثة أيضاً عند الإلغاء
+closeSearchModal(); closePassengerRideModal(); closeChat();
 stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false;
 Utils.showToast('❌ تم الإلغاء','error'); currentRideId=null; currentActiveRide = null;
 if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId);
