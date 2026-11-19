@@ -787,6 +787,8 @@ async function completeDriverSetup() {
     document.getElementById('settingsTabBtn').style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
     
     switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب';
+    switchModeBtn.onclick = toggleUserRole; // ✅ إعادة الوظيفة الأصلية
+    
     driverReceiveRequestsTop.style.display = 'block'; passengerMyRequestsTop.style.display = 'none';
     mainRequestBtn.style.display = 'none'; // ✅ إخفاء زر الطلب للسائق
     
@@ -868,6 +870,7 @@ async function routeUserAfterAuth(user) {
             
             switchModeBtn.style.display = 'block';
             switchModeBtn.innerHTML = '👤 التبديل لراكب';
+            switchModeBtn.onclick = toggleUserRole;
             
             driverReceiveRequestsTop.style.display = 'block';
             passengerMyRequestsTop.style.display = 'none';
@@ -894,8 +897,12 @@ async function routeUserAfterAuth(user) {
         if (ddCheck.exists) { 
             switchModeBtn.style.display = 'block';
             switchModeBtn.innerHTML = '🚕 التبديل لسائق';
+            switchModeBtn.onclick = toggleUserRole;
         } else { 
-            switchModeBtn.style.display = 'none'; 
+            // ✅ الحل: إظهار الزر دائماً للراكب الجديد مع نص واضح يفتح نموذج التسجيل
+            switchModeBtn.style.display = 'block'; 
+            switchModeBtn.innerHTML = '🚕 سجل كسائق';
+            switchModeBtn.onclick = openDriverSetupModal; 
         }
         
         passengerMyRequestsTop.style.display = 'block';
@@ -1415,9 +1422,13 @@ async function toggleUserRole() {
         
         const dd = await db.collection('drivers').doc(currentUser.uid).get();
         if (dd.exists) {
-            switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق';
+            switchModeBtn.style.display = 'block'; 
+            switchModeBtn.innerHTML = '🚕 التبديل لسائق';
+            switchModeBtn.onclick = toggleUserRole;
         } else {
-            switchModeBtn.style.display = 'none';
+            switchModeBtn.style.display = 'block'; 
+            switchModeBtn.innerHTML = '🚕 سجل كسائق';
+            switchModeBtn.onclick = openDriverSetupModal;
         }
         
         passengerMyRequestsTop.style.display = 'block';
@@ -1435,6 +1446,7 @@ async function toggleUserRole() {
             settingsTabBtn.style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
             
             switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب';
+            switchModeBtn.onclick = toggleUserRole;
             
             driverReceiveRequestsTop.style.display = 'block';
             passengerMyRequestsTop.style.display = 'none';
@@ -1446,7 +1458,7 @@ async function toggleUserRole() {
             
             startLocationUpdates(currentUser.uid); startDriverRequestListener(); Utils.showToast('✅ تم التبديل إلى وضع السائق');
         } else { 
-            Utils.showToast('⚠️ يجب تسجيل السيارة أولاً', 'error'); openDriverSetupModal(); 
+            openDriverSetupModal(); 
         }
     }
 }
