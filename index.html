@@ -1253,7 +1253,7 @@ try {
 const ref=await db.collection('rideRequests').add({
 passengerId:currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value},
 destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType: requestedCarType,
-price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:[]
+price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:[], dispatchStage: 0
 });
 currentRideId=ref.id;
 } catch(e){ Utils.showToast('❌ فشل الإنشاء','error'); rideState='idle'; closeSearchModal(); return; }
@@ -1263,36 +1263,52 @@ dispatchDrivers.sort((a,b)=>a.distance-b.distance);
 if(dispatchDrivers.length===0){ document.getElementById('searchStatusText').textContent='لا يوجد سائقين'; document.getElementById('searchSubText').innerHTML = `لم نجد سائقين <b>${requestedCarType}</b> في منطقتك.<br>يرجى المحاولة لاحقاً أو تغيير النوع.`; setTimeout(()=>{rideState='idle';closeSearchModal();},4000); return; }
 dispatchNext(); listenForRideUpdate();
 }
-function listenForRideUpdate() {
-if(rideTimeoutId)clearTimeout(rideTimeoutId);
-const unsub=db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap=>{
-if(!docSnap.exists)return;
-const data=docSnap.data();
-if(data.status==='accepted'){
-rideState='matched';
-if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId);
-closeSearchModal(); stopPulseOnCurrent();
-currentActiveRide = {id: currentRideId, ...data};
 
-db.collection('drivers').doc(data.acceptedBy).get().then(ds=>{
-if(ds.exists){
-const dr=ds.data(), dn=dr.carName||dr.email?.split('@')[0]||'سائق';
-createChat(currentRideId,currentUser.uid,data.acceptedBy).then(cid=>{
-showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', dn, data);
-});
-Utils.showToast(`✅ قبل السائق الطلب! تم فتح المحادثة`);
-if(dr.location&&pickupPos&&destPos) MapUtils.drawDualRoute(map,[dr.location.lat,dr.location.lng],pickupPos,destPos);
-saveToLocalLog({id:currentRideId, status:'accepted', pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()});
+// ✅ تم تعديل هذه الدالة لتحديث واجهة الراكب عند رفض السائق وانتقال الطلب للتالي
+function listenForRideUpdate() {
+    if(rideTimeoutId) clearTimeout(rideTimeoutId);
+    const unsub = db.collection('rideRequests').doc(currentRideId).onSnapshot(docSnap => {
+        if(!docSnap.exists) return;
+        const data = docSnap.data();
+        
+        // ✅ تحديث واجهة الراكب عند رفض السائق وانتقال الطلب للسائق التالي
+        if (data.status === 'pending' && document.getElementById('searchModal').classList.contains('active')) {
+            const currentIndex = (data.dispatchStage || 0) + 1;
+            const remaining = Math.max(0, dispatchDrivers.length - currentIndex);
+            const statusTextEl = document.getElementById('searchStatusText');
+            const subTextEl = document.getElementById('searchSubText');
+            if (statusTextEl && subTextEl) {
+                statusTextEl.textContent = `جاري الاتصال بالسائق ${currentIndex}...`;
+                subTextEl.textContent = `متبقي ${remaining} سائقين`;
+            }
+        }
+
+        if(data.status === 'accepted') {
+            rideState = 'matched';
+            if(dispatchTimeoutId) clearTimeout(dispatchTimeoutId);
+            closeSearchModal(); stopPulseOnCurrent();
+            currentActiveRide = {id: currentRideId, ...data};
+
+            db.collection('drivers').doc(data.acceptedBy).get().then(ds => {
+                if(ds.exists) {
+                    const dr = ds.data(), dn = dr.carName || dr.email?.split('@')[0] || 'سائق';
+                    createChat(currentRideId, currentUser.uid, data.acceptedBy).then(cid => {
+                        showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', dn, data);
+                    });
+                    Utils.showToast(`✅ قبل السائق الطلب! تم فتح المحادثة`);
+                    if(dr.location && pickupPos && destPos) MapUtils.drawDualRoute(map, [dr.location.lat, dr.location.lng], pickupPos, destPos);
+                    saveToLocalLog({id: currentRideId, status: 'accepted', pickup: data.pickup, destination: data.destination, price: data.price, createdAt: data.createdAt?.toDate?.() || new Date().toISOString()});
+                }
+            });
+            unsub();
+        } else if(data.status === 'expired' || data.status === 'cancelled') {
+            rideState = 'idle'; closeSearchModal(); stopPulseOnCurrent();
+            document.getElementById('bookBtn').disabled = false; unsub();
+            saveToLocalLog({id: currentRideId, status: data.status, pickup: data.pickup, destination: data.destination, price: data.price, createdAt: data.createdAt?.toDate?.() || new Date().toISOString()});
+        }
+    });
 }
-});
-unsub();
-} else if(data.status==='expired'||data.status==='cancelled'){
-rideState='idle'; closeSearchModal(); stopPulseOnCurrent();
-document.getElementById('bookBtn').disabled=false; unsub();
-saveToLocalLog({id:currentRideId, status:data.status, pickup:data.pickup, destination:data.destination, price:data.price, createdAt:data.createdAt?.toDate?.()||new Date().toISOString()});
-}
-});
-}
+
 function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
 function cancelRide(){
 if(confirm('إلغاء الرحلة؟')&&currentRideId){
