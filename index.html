@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Yasser Ride Pro</title>
+<title>Yasser Ride Pro 🚖</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -31,7 +31,8 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .floating-controls { position: absolute; top: 20px; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 24px; pointer-events: none; }
 .floating-controls > * { pointer-events: auto; }
 
-.user-menu-container { position: relative; order: 1; display: flex; flex-direction: column; gap: 12px; }
+/* ✅ أيقونة مستخدم عصرية وأنيقة جداً (Glassmorphism + Squircle) */
+.user-menu-container { position: relative; order: 1; }
 .user-icon-btn { 
   background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(240,240,240,0.9)); 
   backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -50,27 +51,28 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 }
 .user-icon-btn:active { transform: scale(0.95); }
 
-/* ✅ أيقونة تحديد الموقع العائمة الزرقاء */
-.locate-btn { 
-  background: linear-gradient(145deg, rgba(66, 165, 245, 0.95), rgba(33, 150, 243, 0.9)); 
-  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255,255,255,0.6); 
-  width: 50px; height: 50px; border-radius: 16px; 
-  cursor: pointer; font-size: 1.4em; display: flex; align-items: center; justify-content: center; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3), inset 0 1px 0 rgba(255,255,255,0.8); 
-  color: #fff;
-  animation: locate-pulse 2s infinite;
+/* ✅ أيقونة تحديد الموقع العائمة الزرقاء الأنيقة */
+.floating-locate-btn {
+  position: absolute;
+  top: 65px;
+  right: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #42A5F5, #1E88E5);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
 }
-@keyframes locate-pulse {
-  0%, 100% { box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3); }
-  50% { box-shadow: 0 4px 25px rgba(33, 150, 243, 0.6); }
-}
-.locate-btn:hover { 
-  transform: translateY(-2px) scale(1.05); 
-  box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4); 
-}
-.locate-btn:active { transform: scale(0.95); }
+.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 30px rgba(30, 136, 229, 0.5); }
+.floating-locate-btn:active { transform: scale(0.95); }
 
 .toggle-mode-container { position: absolute; left: 50%; transform: translateX(-50%); top: 0; order: 2; }
 .register-car-btn { 
@@ -99,43 +101,34 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 @keyframes pulse-orange-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); } 50% { box-shadow: 0 0 0 12px rgba(255, 152, 0, 0); } }
 @keyframes pulse-red-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); } 50% { box-shadow: 0 0 0 12px rgba(239, 83, 80, 0); } }
 
-/* ✅ قائمة منسدلة محسنة وعصرية */
+/* ✅ قائمة المستخدم المنسدلة المعاد تصميمها لتكون أكثر عصرية وأناقة */
 .dropdown-menu { 
-  position: absolute; width: 340px; 
-  background: rgba(255,255,255,0.98); 
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
-  border-radius: 20px; 
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5); 
-  z-index: 2000; overflow: hidden; 
-  transform-origin: top right; transform: scale(0.95); opacity: 0; visibility: hidden; 
-  transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1); 
-  border: 1px solid rgba(255,255,255,0.6); 
-  right: 0; left: auto; top: 75px; 
+  position: absolute; width: 340px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5); 
+  z-index: 2000; overflow: hidden; transform-origin: top right; 
+  transform: scale(0.95) translateY(-10px); opacity: 0; visibility: hidden; 
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); border: none; right: 0; left: auto; top: 65px; 
 }
-.dropdown-menu.show { transform: scale(1); opacity: 1; visibility: visible; }
+.dropdown-menu.show { transform: scale(1) translateY(0); opacity: 1; visibility: visible; }
 .dropdown-header { 
-  padding: 18px 20px; 
-  background: linear-gradient(135deg, #f8fdf4, #ffffff); 
-  border-bottom: 1px solid rgba(156, 205, 50, 0.15); 
+  padding: 20px; background: linear-gradient(135deg, #F8F9FA, #FFFFFF); border-bottom: 1px solid rgba(0,0,0,0.05); 
   display: flex; justify-content: space-between; align-items: center; 
 }
-.dropdown-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 10px; }
-.dropdown-tab { 
-  flex: 1; padding: 14px 12px; text-align: center; cursor: pointer; 
-  font-size: 0.88em; font-weight: 600; color: #666; background: transparent; 
-  border: none; border-bottom: 3px solid transparent; transition: 0.2s; 
-  border-radius: 10px 10px 0 0; 
-}
-.dropdown-tab.active { 
-  color: var(--primary-dark); border-bottom-color: var(--primary); 
-  background: linear-gradient(135deg, #f0fdf4, #ffffff); font-weight: 700; 
-}
-.dropdown-content { max-height: 420px; overflow-y: auto; padding: 12px; background: #fff; }
+.dropdown-header span { font-weight: 700; font-size: 1.05em; color: #1B1B1B; }
 .logout-link { 
-  color: var(--danger); text-decoration: none; font-size: 0.9em; font-weight: 600; 
-  display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; 
+  color: #EF5350; text-decoration: none; font-size: 0.9em; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; 
+  cursor: pointer; padding: 6px 12px; border-radius: 10px; transition: all 0.2s; 
 }
-.logout-link:hover { color: #C62828; transform: scale(1.05); }
+.logout-link:hover { background: #FFEBEE; }
+.dropdown-tabs { display: flex; background: #F5F5F5; margin: 12px; border-radius: 14px; padding: 4px; }
+.dropdown-tab { 
+  flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 0.9em; font-weight: 600; color: #666; 
+  background: transparent; border: none; border-radius: 10px; transition: all 0.25s; 
+}
+.dropdown-tab.active { color: #1B1B1B; background: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.dropdown-content { max-height: 350px; overflow-y: auto; padding: 12px; background: transparent; }
+.dropdown-content::-webkit-scrollbar { width: 6px; }
+.dropdown-content::-webkit-scrollbar-thumb { background: #E0E0E0; border-radius: 10px; }
 
 .auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 2000; position: relative; }
 .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
@@ -145,111 +138,79 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: var(--card); }
 .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(156, 205, 50, 0.15); background: #FFF; }
 .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; margin-top: 8px; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-.auth-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } 
-.auth-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
+.auth-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } .auth-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; }
 .main-logo { font-size: 4.5em; margin-bottom: 18px; animation: bounce 2.5s infinite; filter: drop-shadow(0 4px 12px rgba(156, 205, 50, 0.3)); }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 .main-title { font-size: 1.8em; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
 .main-subtitle { color: #555; font-size: 1em; margin-bottom: 40px; line-height: 1.5; max-width: 280px; }
 
 .marker-base { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); font-size: 1.3em; position: relative; z-index: 1000; border: 3px solid var(--primary); }
-.marker-passenger { border-color: #66BB6A; } 
-.marker-driver { border-color: #42A5F5; } 
-.marker-truck { border-color: #9C27B0; }
+.marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
 .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
 
-/* ✅ النافذة المنسدلة المحسنة مع زر إغلاق */
+/* ✅ نافذة طلب السيارة المعاد تصميمها لتكون أكثر عصرية وسلاسة مع زر إغلاق أنيق */
 .bottom-sheet-container { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1); pointer-events: none; }
 .bottom-sheet { 
-  background: rgba(255, 255, 255, 0.98); 
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+  background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-top-left-radius: 28px; border-top-right-radius: 28px; 
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.5); 
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.15), 0 -2px 10px rgba(0,0,0,0.05); 
   padding: 24px; transform: translateY(110%); 
-  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); 
-  max-height: 80vh; overflow-y: auto; pointer-events: auto; 
-  border-top: 1px solid rgba(255,255,255,0.6); 
-  position: relative; 
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+  max-height: 80vh; overflow-y: auto; pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.8); 
 }
 .bottom-sheet.open { transform: translateY(0); }
-.sheet-handle { 
-  width: 45px; height: 5px; 
-  background: linear-gradient(90deg, #ddd, #bbb, #ddd); 
-  border-radius: 10px; margin: 0 auto 18px auto; 
+.sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.sheet-handle { width: 48px; height: 6px; background: #E0E0E0; border-radius: 10px; margin: 0; cursor: grab; }
+.sheet-close-btn {
+  background: #F5F5F5; border: none; width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer; font-size: 1.2em; color: #666; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
 }
-.sheet-close-btn { 
-  position: absolute; top: 18px; left: 20px; 
-  background: rgba(239, 83, 80, 0.1); border: none; 
-  width: 32px; height: 32px; border-radius: 50%; 
-  cursor: pointer; font-size: 1.1em; 
-  display: flex; align-items: center; justify-content: center; 
-  color: var(--danger); transition: 0.2s; z-index: 10;
-}
-.sheet-close-btn:hover { background: rgba(239, 83, 80, 0.2); transform: scale(1.1) rotate(90deg); }
+.sheet-close-btn:hover { background: #E0E0E0; color: #333; }
 
 .fab-request-btn { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; padding: 16px 32px; border-radius: 50px; font-size: 1.1em; font-weight: 800; cursor: pointer; z-index: 999; box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; pointer-events: auto; }
 .fab-request-btn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5); }
 .fab-request-btn.hidden { transform: translateX(-50%) translateY(100px); opacity: 0; pointer-events: none; }
 
 .location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-.loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); transition: 0.25s; }
-.loc-row:hover { border-color: var(--primary-light); box-shadow: 0 4px 12px rgba(156, 205, 50, 0.1); }
-.loc-header { display: flex; align-items: center; gap: 10px; } 
-.loc-icon { font-size: 1.4em; } 
-.loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
+.loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 14px; border-radius: 16px; border: 1px solid var(--border); }
+.loc-header { display: flex; align-items: center; gap: 10px; } .loc-icon { font-size: 1.4em; } .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
 .loc-input-group { display: flex; gap: 8px; }
 .loc-input { flex: 1; padding: 10px 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 0.9em; outline: none; transition: 0.25s; background: #FFF; }
 .loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
 .loc-btn { padding: 10px 14px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 12px; cursor: pointer; font-size: 0.9em; transition: 0.25s; white-space: nowrap; font-weight: 600; }
-.loc-btn:hover { background: var(--primary-dark); transform: translateY(-1px); } 
-.loc-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
-.loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); } 
-.loc-btn.gps-btn:hover { background: linear-gradient(135deg, #29B6F6, #039BE5); }
+.loc-btn:hover { background: var(--primary-dark); transform: translateY(-1px); } .loc-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
+.loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); } .loc-btn.gps-btn:hover { background: linear-gradient(135deg, #29B6F6, #039BE5); }
 .loc-coords { font-size: 0.75em; color: #777; margin-top: 4px; min-height: 24px; }
 .coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 5px 12px; border-radius: 8px; font-family: monospace; font-size: 0.85em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); }
-.coords-copy-btn { margin-right: 8px; padding: 3px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; } 
-.coords-copy-btn:hover { background: #FFC107; }
+.coords-copy-btn { margin-right: 8px; padding: 3px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 6px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; } .coords-copy-btn:hover { background: #FFC107; }
 
 .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
-.info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 12px; border-radius: 14px; text-align: center; border: 1px solid var(--border); transition: 0.25s; }
-.info-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(156, 205, 50, 0.15); }
-.info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); } 
-.info-card .label { font-size: 0.75em; color: #555; margin-top: 3px; font-weight: 500; }
+.info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 12px; border-radius: 14px; text-align: center; border: 1px solid var(--border); }
+.info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); } .info-card .label { font-size: 0.75em; color: #555; margin-top: 3px; font-weight: 500; }
 .price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 14px; border: 2px solid #FFECB3; box-shadow: 0 2px 8px rgba(255, 213, 79, 0.2); }
 .car-selector { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
 .car-opt { flex: 0 0 28%; min-width: 80px; background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 12px 8px; text-align: center; cursor: pointer; transition: 0.25s; }
-.car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); transform: scale(1.05); }
-.car-opt .ico { font-size: 1.6em; } 
-.car-opt .name { font-weight: 700; font-size: 0.75em; margin-top: 6px; line-height: 1.3; } 
-.car-opt .rate { color: var(--primary-dark); font-size: 0.7em; font-weight: 600; }
+.car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); }
+.car-opt .ico { font-size: 1.6em; } .car-opt .name { font-weight: 700; font-size: 0.75em; margin-top: 6px; line-height: 1.3; } .car-opt .rate { color: var(--primary-dark); font-size: 0.7em; font-weight: 600; }
 .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.05em; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(124, 179, 66, 0.3); }
-.book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; } 
-.book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; } .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; } 
-.driver-card.show { display: block; animation: slideUp 0.4s; }
+.driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; } .driver-card.show { display: block; animation: slideUp 0.4s; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 .d-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
 .d-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #BBDEFB, #90CAF9); display: flex; align-items: center; justify-content: center; font-size: 1.8em; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2); }
-.d-name { font-weight: 800; font-size: 1.05em; color: #1565C0; } 
-.d-meta { font-size: 0.85em; color: #555; margin-top: 3px; font-weight: 500; } 
-.d-stars { color: #FFC107; margin-top: 5px; font-size: 0.9em; }
+.d-name { font-weight: 800; font-size: 1.05em; color: #1565C0; } .d-meta { font-size: 0.85em; color: #555; margin-top: 3px; font-weight: 500; } .d-stars { color: #FFC107; margin-top: 5px; font-size: 0.9em; }
 .d-eta { background: #FFF; padding: 10px; border-radius: 12px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 12px; border: 1px solid var(--border); }
-.cancel-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 14px; margin-top: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); transition: 0.25s; }
-.cancel-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 83, 80, 0.4); }
+.cancel-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 14px; margin-top: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); }
 
-.autocomplete { position: relative; } 
-.autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; } 
-.autocomplete-results.show { display: block; }
-.autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
-.autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
-.form-group { margin-bottom: 18px; text-align: right; } 
-.form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
+.autocomplete { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; } .autocomplete-results.show { display: block; }
+.autocomplete-item { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
+.form-group { margin-bottom: 18px; text-align: right; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
 .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
-.form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } 
-.auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
+.form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 5000; display: none; align-items: center; justify-content: center; }
 .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
@@ -263,22 +224,14 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .popup-close { background: rgba(255,255,255,0.3); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #1B1B1B; font-weight: bold; }
 .popup-body { flex: 1; overflow-y: auto; padding: 16px; background: #f9f9f9; }
 .requests-list { padding: 0; max-height: 100%; overflow-y: visible; }
-.request-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 14px; border-right: 4px solid var(--primary); transition: 0.25s; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05); } 
-.request-card.urgent { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
-.req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; } 
-.req-time { font-size: 0.82em; color: #555; background: #E3F2FD; padding: 5px 12px; border-radius: 18px; font-weight: 600; } 
-.req-urgent { font-size: 0.78em; color: var(--danger); font-weight: 700; }
-.req-route { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; } 
-.req-point { display: flex; align-items: flex-start; gap: 10px; font-size: 0.92em; }
+.request-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 14px; border-right: 4px solid var(--primary); transition: 0.25s; border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05); } .request-card.urgent { border-right-color: var(--danger); background: linear-gradient(135deg, #FFEBEE, #FFCDD2); }
+.req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; } .req-time { font-size: 0.82em; color: #555; background: #E3F2FD; padding: 5px 12px; border-radius: 18px; font-weight: 600; } .req-urgent { font-size: 0.78em; color: var(--danger); font-weight: 700; }
+.req-route { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; } .req-point { display: flex; align-items: flex-start; gap: 10px; font-size: 0.92em; }
 .req-distance-badge { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 14px; border-radius: 24px; font-size: 0.82em; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
-.req-destination-info { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); padding: 10px 14px; border-radius: 12px; font-size: 0.88em; margin-top: 8px; border-right: 4px solid var(--secondary); font-weight: 500; } 
-.req-destination-info strong { color: #1565C0; }
-.req-actions { display: flex; gap: 10px; } 
-.req-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.92em; cursor: pointer; transition: 0.25s; }
-.accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } 
-.decline-btn { background: #ECEFF1; color: #455A64; }
-.empty-state { text-align: center; padding: 45px 24px; color: #666; } 
-.empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
+.req-destination-info { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); padding: 10px 14px; border-radius: 12px; font-size: 0.88em; margin-top: 8px; border-right: 4px solid var(--secondary); font-weight: 500; } .req-destination-info strong { color: #1565C0; }
+.req-actions { display: flex; gap: 10px; } .req-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 0.92em; cursor: pointer; transition: 0.25s; }
+.accept-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; } .decline-btn { background: #ECEFF1; color: #455A64; }
+.empty-state { text-align: center; padding: 45px 24px; color: #666; } .empty-state .icon { font-size: 3.5em; margin-bottom: 18px; opacity: 0.4; }
 .refresh-btn { width: 100%; padding: 14px; background: #ECEFF1; color: #37474F; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: 0.2s; }
 
 .passenger-ride-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 4000; display: none; align-items: center; justify-content: center; }
@@ -334,8 +287,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 
 #floatingChatBtn { position: fixed; bottom: 85px; right: 22px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 34px; font-weight: 700; cursor: pointer; z-index: 2500; box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); display: flex; align-items: center; gap: 10px; animation: pulse-btn 2.5s infinite; }
 @keyframes pulse-btn { 0%, 100% { box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); } 50% { box-shadow: 0 6px 36px rgba(255, 213, 79, 0.8); } }
-#loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: linear-gradient(135deg, #FFF, #F9F9F9); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; } 
-#loadingOverlay.hidden { display: none; }
+#loadingOverlay { position: fixed; top:0; left:0; right:0; bottom:0; background: linear-gradient(135deg, #FFF, #F9F9F9); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; } #loadingOverlay.hidden { display: none; }
 .start-trip-btn { background: linear-gradient(135deg, #66BB6A, #43A047); color: #fff; border: none; padding: 12px 24px; border-radius: 28px; font-weight: 700; font-size: 0.92em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.25s; box-shadow: 0 4px 16px rgba(67, 160, 71, 0.4); }
 .cancel-trip-btn { background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; padding: 12px 24px; border-radius: 28px; font-weight: 700; font-size: 0.92em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.25s; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.4); margin-right: 10px; }
 .record-card { background: var(--surface); border-radius: 14px; padding: 14px; border-right: 4px solid var(--primary); border: 1px solid var(--border); transition: all 0.3s ease; } 
@@ -398,16 +350,17 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-      <button class="locate-btn" id="locateBtn" onclick="showDriverToPassengerRoute()" title="عرض المسار">📍</button>
+      <!-- ✅ أيقونة تحديد الموقع العائمة الزرقاء -->
+      <button class="floating-locate-btn" id="locateBtn" onclick="handleLocateClick()" title="تحديد الموقع / رسم المسار">📍</button>
       <div class="dropdown-menu" id="userDropdownMenu">
         <div class="dropdown-header">
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
           <span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
         </div>
-        <div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+        <div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #f0fdf4;">
           <button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);">📜 طلباتي</button>
         </div>
-        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #f0fdf4;">
           <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(156, 205, 50, 0.3);">🚙 استقبال الطلبات</button>
         </div>
         <div class="dropdown-tabs">
@@ -434,8 +387,11 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <button id="mainRequestBtn" class="fab-request-btn" onclick="toggleBottomSheet()"><span>🚖</span> اطلب سيارة الآن</button>
 <div class="bottom-sheet-container">
 <div class="bottom-sheet" id="requestSheet">
-<button class="sheet-close-btn" onclick="toggleBottomSheet()">✕</button>
-<div class="sheet-handle"></div>
+  <!-- ✅ رأس النافذة مع زر الإغلاق الأنيق -->
+  <div class="sheet-header">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close-btn" onclick="toggleBottomSheet()" title="إغلاق">✕</button>
+  </div>
 <div class="location-box">
 <div class="loc-row">
 <div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">موقع الانطلاق</span></div>
@@ -595,7 +551,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <script>
 let db, auth, app, currentUser = null, currentDriver = null;
 let driverLocationInterval = null, passengerLocationInterval = null, activeRequestListener = null, activeChatListener = null;
-let map, pickupMarker, destMarker, routeControl, driverRoute, passengerRoute, driverToPassengerRoute;
+let map, pickupMarker, destMarker, routeControl, driverRoute, passengerRoute;
 let pickupPos = null, destPos = null, myCurrentPos = null;
 let selectedRate = 10, baseFare = 50, distKm = 0, timeMin = 0, rideState = 'idle', mapClickEnabled = false;
 let driverAvailable = true, currentRideId = null, currentChatId = null, rideTimeoutId = null;
@@ -613,7 +569,7 @@ const MAP_CONFIG = {
     driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [36, 36], iconAnchor: [18, 36] }),
     truck: L.divIcon({ className: 'marker-base marker-truck', html: '🚚', iconSize: [36, 36], iconAnchor: [18, 36] }),
     motorcycle: L.divIcon({ className: 'marker-base marker-driver', html: '🏍️', iconSize: [36, 36], iconAnchor: [18, 36] }),
-    luxury: L.divIcon({ className: 'marker-base marker-driver', html: '🚘', iconSize: [36, 36], iconAnchor: [18, 36] }),
+    luxury: L.divIcon({ className: 'marker-base marker-driver', html: '🚘', iconSize: 36, iconAnchor: [18, 36] }),
     destination: L.divIcon({ className: 'marker-destination', html: '🏁', iconSize: [32, 32], iconAnchor: [16, 32] }),
     chatPulse: L.divIcon({ className: 'pulse-marker-chat', html: '🔴', iconSize: [20, 20], iconAnchor: [10, 20] }),
     chatMe: L.divIcon({ className: 'marker-me', html: '🔵', iconSize: [20, 20], iconAnchor: [10, 20] })
@@ -641,17 +597,6 @@ const MapUtils = {
   createMarker: (pos, type='passenger', popup=null) => { const i=MAP_CONFIG.markerIcons[type]||MAP_CONFIG.markerIcons.passenger; const m=L.marker(pos, {icon:i}); if(popup)m.bindPopup(`<div class="custom-popup">${popup}</div>`); return m; },
   drawRoute: (map, wps, style) => { if(!wps||wps.length<2)return null; return L.Routing.control({waypoints:wps.map(p=>L.latLng(p)), routeWhileDragging:false, addWaypoints:false, show:false, createMarker:()=>null, lineOptions:{styles:[style]}, router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1', profile:'driving'})}).addTo(map); },
   drawDualRoute: (map, dPos, pPos, dest) => { if(driverRoute)map.removeControl(driverRoute); if(passengerRoute)map.removeControl(passengerRoute); driverRoute=MapUtils.drawRoute(map,[dPos,pPos],MAP_CONFIG.routeStyles.driver); passengerRoute=MapUtils.drawRoute(map,[pPos,dest],MAP_CONFIG.routeStyles.passenger); map.fitBounds(L.latLngBounds([dPos,pPos,dest]),{padding:[50,50]}); },
-  drawDriverToPassengerRoute: (map, dPos, pPos) => { 
-    if(driverToPassengerRoute) map.removeControl(driverToPassengerRoute); 
-    driverToPassengerRoute = MapUtils.drawRoute(map, [dPos, pPos], {color: '#2196F3', weight: 5, opacity: 0.9}); 
-    map.fitBounds(L.latLngBounds([dPos, pPos]), {padding: [60, 60]});
-  },
-  clearAllRoutes: (map) => {
-    if(driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
-    if(passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
-    if(driverToPassengerRoute) { map.removeControl(driverToPassengerRoute); driverToPassengerRoute = null; }
-    if(window.driverMarker) { map.removeLayer(window.driverMarker); window.driverMarker = null; }
-  },
   initChatMiniMap: (id, myPos, otherPos, role) => {
     const m=L.map(id, {zoomControl:true, attributionControl:false, dragging:true, touchZoom:true, scrollWheelZoom:true}).setView(myPos||otherPos||MAP_CONFIG.defaultView, 15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(m);
@@ -898,7 +843,6 @@ function startLocationUpdates(uid) {
         const l = {lat: p.coords.latitude, lng: p.coords.longitude};
         await db.collection('drivers').doc(uid).update({ location: l, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: true, connectionStatus: 'online' });
         myCurrentPos = [l.lat, l.lng];
-        if(currentDriver) currentDriver.location = l;
         if(chatMiniMap && currentActiveRide?.passengerId) { const o = await getPassengerLocation(currentActiveRide.passengerId); MapUtils.updateChatMiniMap(chatMiniMap, myCurrentPos, o); updateChatDistanceBadge(myCurrentPos, o); }
       } catch(e) { if(!navigator.onLine) setDriverOfflineImmediately(uid); }
     }, null, {enableHighAccuracy: true, timeout: 5000});
@@ -936,12 +880,43 @@ function toggleDriverStatus() {
 function startDriverRequestListener() {
   if (!currentDriver || !currentDriver.uid || !currentDriver.carType) return;
   if (activeRequestListener) activeRequestListener();
-  activeRequestListener = db.collection('rideRequests').where('status', '==', 'pending').where('carType', '==', currentDriver.carType).limit(20).onSnapshot(s => {
-    const r = [];
-    s.forEach(d => { const x = d.data(); if (x.skippedBy?.includes(currentDriver.uid)) return; if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') { r.push({ id: d.id, ...x }); } });
-    if (r.length > 0 && !document.getElementById('incomingRequestModal').classList.contains('active')) { showIncomingRequest(r[0]); }
-    if (document.getElementById('driverRequestsModal').classList.contains('active')) { renderRequests(r, document.getElementById('popupRequestsList'), document.getElementById('popupRequestsCount')); }
-  }, e => { console.error(e); });
+  // ✅ الاستماع أيضاً لحالة 'cancelled' لإغلاق النافذة فوراً عند إلغاء الراكب للطلب
+  activeRequestListener = db.collection('rideRequests')
+    .where('status', 'in', ['pending', 'accepted', 'cancelled'])
+    .where('carType', '==', currentDriver.carType)
+    .limit(20)
+    .onSnapshot(s => {
+      let incomingFound = false;
+      s.forEach(d => {
+        const x = d.data();
+        // ✅ إذا تم إلغاء الطلب، أغلق نافذة الطلب الوارد فوراً
+        if (x.status === 'cancelled') {
+          if (pendingIncomingRide && pendingIncomingRide.id === d.id) {
+            closeIncomingRequest();
+          }
+          return;
+        }
+        if (x.skippedBy?.includes(currentDriver.uid)) return;
+        if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') {
+          incomingFound = true;
+          if (!document.getElementById('incomingRequestModal').classList.contains('active')) {
+            showIncomingRequest({ id: d.id, ...x });
+          }
+        }
+      });
+      if (document.getElementById('driverRequestsModal').classList.contains('active')) {
+        const r = [];
+        s.forEach(d => {
+          const x = d.data();
+          if (x.status === 'cancelled') return;
+          if (x.skippedBy?.includes(currentDriver.uid)) return;
+          if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') {
+            r.push({ id: d.id, ...x });
+          }
+        });
+        renderRequests(r, document.getElementById('popupRequestsList'), document.getElementById('popupRequestsCount'));
+      }
+    }, e => { console.error(e); });
 }
 
 function loadRequests() {
@@ -1032,7 +1007,7 @@ async function showChatInterface(rid, pid, did, role, name, rd=null) {
   Utils.playSound('chatOpenSound');
   const cid=`chat_${rid}`; currentChatId=cid;
   const ex=document.getElementById('chatOverlay'); if(ex)ex.remove();
-  const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.pickup?.lat}','${rd.pickup?.lng}','${rd.pickup?.name||'الراكب'}')">🚀 بدء الرحلة</button>`:'';
+  const stBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:'';
   const cnBtn=role==='driver'&&rd&&rd.status==='accepted'?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:'';
   let distBetween = "جاري التحديد...", driverPos = role === 'driver' ? (currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null) : (rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null);
   let passengerPos = role === 'passenger' ? myCurrentPos : (rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null);
@@ -1075,65 +1050,89 @@ window.closeChat=function(){
 };
 window.sendChatMessage=async function(cid,sid,st){ const i=document.getElementById('chatInput'), t=i.value.trim(); if(!t)return; await sendMessage(cid,sid,st,t); i.value=''; };
 
-// ✅ تعديل بدء الرحلة: إغلاق المحادثة، رسم المسار على الخارطة، إظهار أيقونة محادثات
-window.startTripNavigation=function(lat,lng,name){ 
-  if(!lat||!lng)return; 
+// ✅ تعديل زر بدء الرحلة: إغلاق المحادثة، رسم المسار على الخريطة دون الانتقال لصفحة أخرى، وإظهار أيقونة المحادثة العائمة
+window.startTripNavigation = function(lat, lng, name) {
+  if (!lat || !lng) return;
   
-  // ✅ إغلاق نافذة المحادثة
+  // 1. إغلاق نافذة المحادثة
   closeChat();
   
-  // ✅ حذف جميع المسارات القديمة ورسم مسار من السائق إلى الراكب فقط
-  if(currentDriver?.location) {
-    MapUtils.clearAllRoutes(map);
-    const driverPos = [currentDriver.location.lat, currentDriver.location.lng];
-    const passengerPos = [parseFloat(lat), parseFloat(lng)];
-    MapUtils.drawDriverToPassengerRoute(map, driverPos, passengerPos);
+  // 2. رسم المسار من السائق إلى الراكب على خريطة السائق الرئيسية
+  if (currentDriver && currentActiveRide) {
+    const driverPos = currentDriver.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
+    const targetPos = currentActiveRide.pickup ? [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng] : [parseFloat(lat), parseFloat(lng)];
+    
+    if (driverPos && targetPos) {
+      if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
+      if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
+      driverRoute = MapUtils.drawRoute(map, [driverPos, targetPos], MAP_CONFIG.routeStyles.driver);
+      map.fitBounds(L.latLngBounds([driverPos, targetPos]), { padding: [60, 60] });
+    }
   }
   
-  // ✅ تحديث حالة الرحلة وإرسال رسالة
-  if(currentActiveRide?.id) {
-    db.collection('rideRequests').doc(currentActiveRide.id).update({tripStarted:true,tripStartedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+  // 3. إظهار أيقونة محادثات عائمة ليواصل المحادثة إن أراد ذلك
+  if (currentActiveRide) {
+    showFloatingChatButtonForDriver();
+  }
+
+  // 4. تحديث حالة الرحلة في قاعدة البيانات
+  if (currentActiveRide?.id) {
+    db.collection('rideRequests').doc(currentActiveRide.id).update({
+      tripStarted: true,
+      tripStartedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(() => {});
     const cid = `chat_${currentActiveRide.id}`;
-    sendMessage(cid, currentDriver.uid, 'driver', '🚀 تم بدء الرحلة! أنا في الطريق إليك الآن.');
-    
-    // ✅ إظهار أيقونة المحادثات العائمة لمتابعة المحادثة
-    const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
-    showChatButton(currentActiveRide.id, cid, 'driver', dn, currentActiveRide);
+    sendMessage(cid, currentDriver.uid, 'driver', '🚀 تم بدء الرحلة! نحن في الطريق.');
   }
 };
 
-// ✅ تعديل إلغاء الرحلة: حذف المسارات وأيقونة المحادثات
-window.cancelActiveTrip=async function(rid){ 
-  try{ 
-    await db.collection('rideRequests').doc(rid).update({status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp()}); 
-    if(currentDriver?.uid) { await db.collection('drivers').doc(currentDriver.uid).update({available:true}); driverAvailable = true; updateAvailabilityButton(); }
-    if (currentActiveRide?.id === rid && currentActiveRide.passengerId) {
-      const cid = `chat_${rid}`;
-      await sendMessage(cid, currentDriver.uid, 'driver', '⚠️ تم إلغاء الرحلة.');
+function showFloatingChatButtonForDriver() {
+  const ex = document.getElementById('floatingChatBtn');
+  if (ex) ex.remove();
+  const b = document.createElement('button');
+  b.id = 'floatingChatBtn';
+  b.innerHTML = '💬 محادثة';
+  b.onclick = () => {
+    if (currentActiveRide) {
+      const driverName = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
+      showChatInterface(currentActiveRide.id, currentActiveRide.passengerId, currentDriver.uid, 'driver', driverName, currentActiveRide);
+    }
+  };
+  document.body.appendChild(b);
+}
+
+// ✅ تعديل زر إلغاء الرحلة: حذف جميع المسارات من الخريطة وحذف أيقونة المحادثات فوراً
+window.cancelActiveTrip = async function(rid) {
+  try {
+    await db.collection('rideRequests').doc(rid).update({
+      status: 'cancelled',
+      cancelledBy: currentDriver?.uid || currentUser.uid,
+      cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    if (currentDriver?.uid) {
+      await db.collection('drivers').doc(currentDriver.uid).update({ available: true });
+      driverAvailable = true;
+      updateAvailabilityButton();
     }
     
-    // ✅ حذف جميع المسارات من خارطة السائق
-    MapUtils.clearAllRoutes(map);
+    // حذف جميع المسارات من خريطة السائق
+    if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
+    if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
     
-    // ✅ حذف أيقونة المحادثات العائمة
-    const chatBtn = document.getElementById('floatingChatBtn');
-    if(chatBtn) chatBtn.remove();
+    // حذف أيقونة المحادثات العائمة
+    const c = document.getElementById('floatingChatBtn');
+    if (c) c.remove();
     
-    closeChat(); 
-    if(currentActiveRide?.id===rid) currentActiveRide=null; 
-    loadRequests(); 
-  }catch(e){console.error(e);} 
+    // إغلاق المحادثة إذا كانت مفتوحة
+    closeChat();
+    
+    if (currentActiveRide?.id === rid) currentActiveRide = null;
+    loadRequests();
+  } catch (e) { console.error(e); }
 };
 
-function showChatButton(rid, cid, role, name, rd){ 
-  const ex=document.getElementById('floatingChatBtn'); 
-  if(ex)ex.remove(); 
-  const b=document.createElement('button'); 
-  b.id='floatingChatBtn'; 
-  b.innerHTML='💬 محادثة'; 
-  b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); 
-  document.body.appendChild(b); 
-}
+function showChatButton(rid, cid, role, name, rd){ const ex=document.getElementById('floatingChatBtn'); if(ex)ex.remove(); const b=document.createElement('button'); b.id='floatingChatBtn'; b.innerHTML='💬 محادثة'; b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); document.body.appendChild(b); }
 function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
 function toggleBottomSheet() { const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); sheet.classList.toggle('open'); if(sheet.classList.contains('open')) { btn.classList.add('hidden'); } else { btn.classList.remove('hidden'); } }
 document.addEventListener('click', function(event) { const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) { sheet.classList.remove('open'); btn.classList.remove('hidden'); } }, {passive: true});
@@ -1323,9 +1322,6 @@ function listenForRideUpdate() {
       Utils.stopSound('searchingSound'); rideState = 'idle'; closeSearchModal(); stopPulseOnCurrent();
       document.getElementById('bookBtn').disabled = false; unsub();
       saveToLocalLog({id: currentRideId, status: data.status, pickup: data.pickup, destination: data.destination, price: data.price, createdAt: data.createdAt?.toDate?.() || new Date().toISOString()});
-      
-      // ✅ عند إلغاء الراكب للطلب، اختفاء نافذة طلب رحلة جديد من السائق
-      closeIncomingRequest();
     }
   });
 }
@@ -1339,10 +1335,6 @@ function cancelRide(){
     updateRideStatus('cancelled'); rideState='idle';
     closeSearchModal(); closePassengerRideModal(); closeChat();
     stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false;
-    
-    // ✅ عند إلغاء الراكب للطلب، اختفاء نافذة طلب رحلة جديد من السائق
-    closeIncomingRequest();
-    
     currentRideId=null; currentActiveRide = null;
     if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId);
     const c=document.getElementById('floatingChatBtn'); if(c)c.remove();
@@ -1350,33 +1342,39 @@ function cancelRide(){
   }
 }
 
-// ✅ دالة رسم المسار من السائق إلى الراكب عند الضغط على أيقونة الموقع
-function showDriverToPassengerRoute() {
-  if (!currentActiveRide) {
-    // إذا لم تكن هناك رحلة نشطة، ننتقل إلى موقع الراكب الحالي
-    if(myCurrentPos && map) {
-      map.setView(myCurrentPos, 16);
-    }
-    return;
-  }
-  
-  if (currentDriver && currentActiveRide.pickup) {
-    // للسائق: رسم مسار من موقعه إلى الراكب
-    const driverPos = currentDriver.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
-    const passengerPos = [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng];
+// ✅ وظيفة زر تحديد الموقع العائم: رسم المسار من السائق إلى الراكب فقط، أو توسيط الخريطة على الموقع الحالي
+function handleLocateClick() {
+  if (currentActiveRide) {
+    const driverPos = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
+    const passengerPos = currentActiveRide.pickup ? [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng] : null;
+    
     if (driverPos && passengerPos) {
-      MapUtils.clearAllRoutes(map);
-      MapUtils.drawDriverToPassengerRoute(map, driverPos, passengerPos);
-    }
-  } else if (!currentDriver && currentActiveRide.assignedDriverId) {
-    // للراكب: رسم مسار من موقعه إلى السائق
-    const passengerPos = myCurrentPos || (currentActiveRide.pickup ? [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng] : null);
-    getDriverLocation(currentActiveRide.assignedDriverId).then(driverPos => {
-      if (passengerPos && driverPos) {
-        MapUtils.clearAllRoutes(map);
-        MapUtils.drawDriverToPassengerRoute(map, passengerPos, driverPos);
+      if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
+      if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
+      driverRoute = MapUtils.drawRoute(map, [driverPos, passengerPos], MAP_CONFIG.routeStyles.driver);
+      map.fitBounds(L.latLngBounds([driverPos, passengerPos]), { padding: [60, 60] });
+    } else {
+      // احتياطي: إذا لم يكن موقع الراكب متاحاً، نرسم إلى الوجهة
+      const destPos = currentActiveRide.destination ? [currentActiveRide.destination.lat, currentActiveRide.destination.lng] : null;
+      if (driverPos && destPos) {
+        if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
+        if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
+        driverRoute = MapUtils.drawRoute(map, [driverPos, destPos], MAP_CONFIG.routeStyles.driver);
+        map.fitBounds(L.latLngBounds([driverPos, destPos]), { padding: [60, 60] });
       }
-    });
+    }
+  } else {
+    // إذا لم تكن هناك رحلة نشطة، نركز الخريطة على موقع المستخدم الحالي
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(p => {
+        const pos = [p.coords.latitude, p.coords.longitude];
+        myCurrentPos = pos;
+        map.setView(pos, 16);
+        if (pickupMarker) pickupMarker.setLatLng(pos);
+      }, () => {
+        alert('تعذر الحصول على الموقع. يرجى تفعيل الـ GPS.');
+      }, { enableHighAccuracy: true });
+    }
   }
 }
 
