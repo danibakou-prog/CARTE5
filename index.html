@@ -584,9 +584,24 @@ let currentPulsingMarker = null, heartbeatInterval = null, offlineUpdateQueued =
 let currentTileLayer = null; // ✅ متغير لطبقة الخريطة لتبديل الليل/النهار
 
 const MAP_CONFIG = {
-  defaultView: [35.633994, 3.224367], defaultZoom: 14,
-  tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }],
-  routeStyles: { driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } },
+  defaultView: [35.633994, 3.224367], 
+  defaultZoom: 14,
+  
+  // ✅ الخيار 1: الوضع الليلي (Dark Mode) - استخدم هذا الرابط للأسفل
+  tileLayers: [{ 
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', 
+    attribution: '&copy; OpenStreetMap &copy; CARTO', 
+    maxZoom: 19 
+  }],
+
+  // 💡 إذا أردت الوضع النهاري العادي، استبدل الرابط أعلاه بالرابط التالي:
+  // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+  routeStyles: { 
+    driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, 
+    passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, 
+    chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } 
+  },
   markerIcons: {
     passenger: L.divIcon({ className: 'marker-base marker-passenger', html: '👤', iconSize: [36, 36], iconAnchor: [18, 36] }),
     driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [36, 36], iconAnchor: [18, 36] }),
