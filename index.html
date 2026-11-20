@@ -51,7 +51,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 }
 .user-icon-btn:active { transform: scale(0.95); }
 
-/* ✅ أيقونة تحديد الموقع العائمة الزرقاء الأنيقة */
+/* ✅ أيقونة تحديد الموقع / رسم المسار العائمة الزرقاء الأنيقة */
 .floating-locate-btn {
   position: absolute;
   top: 65px;
@@ -350,8 +350,8 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-      <!-- ✅ أيقونة تحديد الموقع العائمة الزرقاء -->
-      <button class="floating-locate-btn" id="locateBtn" onclick="handleLocateClick()" title="تحديد الموقع / رسم المسار">📍</button>
+      <!-- ✅ أيقونة تحديد الموقع / رسم المسار العائمة الزرقاء -->
+      <button class="floating-locate-btn" id="locateBtn" onclick="handleLocateClick()" title="تحديد الموقع / رسم المسار">🛣️</button>
       <div class="dropdown-menu" id="userDropdownMenu">
         <div class="dropdown-header">
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
@@ -543,7 +543,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 </div>
 </div>
 
-<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/0396.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/ogg/0396.ogg" type="audio/mpeg"></audio>
+<audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1699.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/1699.mp3" type="audio/mpeg"></audio>
 <audio id="chatMessageSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/mp3/2947.mp3" type="audio/mpeg"></audio>
 <audio id="searchingSound" loop preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/1614.ogg" type="audio/ogg"></audio>
 <audio id="chatOpenSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/0396.ogg" type="audio/ogg"></audio>
@@ -566,10 +566,11 @@ const MAP_CONFIG = {
   routeStyles: { driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } },
   markerIcons: {
     passenger: L.divIcon({ className: 'marker-base marker-passenger', html: '👤', iconSize: [36, 36], iconAnchor: [18, 36] }),
-    driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [36, 36], iconAnchor: [18, 36] }),
-    truck: L.divIcon({ className: 'marker-base marker-truck', html: '🚚', iconSize: [36, 36], iconAnchor: [18, 36] }),
-    motorcycle: L.divIcon({ className: 'marker-base marker-driver', html: '🏍️', iconSize: [36, 36], iconAnchor: [18, 36] }),
-    luxury: L.divIcon({ className: 'marker-base marker-driver', html: '🚘', iconSize: 36, iconAnchor: [18, 36] }),
+    // ✅ أيقونات السائق الجديدة (صور SVG)
+    driver: L.divIcon({ className: 'marker-base marker-driver', html: '<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzQyQTVGNSI+PHBhdGggZD0iTTE4LjkyIDguMTVsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDBsLTEuMDUgMS4wNWMtLjM3LjM3LS4zNy45NiAwIDEuMzNsLjgxLjgxYy4zNy4zNy45Ni4zNyAxLjMzIDBsMS4wNS0xLjA1Yy4zNy0uMzcuMzctLjk2IDAtMS4zMnpNMTMuNSAxMS41bC0xLjA1IDEuMDVjLS4zNy4zNy0uMzcuOTYgMCAxLjMzbC44MS44MWMuMzcuMzcuOTYuMzcgMS4zMyAwbDEuMDUtMS4wNWMuMzctLjM3LjM3LS45NiAwLTEuMzNsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDB6TTguNSAxMi41bC0xLjA1IDEuMDVjLS4zNy4zNy0uMzcuOTYgMCAxLjMzbC44MS44MWMuMzcuMzcuOTYuMzcgMS4zMyAwbDEuMDUtMS4wNWMuMzctLjM3LjM3LS45NiAwLTEuMzNsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDB6Ii8+PHBhdGggZD0iTTE5IDlIMTZWNUgzVjlIOXY0SDhWOWgtMXY0aDJ2NGgydi0yaDF2Mmgydi0yaDF2MmgxVjl6Ii8+PC9zdmc+" style="width:24px;height:24px">', iconSize: [36, 36], iconAnchor: [18, 36] }),
+    truck: L.divIcon({ className: 'marker-base marker-truck', html: '<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzlDMjdCMCI+PHBhdGggZD0iTTEgMjFoMjJMMTkgNWgtMkw5IDVoLTJMNCAyMWhtMTUgMGgtMnYtMmgydjJ6bS02IDBoLTJ2LTJoMnYyeiIvPjwvc3ZnPg==" style="width:24px;height:24px">', iconSize: [36, 36], iconAnchor: [18, 36] }),
+    motorcycle: L.divIcon({ className: 'marker-base marker-driver', html: '<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzQyQTVGNSI+PHBhdGggZD0iTTE5IDdoLTR2LTJoLTJ2Mkg3Yy0xLjEgMC0yIC45LTIgMnY0aDJ2LTJoOHYyaC0ydjJoNHYyaC0ydjJoNHoiLz48L3N2Zz4=" style="width:24px;height:24px">', iconSize: [36, 36], iconAnchor: [18, 36] }),
+    luxury: L.divIcon({ className: 'marker-base marker-driver', html: '<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzRGNTFGNCI+PHBhdGggZD0iTTE4LjkyIDguMTVsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDBsLTEuMDUgMS4wNWMtLjM3LjM3LS4zNy45NiAwIDEuMzNsLjgxLjgxYy4zNy4zNy45Ni4zNyAxLjMzIDBsMS4wNS0xLjA1Yy4zNy0uMzcuMzctLjk2IDAtMS4zMnpNMTMuNSAxMS41bC0xLjA1IDEuMDVjLS4zNy4zNy0uMzcuOTYgMCAxLjMzbC44MS44MWMuMzcuMzcuOTYuMzcgMS4zMyAwbDEuMDUtMS4wNWMuMzctLjM3LjM3LS45NiAwLTEuMzNsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDB6TTguNSAxMi41bC0xLjA1IDEuMDVjLS4zNy4zNy0uMzcuOTYgMCAxLjMzbC44MS44MWMuMzcuMzcuOTYuMzcgMS4zMyAwbDEuMDUtMS4wNWMuMzctLjM3LjM3LS45NiAwLTEuMzNsLS44MS0uODFjLS4zNy0uMzctLjk2LS4zNy0xLjMzIDB6Ii8+PHBhdGggZD0iTTE5IDlIMTZWNUgzVjlIOXY0SDhWOWgtMXY0aDJ2NGgydi0yaDF2Mmgydi0yaDF2MmgxVjl6Ii8+PC9zdmc+" style="width:24px;height:24px">', iconSize: 36, iconAnchor: [18, 36] }),
     destination: L.divIcon({ className: 'marker-destination', html: '🏁', iconSize: [32, 32], iconAnchor: [16, 32] }),
     chatPulse: L.divIcon({ className: 'pulse-marker-chat', html: '🔴', iconSize: [20, 20], iconAnchor: [10, 20] }),
     chatMe: L.divIcon({ className: 'marker-me', html: '🔵', iconSize: [20, 20], iconAnchor: [10, 20] })
