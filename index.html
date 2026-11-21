@@ -340,7 +340,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
         </div>
         <div id="menuHistoryContent" class="dropdown-content"><div class="empty-state" style="padding:20px;"><div class="icon">📂</div><p>لا توجد طلبات سابقة</p></div></div>
         <div id="menuSettingsContent" class="dropdown-content" style="display:none; padding:15px;">
-          <div class="form-group"><label>نوع المركبة</label><select id="menuCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+          <div class="form-group"><label>نوع المركبة</label><select id="menuCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="عائلية">🚐 عائلية</option></select></div>
           <div class="form-group"><label>اسم/لوحة السيارة</label><input type="text" id="menuCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345"></div>
           <!-- ✅ تم إضافة ID للزر للتحكم به برمجياً -->
           <button class="auth-btn" id="saveDriverProfileBtn" onclick="saveDriverProfileFromMenu()" style="padding:10px; font-size:0.9em; margin-top:5px;">💾 حفظ التغيرات</button>
@@ -394,6 +394,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
 <div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
 <div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل صغيرة</div><div class="rate">60 د.ج/كم</div></div>
+<div class="car-opt" onclick="selectCar(this, 'عائلية', 40)"><div class="ico">🚐</div><div class="name">عائلية</div><div class="rate">40 د.ج/كم</div></div>
 </div>
 <button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 تأكيد الطلب</button>
 <div class="driver-card" id="driverCard" style="display:none;">
@@ -413,7 +414,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <button class="close-modal" onclick="closeDriverSetupModal()">×</button>
 <div style="font-size: 3.5em; margin-bottom: 14px;">🚕</div>
 <h3 style="color: var(--primary-dark); margin-bottom: 18px; font-weight: 700;">أكمل بياناتك للبدء كسائق محترف</h3>
-<div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="فاخرة">✨ فاخرة</option></select></div>
+<div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🚗 نوع المركبة</label><select id="setupCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="عائلية">🚐 عائلية</option></select></div>
 <div class="form-group" style="max-width: 320px; margin: 0 auto;"><label>🪪 اسم/لوحة السيارة</label><input type="text" id="setupCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345" required></div>
 <button class="auth-btn" onclick="completeDriverSetup()" id="setupBtn" style="max-width: 320px; margin-top: 18px;">✅ تفعيل حساب السائق والبدء</button>
 <button class="auth-btn alt" onclick="skipToPassenger()" style="max-width: 320px; margin-top: 12px;">👤 المتابعة كراكب</button>
@@ -585,7 +586,7 @@ const MapUtils = {
     if (!carType) return 'driver';
     if (carType.includes('دراجة')) return 'motorcycle';
     if (carType.includes('شاحنة')) return 'truck';
-    if (carType.includes('فاخرة')) return 'luxury';
+    if (carType.includes('عائلية')) return 'luxury'; // استخدام أيقونة الفاخرة للعائلية كبديل مناسب
     return 'driver';
   }
 };
