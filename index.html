@@ -54,34 +54,14 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
 
-/* ✅ مجموعة أزرار التحكم الجديدة بجانب زر تحديد الموقع */
-.location-tools-group {
-    position: absolute; top: 68px; left: 0; z-index: 1000; display: flex; flex-direction: column; gap: 12px;
+.floating-locate-btn {
+  position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+  background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
+  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
 }
-.tool-btn {
-  width: 46px; height: 46px; border-radius: 16px;
-  color: white; border: 2px solid rgba(255,255,255,0.8);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); display: flex; align-items: center; justify-content: center;
-  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-.tool-btn:hover { transform: translateY(-3px) scale(1.05); }
-.tool-btn:active { transform: scale(0.95); }
-
-.btn-gps { background: linear-gradient(135deg, #42A5F5, #1E88E5); box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); }
-.btn-pickup { background: linear-gradient(135deg, #66BB6A, #43A047); box-shadow: 0 6px 20px rgba(67, 160, 71, 0.4); }
-.btn-dest { background: linear-gradient(135deg, #EF5350, #C62828); box-shadow: 0 6px 20px rgba(239, 83, 80, 0.4); }
-.btn-car { background: linear-gradient(135deg, #AB47BC, #8E24AA); box-shadow: 0 6px 20px rgba(171, 71, 188, 0.4); }
-
-/* Tooltip for buttons */
-.tool-btn::after {
-    content: attr(data-title);
-    position: absolute; left: 55px; background: rgba(0,0,0,0.8); color: white; padding: 5px 10px;
-    border-radius: 8px; font-size: 0.75em; white-space: nowrap; opacity: 0; visibility: hidden;
-    transition: 0.2s; pointer-events: none;
-}
-.tool-btn:hover::after { opacity: 1; visibility: visible; }
-
+.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(30, 136, 229, 0.6); }
+.floating-locate-btn:active { transform: scale(0.95); }
 
 .toggle-mode-container { position: absolute; left: 50%; transform: translateX(-50%); top: 0; order: 2; }
 .register-car-btn { 
@@ -91,10 +71,12 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 }
 .register-car-btn:hover { transform: translateY(-2px); }
 
+/* ✅ زر التبديل لراكب باللون البرتقالي */
 .register-car-btn.mode-to-passenger { background: linear-gradient(135deg, #FF9800, #F57C00) !important; color: #fff !important; border: none; animation: pulse-orange-glow 2.5s infinite; }
 .register-car-btn.mode-to-driver { background: linear-gradient(135deg, #66BB6A, #43A047) !important; color: #fff !important; border: none; animation: pulse-green-glow 2.5s infinite; }
 
 .availability-container { order: 3; }
+/* ✅ زر متاح/غير متاح أصغر وأكثر أناقة */
 .availability-btn { 
   padding: 8px 16px; border-radius: 20px; font-size: 0.82em; cursor: pointer; font-weight: 700; border: 1px solid rgba(255,255,255,0.4); 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; display: flex; align-items: center; gap: 6px; 
@@ -138,56 +120,47 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
 .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
 
-/* ✅ زر اطلب سيارة الآن العائم الجديد */
+.bottom-sheet-container { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.5, 1); pointer-events: none; }
+.bottom-sheet { 
+  background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); border-top-left-radius: 32px; border-top-right-radius: 32px; 
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.15); padding: 24px 24px 30px 24px; transform: translateY(110%); 
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); max-height: 75vh; overflow-y: auto; pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.8); 
+}
+.bottom-sheet.open { transform: translateY(0); }
+.sheet-handle { width: 60px; height: 6px; background: #E0E0E0; border-radius: 10px; margin: 0 auto 20px auto; cursor: pointer; position: relative; transition: background 0.3s; }
+.sheet-handle:hover { background: #BDBDBD; }
+.sheet-handle::after { content: '▼'; position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #999; font-weight: bold; }
+
 .fab-request-btn { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; padding: 16px 32px; border-radius: 50px; font-size: 1.1em; font-weight: 800; cursor: pointer; z-index: 999; box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; pointer-events: auto; }
 .fab-request-btn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5); }
 .fab-request-btn.hidden { transform: translateX(-50%) translateY(100px); opacity: 0; pointer-events: none; }
 
-/* ✅ تنسيق النافذة المنبثقة الجديدة للطلب */
-.new-order-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-    z-index: 4000; display: none; align-items: center; justify-content: center;
-}
-.new-order-modal.active { display: flex; animation: fadeIn 0.3s; }
-.order-box {
-    background: #fff; width: 90%; max-width: 400px; border-radius: 24px; padding: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; position: relative;
-    animation: slideUp 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-}
-.order-close { position: absolute; top: 15px; left: 15px; background: #f0f0f0; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center; color: #555; }
-.order-title { font-size: 1.2em; font-weight: 800; color: var(--primary-dark); margin-bottom: 20px; }
-.order-summary { background: #f9f9f9; border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border); }
-.summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; }
-.summary-val { font-weight: 700; color: var(--text); }
-.summary-total { border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px; font-size: 1.1em; font-weight: 800; color: var(--primary-dark); display: flex; justify-content: space-between; }
-.confirm-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 16px; font-size: 1.1em; font-weight: 800; cursor: pointer; box-shadow: 0 4px 16px rgba(124, 179, 66, 0.3); }
-.confirm-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
-
-/* ✅ نوافذ الإدخال الصغيرة (Modals) */
-.input-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 3500; display: none; align-items: center; justify-content: center; }
-.input-modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
-.input-modal-box { background: #fff; width: 92%; max-width: 380px; border-radius: 20px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.modal-title { font-weight: 700; font-size: 1.1em; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.close-modal-btn { background: none; border: none; font-size: 1.5em; cursor: pointer; color: #999; }
-.loc-input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+.location-box { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.loc-row { display: flex; flex-direction: column; gap: 8px; background: var(--surface); padding: 16px; border-radius: 18px; border: 1px solid var(--border); transition: 0.3s; }
+.loc-row:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.15); }
+.loc-header { display: flex; align-items: center; gap: 10px; } .loc-icon { font-size: 1.4em; } .loc-label { font-size: 0.8em; color: #666; font-weight: 600; }
+.loc-input-group { display: flex; gap: 8px; }
 .loc-input { flex: 1; padding: 12px 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
-.loc-input:focus { border-color: var(--primary); }
-.loc-action-btn { padding: 12px 16px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 14px; cursor: pointer; font-weight: 600; white-space: nowrap; }
-.autocomplete-results { position: relative; background: #fff; border: 1px solid var(--border); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 3600; box-shadow: var(--shadow); display: none; margin-top: 5px; }
-.autocomplete-results.show { display: block; }
-.autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f5f5f5; font-size: 0.9em; }
-.autocomplete-item:hover { background: #f0fdf4; }
-
-.car-selector-modal { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-.car-opt-modal { background: var(--surface); border: 2px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
-.car-opt-modal.selected { border-color: var(--primary); background: #F1F8E9; }
-.car-opt-modal .ico { font-size: 1.5em; }
-.car-opt-modal .name { font-weight: 700; font-size: 0.85em; margin-top: 5px; }
+.loc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
+.loc-btn { padding: 12px 16px; background: var(--primary); color: #1B1B1B; border: none; border-radius: 14px; cursor: pointer; font-size: 0.9em; transition: 0.25s; white-space: nowrap; font-weight: 600; }
+.loc-btn:hover { background: var(--primary-dark); transform: translateY(-1px); } .loc-btn:disabled { background: var(--primary-light); cursor: not-allowed; }
+.loc-btn.gps-btn { background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: white; } .loc-btn.gps-btn:hover { background: linear-gradient(135deg, #29B6F6, #039BE5); }
+.loc-coords { font-size: 0.75em; color: #777; margin-top: 6px; min-height: 24px; }
+.coords-badge { background: linear-gradient(135deg, var(--primary-light), #E8F5E9); padding: 6px 12px; border-radius: 10px; font-family: monospace; font-size: 0.85em; font-weight: 600; color: var(--primary-dark); display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); }
+.coords-copy-btn { margin-right: 8px; padding: 4px 10px; background: var(--secondary); color: #1B1B1B; border: none; border-radius: 8px; font-size: 0.8em; cursor: pointer; transition: 0.2s; font-weight: 600; } .coords-copy-btn:hover { background: #FFC107; }
 
 .route-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
 .info-card { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); padding: 14px; border-radius: 16px; text-align: center; border: 1px solid var(--border); }
 .info-card .val { font-weight: 800; font-size: 1.1em; color: var(--primary-dark); } .info-card .label { font-size: 0.75em; color: #555; margin-top: 4px; font-weight: 500; }
+.price-display { background: linear-gradient(135deg, #FFF9C4, #FFF59D); padding: 16px; border-radius: 16px; text-align: center; font-weight: 700; color: #5D4037; margin-bottom: 16px; border: 2px solid #FFECB3; box-shadow: 0 4px 12px rgba(255, 213, 79, 0.2); }
+.car-selector { display: flex; gap: 12px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 8px; }
+.car-opt { flex: 0 0 28%; min-width: 85px; background: var(--surface); border: 2px solid var(--border); border-radius: 18px; padding: 14px 8px; text-align: center; cursor: pointer; transition: 0.25s; }
+.car-opt.selected { border-color: var(--primary); background: linear-gradient(135deg, #F1F8E9, #E8F5E9); box-shadow: 0 4px 16px rgba(156, 205, 50, 0.2); }
+.car-opt .ico { font-size: 1.8em; } .car-opt .name { font-weight: 700; font-size: 0.8em; margin-top: 8px; line-height: 1.3; } .car-opt .rate { color: var(--primary-dark); font-size: 0.75em; font-weight: 600; }
+.book-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; border-radius: 18px; font-size: 1.1em; font-weight: 800; cursor: pointer; transition: 0.25s; box-shadow: 0 6px 20px rgba(124, 179, 66, 0.3); }
+.book-btn:disabled { background: var(--primary-light); cursor: not-allowed; transform: none; box-shadow: none; } .book-btn:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.spinner { display: inline-block; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .driver-card { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-radius: 18px; padding: 18px; margin-top: 16px; display: none; } .driver-card.show { display: block; animation: slideUp 0.4s; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -197,6 +170,8 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .d-eta { background: #FFF; padding: 12px; border-radius: 14px; text-align: center; font-weight: 700; color: var(--primary-dark); margin-top: 12px; border: 1px solid var(--border); }
 .cancel-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 16px; margin-top: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); }
 
+.autocomplete { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 14px; max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; } .autocomplete-results.show { display: block; }
+.autocomplete-item { padding: 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
 .form-group { margin-bottom: 18px; text-align: right; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
 .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
 .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
@@ -346,14 +321,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-      
-      <!-- ✅ مجموعة الأزرار الجديدة -->
-      <div class="location-tools-group">
-        <button class="tool-btn btn-gps" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب" data-title="مسار السائق">📍</button>
-        <button class="tool-btn btn-pickup" onclick="openInputModal('pickup')" title="تحديد موقع الانطلاق" data-title="موقع الانطلاق">🟢</button>
-        <button class="tool-btn btn-dest" onclick="openInputModal('dest')" title="تحديد الوجهة" data-title="الوجهة">🏁</button>
-        <button class="tool-btn btn-car" onclick="openInputModal('car')" title="اختيار نوع المركبة" data-title="نوع السيارة">🚗</button>
-      </div>
+      <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
       
       <div class="dropdown-menu" id="userDropdownMenu">
         <div class="dropdown-header">
@@ -374,6 +342,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
         <div id="menuSettingsContent" class="dropdown-content" style="display:none; padding:15px;">
           <div class="form-group"><label>نوع المركبة</label><select id="menuCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="عائلية">🚐 عائلية</option></select></div>
           <div class="form-group"><label>اسم/لوحة السيارة</label><input type="text" id="menuCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345"></div>
+          <!-- ✅ تم إضافة ID للزر للتحكم به برمجياً -->
           <button class="auth-btn" id="saveDriverProfileBtn" onclick="saveDriverProfileFromMenu()" style="padding:10px; font-size:0.9em; margin-top:5px;">💾 حفظ التغيرات</button>
         </div>
       </div>
@@ -387,66 +356,57 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 </div>
 
 <div id="map"></div>
-
-<!-- ✅ زر اطلب سيارة الآن الرئيسي فقط -->
-<button id="mainRequestBtn" class="fab-request-btn" onclick="openNewOrderModal()"><span>🚖</span> اطلب سيارة الآن</button>
-
-<!-- ✅ نافذة تأكيد الطلب الجديدة -->
-<div id="newOrderModal" class="new-order-modal">
-    <div class="order-box">
-        <button class="order-close" onclick="closeNewOrderModal()">×</button>
-        <div class="order-title">📋 تفاصيل الرحلة</div>
-        
-        <div class="order-summary">
-            <div class="summary-row"><span>📍 من:</span> <span class="summary-val" id="modalPickup">---</span></div>
-            <div class="summary-row"><span>🏁 إلى:</span> <span class="summary-val" id="modalDest">---</span></div>
-            <div class="summary-row"><span>🚗 النوع:</span> <span class="summary-val" id="modalCarType">---</span></div>
-            <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ddd;">
-            <div class="summary-row"><span>📏 المسافة:</span> <span class="summary-val" id="modalDist">---</span></div>
-            <div class="summary-row"><span>⏱️ الوقت:</span> <span class="summary-val" id="modalTime">---</span></div>
-            <div class="summary-total"><span>💰 السعر التقريبي:</span> <span id="modalPrice">---</span></div>
-        </div>
-
-        <button class="confirm-btn" id="modalConfirmBtn" onclick="confirmAndBookRide()">✅ تأكيد وإرسال الطلب</button>
-    </div>
+<button id="mainRequestBtn" class="fab-request-btn" onclick="toggleBottomSheet()"><span>🚖</span> اطلب سيارة الآن</button>
+<div class="bottom-sheet-container">
+<div class="bottom-sheet" id="requestSheet">
+  <div class="sheet-handle" onclick="toggleBottomSheet()" title="تصغير / تكبير"></div>
+<div class="location-box">
+<div class="loc-row">
+<div class="loc-header"><span class="loc-icon">📍</span><span class="loc-label">موقع الانطلاق</span></div>
+<div class="autocomplete">
+<div class="loc-input-group">
+<input type="text" class="loc-input" id="pickupInput" placeholder="اكتب عنوان الانطلاق..." autocomplete="off">
+<button class="loc-btn gps-btn" id="gpsBtn" onclick="useGPS()">🛰️ GPS</button>
 </div>
-
-<!-- ✅ نوافذ الإدخال المنفصلة (Modals) -->
-<!-- Modal Pickup -->
-<div id="pickupModal" class="input-modal-overlay">
-    <div class="input-modal-box">
-        <div class="modal-header"><span class="modal-title">🟢 موقع الانطلاق</span><button class="close-modal-btn" onclick="closeInputModal('pickup')">×</button></div>
-        <div class="loc-input-group">
-            <input type="text" class="loc-input" id="modalPickupInput" placeholder="اكتب العنوان..." autocomplete="off">
-            <button class="loc-action-btn" onclick="useGPSForModal()">🛰️ GPS</button>
-        </div>
-        <div class="autocomplete-results" id="modalPickupResults"></div>
-    </div>
+<div class="autocomplete-results" id="pickupResults"></div>
 </div>
-
-<!-- Modal Dest -->
-<div id="destModal" class="input-modal-overlay">
-    <div class="input-modal-box">
-        <div class="modal-header"><span class="modal-title">🏁 الوجهة المطلوبة</span><button class="close-modal-btn" onclick="closeInputModal('dest')">×</button></div>
-        <div class="loc-input-group">
-            <input type="text" class="loc-input" id="modalDestInput" placeholder="اكتب الوجهة..." autocomplete="off">
-            <button class="loc-action-btn" onclick="enableMapClickForModal()">🗺️ خريطة</button>
-        </div>
-        <div class="autocomplete-results" id="modalDestResults"></div>
-    </div>
+<div class="loc-coords" id="pickupCoords"><span class="coords-badge">📍 جاري التحديد...</span></div>
 </div>
-
-<!-- Modal Car Type -->
-<div id="carModal" class="input-modal-overlay">
-    <div class="input-modal-box">
-        <div class="modal-header"><span class="modal-title">🚗 اختر نوع المركبة</span><button class="close-modal-btn" onclick="closeInputModal('car')">×</button></div>
-        <div class="car-selector-modal">
-            <div class="car-opt-modal selected" onclick="selectCarModal(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div></div>
-            <div class="car-opt-modal" onclick="selectCarModal(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div></div>
-            <div class="car-opt-modal" onclick="selectCarModal(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة صغيرة</div></div>
-            <div class="car-opt-modal" onclick="selectCarModal(this, 'عائلية', 40)"><div class="ico">🚐</div><div class="name">عائلية</div></div>
-        </div>
-    </div>
+<div class="loc-row">
+<div class="loc-header"><span class="loc-icon">🏁</span><span class="loc-label">الوجهة المطلوبة</span></div>
+<div class="autocomplete">
+<div class="loc-input-group">
+<input type="text" class="loc-input" id="destInput" placeholder="اكتب عنوان الوجهة..." autocomplete="off">
+<button class="loc-btn" id="mapBtn" onclick="enableMapClick()">🗺️ خريطة</button>
+</div>
+<div class="autocomplete-results" id="destResults"></div>
+</div>
+<div class="loc-coords" id="destCoords">انتظر تحديد الوجهة</div>
+</div>
+</div>
+<div class="route-info" id="routeInfo" style="opacity: 0.4; pointer-events: none;">
+<div class="info-card"><div class="val" id="distVal">---</div><div class="label">📏 المسافة</div></div>
+<div class="info-card"><div class="val" id="timeVal">---</div><div class="label">⏱️ الوقت</div></div>
+<div class="info-card"><div class="val" id="statusVal">---</div><div class="label">🟢 الحالة</div></div>
+</div>
+<div class="price-display" id="priceBox">اختر الوجهة أولاً لحساب السعر</div>
+<div class="car-selector">
+<div class="car-opt selected" onclick="selectCar(this, 'دراجة نارية', 10)"><div class="ico">🏍️</div><div class="name">دراجة نارية</div><div class="rate">10 د.ج/كم</div></div>
+<div class="car-opt" onclick="selectCar(this, 'مريحة', 25)"><div class="ico">🚙</div><div class="name">مريحة</div><div class="rate">25 د.ج/كم</div></div>
+<div class="car-opt" onclick="selectCar(this, 'شاحنة نقل صغيرة', 60)"><div class="ico">🚚</div><div class="name">شاحنة نقل صغيرة</div><div class="rate">60 د.ج/كم</div></div>
+<div class="car-opt" onclick="selectCar(this, 'عائلية', 40)"><div class="ico">🚐</div><div class="name">عائلية</div><div class="rate">40 د.ج/كم</div></div>
+</div>
+<button class="book-btn" id="bookBtn" onclick="bookRide()" disabled>📱 تأكيد الطلب</button>
+<div class="driver-card" id="driverCard" style="display:none;">
+<div class="d-header">
+<div class="d-avatar">👨✈️</div>
+<div style="flex:1"><div class="d-name" id="dName">---</div><div class="d-meta" id="dMeta">---</div><div class="d-stars">⭐⭐⭐⭐⭐ (4.9)</div></div>
+</div>
+<div class="d-eta" id="dEta">جاري التحميل...</div>
+<button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
+</div>
+</div>
+</div>
 </div>
 
 <div id="driverSetupModal" class="modal-overlay">
@@ -626,7 +586,7 @@ const MapUtils = {
     if (!carType) return 'driver';
     if (carType.includes('دراجة')) return 'motorcycle';
     if (carType.includes('شاحنة')) return 'truck';
-    if (carType.includes('عائلية')) return 'luxury';
+    if (carType.includes('عائلية')) return 'luxury'; // استخدام أيقونة الفاخرة للعائلية كبديل مناسب
     return 'driver';
   }
 };
@@ -854,6 +814,7 @@ async function routeUserAfterAuth(user) {
     switchView('view-request'); startPassengerLocationTracking(); 
   }
   
+  // ✅ إضافة مستمعي الأحداث لإعادة زر الحفظ لوضعه الأصلي عند تعديل الحقول
   const menuCarType = document.getElementById('menuCarType');
   const menuCarName = document.getElementById('menuCarName');
   const saveBtn = document.getElementById('saveDriverProfileBtn');
@@ -1150,77 +1111,25 @@ function showChatButton(rid, cid, role, name, rd){
 
 function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id==='view-request'&&!map)setTimeout(initMap,100); const c=document.getElementById('floatingChatBtn'); if(c)c.remove(); }
 
-// ✅ وظائف النافذة المنبثقة الجديدة
-function openNewOrderModal() {
-    if(!pickupPos || !destPos) {
-        alert("يرجى تحديد موقع الانطلاق والوجهة أولاً باستخدام الأزرار الجانبية");
-        return;
-    }
-    // تحديث البيانات في النافذة
-    document.getElementById('modalPickup').textContent = document.getElementById('modalPickupInput').value || 'موقعي الحالي';
-    document.getElementById('modalDest').textContent = document.getElementById('modalDestInput').value || 'محدد';
-    
-    const selectedCar = document.querySelector('.car-opt-modal.selected .name');
-    document.getElementById('modalCarType').textContent = selectedCar ? selectedCar.textContent : 'مريحة';
-    
-    document.getElementById('modalDist').textContent = distKm > 0 ? `${distKm} كم` : '---';
-    document.getElementById('modalTime').textContent = timeMin > 0 ? `~${timeMin} دقيقة` : '---';
-    
-    const price = baseFare + Math.round(distKm * selectedRate);
-    document.getElementById('modalPrice').textContent = distKm > 0 ? `${price} د.ج` : '---';
-    
-    document.getElementById('newOrderModal').classList.add('active');
+function toggleBottomSheet() { 
+  const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); 
+  sheet.classList.toggle('open'); 
+  if(sheet.classList.contains('open')) { btn.classList.add('hidden'); } 
+  else { btn.classList.remove('hidden'); } 
 }
 
-function closeNewOrderModal() {
-    document.getElementById('newOrderModal').classList.remove('active');
-}
-
-// ✅ وظائف Modals الإدخال
-function openInputModal(type) {
-    if(type === 'pickup') document.getElementById('pickupModal').classList.add('active');
-    if(type === 'dest') document.getElementById('destModal').classList.add('active');
-    if(type === 'car') document.getElementById('carModal').classList.add('active');
-}
-
-function closeInputModal(type) {
-    if(type === 'pickup') document.getElementById('pickupModal').classList.remove('active');
-    if(type === 'dest') document.getElementById('destModal').classList.remove('active');
-    if(type === 'car') document.getElementById('carModal').classList.remove('active');
-}
-
-// ✅ ربط المدخلات في المودال بالوظائف الرئيسية
-function useGPSForModal() {
-    useGPS(); // تستخدم الوظيفة الأصلية التي تحدث pickupPos
-    closeInputModal('pickup');
-}
-
-function enableMapClickForModal() {
-    enableMapClick(); // تستخدم الوظيفة الأصلية
-    closeInputModal('dest');
-}
-
-function selectCarModal(el, name, rate) {
-    document.querySelectorAll('.car-opt-modal').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedRate = rate;
-    if(distKm > 0) {
-        const price = baseFare + Math.round(distKm * selectedRate);
-        document.getElementById('modalPrice').textContent = `${price} د.ج`;
-    }
-    closeInputModal('car');
-}
-
-// ✅ وظيفة الحجز النهائية
-function confirmAndBookRide() {
-    closeNewOrderModal();
-    bookRide(); // تستدعي الوظيفة الأصلية للحجز والبحث
-}
+document.addEventListener('click', function(event) { 
+  const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); 
+  if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) { 
+    sheet.classList.remove('open'); 
+    btn.classList.remove('hidden'); 
+  } 
+}, {passive: true});
 
 function initMap() { 
   map=MapUtils.initMap('map'); 
-  setupAutocomplete('modalPickupInput','modalPickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'modalPickupInput','modalPickupRes',true), true); 
-  setupAutocomplete('modalDestInput','modalDestResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'modalDestInput','modalDestRes',false), true); 
+  setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); 
+  setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); 
   if(navigator.geolocation) useGPS(); else fallbackLocation(); 
   map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); }); 
 }
@@ -1228,28 +1137,31 @@ function initMap() {
 function setLocation(m, pos, iid, cid, isP) { 
   if(isP) pickupPos=pos; else destPos=pos; 
   document.getElementById(iid).value = isP?'موقعي الحالي':document.getElementById(iid).value||'محدد'; 
+  document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋 نسخ</button>`; 
   if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16); 
   if(pickupPos&&destPos) drawRoute(); return m; 
 }
 
 function useGPS() { 
-  const b=document.getElementById('locateRouteBtn'); // استخدام الزر الموجود
+  const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...'; 
   navigator.geolocation.getCurrentPosition(p=>{ 
-    pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('modalPickupInput').value='موقعي الحالي'; 
+    pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('pickupInput').value='موقعي الحالي'; 
+    document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`; 
     if(pickupMarker)map.removeLayer(pickupMarker); pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); map.setView(pickupPos,16); 
-    if(destPos)drawRoute(); 
-  },()=>{},{enableHighAccuracy:true,timeout:10000}); 
+    if(destPos)drawRoute(); b.textContent='🛰️ GPS';b.disabled=false; 
+  },()=>{b.textContent='❌';setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);},{enableHighAccuracy:true,timeout:10000}); 
 }
 
 function fallbackLocation() { 
   pickupPos = [35.633994, 3.224367]; 
-  document.getElementById('modalPickupInput').value = 'موقع افتراضي'; 
+  document.getElementById('pickupInput').value = 'موقع افتراضي'; 
+  document.getElementById('pickupCoords').innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0], pickupPos[1])}</span>`; 
   pickupMarker = MapUtils.createMarker(pickupPos, 'passenger').addTo(map); 
   if(destPos) drawRoute(); 
 }
 
-function enableMapClick() { mapClickEnabled=true; setTimeout(()=>{mapClickEnabled=false;},10000); }
-function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('modalDestInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; if(pickupPos)drawRoute(); }
+function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
+function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
 
 function setupAutocomplete(iid, rid, cb, countryOnly=true) { 
   const inp=document.getElementById(iid), res=document.getElementById(rid); 
@@ -1268,6 +1180,8 @@ function setupAutocomplete(iid, rid, cb, countryOnly=true) {
   }; 
   inp.addEventListener('input', Utils.debounce(performSearch, 400)); 
   document.addEventListener('click', e=>{if(e.target!==inp&&!res.contains(e.target))res.classList.remove('show');},{passive:true}); 
+  window.addEventListener('scroll', ()=>res.classList.remove('show'),{passive:true}); 
+  window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true}); 
 }
 
 function drawRoute() { 
@@ -1276,10 +1190,14 @@ function drawRoute() {
   routeControl=MapUtils.drawRoute(map,[pickupPos,destPos],{color:'#9ACD32',weight:5,opacity:0.85}); 
   routeControl.on('routesfound',e=>{ 
     const r=e.routes[0]; distKm=(r.summary.totalDistance/1000).toFixed(1); timeMin=Math.round(r.summary.totalTime/60); 
-    updatePrice(); 
+    document.getElementById('routeInfo').style.opacity='1'; document.getElementById('routeInfo').style.pointerEvents='auto'; 
+    document.getElementById('distVal').textContent=`${distKm} كم`; document.getElementById('timeVal').textContent=`~${timeMin} دقيقة`; 
+    document.getElementById('statusVal').textContent='جاهز'; updatePrice(); document.getElementById('bookBtn').disabled=false; 
   }); 
+  routeControl.on('routingerror',()=>{document.getElementById('statusVal').textContent='خطأ';}); 
 }
-function updatePrice() { /* السعر يحسب داخل المودال الآن */ }
+function updatePrice() { document.getElementById('priceBox').innerHTML=`💰 السعر التقريبي: <span style="font-size:1.2em">${baseFare+Math.round(distKm*selectedRate)}</span> د.ج`; }
+function selectCar(el,n,r){ document.querySelectorAll('.car-opt').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); selectedRate=r; if(distKm>0)updatePrice(); }
 
 function openSearchModal() { const m=document.getElementById('searchModal'); m.classList.add('active'); setTimeout(()=>{ if(!searchMap)searchMap=MapUtils.initMap('searchMap'); else{searchMap.invalidateSize();searchMap.setView(pickupPos||MAP_CONFIG.defaultView,14);} if(pickupPos)MapUtils.createMarker(pickupPos,'passenger').addTo(searchMap); startSearchMapUpdates(); },100); }
 function closeSearchModal() { document.getElementById('searchModal').classList.remove('active'); stopSearchMapUpdates(); Utils.stopSound('searchingSound'); }
@@ -1292,8 +1210,8 @@ async function updateNearbyDriversOnSearchMap() {
   searchMarkers.forEach(m => { try { searchMap.removeLayer(m); } catch(e){} });
   searchMarkers = [];
   try {
-    const selectedCarOpt = document.querySelector('.car-opt-modal.selected .name');
-    const requestedType = selectedCarOpt ? selectedCarOpt.textContent.trim() : 'مريحة';
+    const selectedCarOpt = document.querySelector('.car-opt.selected');
+    const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة';
     const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get();
     let foundCount = 0;
     ds.forEach(doc => {
@@ -1342,15 +1260,15 @@ function stopPulseOnCurrent() { if(currentPulsingMarker){ const el=currentPulsin
 
 async function bookRide() {
   if(!pickupPos||!destPos)return;
-  const selectedEl = document.querySelector('.car-opt-modal.selected .name');
+  const selectedEl = document.querySelector('.car-opt.selected .name');
   const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
   openSearchModal(); rideState='searching'; dispatchIndex=0; dispatchDrivers=[];
   document.getElementById('searchStatusText').textContent='جاري البحث عن سائقين...';
   document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType} بدقة عالية`;
   try {
     const ref=await db.collection('rideRequests').add({
-      passengerId:currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('modalPickupInput').value},
-      destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('modalDestInput').value}, distance:parseFloat(distKm), time:timeMin, carType: requestedCarType,
+      passengerId:currentUser.uid, pickup:{lat:pickupPos[0],lng:pickupPos[1],name:document.getElementById('pickupInput').value},
+      destination:{lat:destPos[0],lng:destPos[1],name:document.getElementById('destInput').value}, distance:parseFloat(distKm), time:timeMin, carType: requestedCarType,
       price:baseFare+Math.round(distKm*selectedRate), status:'pending', assignedDriverId:null, createdAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:[], dispatchStage: 0
     });
     currentRideId=ref.id;
@@ -1385,6 +1303,7 @@ function listenForRideUpdate() {
           const dr = ds.data(), dn = dr.carName || dr.email?.split('@')[0] || 'سائق';
           createChat(currentRideId, currentUser.uid, data.acceptedBy).then(cid => { 
             showChatInterface(currentRideId, currentUser.uid, data.acceptedBy, 'passenger', dn, data); 
+            // ✅ إظهار زر المحادثة للراكب عند قبول السائق
             showChatButton(currentRideId, cid, 'passenger', dn, data);
           });
           if(dr.location && pickupPos && destPos) {
@@ -1399,7 +1318,9 @@ function listenForRideUpdate() {
       unsub();
     } else if(data.status === 'expired' || data.status === 'cancelled') {
       Utils.stopSound('searchingSound'); rideState = 'idle'; closeSearchModal(); stopPulseOnCurrent();
+      document.getElementById('bookBtn').disabled = false; unsub();
       
+      // ✅ إزالة أيقونة المحادثة فوراً عند إلغاء الرحلة (من أي طرف)
       let chatBtn = document.getElementById('floatingChatBtn');
       if (chatBtn) chatBtn.remove();
       
@@ -1415,7 +1336,7 @@ function cancelRide(){
     Utils.stopSound('searchingSound');
     updateRideStatus('cancelled'); rideState='idle';
     closeSearchModal(); closePassengerRideModal(); closeChat();
-    stopPulseOnCurrent();
+    stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false;
     
     let chatBtn = document.getElementById('floatingChatBtn');
     if (chatBtn) chatBtn.remove();
@@ -1495,6 +1416,7 @@ async function saveDriverProfileFromMenu() {
     startDriverRequestListener(); 
     document.getElementById('popupDriverName').textContent = `${newName} | ${newType}`;
     
+    // ✅ تغيير النص إلى "تم الحفظ" باللون الأخضر لمدة ثانيتين
     btn.textContent = '✅ تم الحفظ';
     btn.style.background = 'linear-gradient(135deg, #66BB6A, #43A047)';
     setTimeout(() => {
