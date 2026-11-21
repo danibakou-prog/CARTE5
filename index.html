@@ -31,7 +31,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .floating-controls { position: absolute; top: 20px; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 24px; pointer-events: none; }
 .floating-controls > * { pointer-events: auto; }
 
-.user-menu-container { position: relative; order: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.user-menu-container { position: relative; order: 1; }
 .user-icon-btn { 
   background: linear-gradient(135deg, rgba(156, 205, 50, 0.15), rgba(124, 179, 66, 0.25)); 
   backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -53,41 +53,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 @keyframes glassShine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
-
-/* ✅ زر الإبلاغ عن مشكلة (الأصفر) */
-.report-problem-btn {
-    background: linear-gradient(135deg, #FFD54F, #FFB300);
-    color: #1B1B1B;
-    border: 2px solid rgba(255,255,255,0.9);
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    font-size: 1.2em;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255, 179, 0, 0.4);
-    transition: all 0.3s ease;
-    z-index: 1001;
-}
-.report-problem-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 16px rgba(255, 179, 0, 0.6); }
-.report-problem-btn:active { transform: scale(0.95); }
-
-/* ✅ زر استقبال الطلبات للسائق */
-.requests-toggle-btn {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #1B1B1B;
-    border: 2px solid rgba(255,255,255,0.9);
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    font-size: 1.2em;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(156, 205, 50, 0.4);
-    transition: all 0.3s ease;
-    z-index: 1001;
-}
-.requests-toggle-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 16px rgba(156, 205, 50, 0.6); }
-.requests-toggle-btn:active { transform: scale(0.95); }
-
 
 .floating-locate-btn {
   position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
@@ -318,10 +283,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .search-text { font-size: 1.2em; font-weight: 700; color: var(--text); margin-bottom: 6px; } 
 .search-sub { font-size: 0.9em; color: #666; }
 .cancel-search-btn { margin-top: 18px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.25s; font-size: 0.95em; }
-
-/* ✅ نافذة التبليغ عن مشكلة */
-.report-modal-content { text-align: right; }
-.report-modal-content textarea { width: 100%; height: 120px; padding: 12px; border: 2px solid var(--border); border-radius: 12px; resize: none; margin-bottom: 15px; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -360,11 +321,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-      
-      <!-- ✅ الأزرار الإضافية تحت الأيقونة -->
-      <button class="report-problem-btn" id="passengerReportBtn" onclick="openReportModal()" title="التبليغ عن مشكلة" style="display:none;">⚠️</button>
-      <button class="requests-toggle-btn" id="driverRequestsBtn" onclick="openDriverRequestsModal()" title="استقبال الطلبات" style="display:none;">📋</button>
-      
       <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
       
       <div class="dropdown-menu" id="userDropdownMenu">
@@ -372,12 +328,12 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
           <span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
         </div>
-        
-        <!-- ✅ تم استبدال زر طلباتي وزر استقبال الطلبات بزر التبليغ الموحد -->
-        <div id="reportProblemTop" style="padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
-          <button class="auth-btn" onclick="openReportModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(255, 179, 0, 0.3);">⚠️ التبليغ عن مشكلة</button>
+        <div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+          <button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);">📜 طلباتي</button>
         </div>
-
+        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+          <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(156, 205, 50, 0.3);">🚙 استقبال الطلبات</button>
+        </div>
         <div class="dropdown-tabs">
           <button class="dropdown-tab active" onclick="switchMenuTab('history')">📜 سجل الطلبات</button>
           <button class="dropdown-tab" id="settingsTabBtn" onclick="switchMenuTab('settings')" style="display:none;">⚙️ إعدادات المركبة</button>
@@ -450,18 +406,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <button class="cancel-btn" onclick="cancelRide()">❌ إلغاء الرحلة</button>
 </div>
 </div>
-</div>
-</div>
-
-<!-- ✅ نافذة التبليغ عن مشكلة -->
-<div id="reportModal" class="modal-overlay">
-<div class="modal-content report-modal-content">
-<button class="close-modal" onclick="closeReportModal()">×</button>
-<div style="font-size: 3em; margin-bottom: 10px;">⚠️</div>
-<h3 style="color: #F57C00; margin-bottom: 15px;">التبليغ عن مشكلة</h3>
-<p style="margin-bottom: 15px; color: #555;">يرجى وصف المشكلة التي واجهتها وسنقوم بمراجعتها فوراً.</p>
-<textarea id="reportText" placeholder="اكتب تفاصيل المشكلة هنا..."></textarea>
-<button class="auth-btn" onclick="submitReport()" style="background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B;">📩 إرسال البلاغ</button>
 </div>
 </div>
 
@@ -663,26 +607,6 @@ function closeDriverSetupModal() { document.getElementById('driverSetupModal').c
 function openDriverRequestsModal() { if (!currentDriver || !driverAvailable) return; document.getElementById('driverRequestsModal').classList.add('active'); loadRequests(); }
 function closeDriverRequestsModal() { document.getElementById('driverRequestsModal').classList.remove('active'); }
 
-// ✅ دوال التبليغ عن مشكلة
-function openReportModal() { document.getElementById('reportModal').classList.add('active'); }
-function closeReportModal() { document.getElementById('reportModal').classList.remove('active'); }
-function submitReport() {
-    const text = document.getElementById('reportText').value.trim();
-    if(!text) return alert("يرجى كتابة تفاصيل المشكلة");
-    
-    // محاكاة إرسال البلاغ (يمكن ربطها بقاعدة البيانات لاحقاً)
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.disabled = true; btn.innerHTML = '🔄 جاري الإرسال...';
-    
-    setTimeout(() => {
-        alert("تم إرسال بلاغك بنجاح! شكراً لمساعدتنا في تحسين الخدمة.");
-        document.getElementById('reportText').value = '';
-        closeReportModal();
-        btn.disabled = false; btn.innerHTML = originalText;
-    }, 1500);
-}
-
 function openPassengerRideModal() {
   if(!currentActiveRide) return;
   document.getElementById('pPickupName').textContent = currentActiveRide.pickup?.name || '---';
@@ -823,8 +747,7 @@ async function completeDriverSetup() {
   document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = carName;
   document.getElementById('settingsTabBtn').style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
   switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-  document.getElementById('driverReceiveRequestsTop').style.display = 'none'; // تم إخفاء هذا الزر القديم
-  document.getElementById('passengerMyRequestsTop').style.display = 'none';
+  document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
   document.getElementById('mainRequestBtn').style.display = 'none';
   document.getElementById('popupDriverName').textContent = `${carName} | ${carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${carType}`;
   document.getElementById('menuCarType').value = carType; document.getElementById('menuCarName').value = carName;
@@ -867,11 +790,6 @@ function initFirebase() {
 async function routeUserAfterAuth(user) {
   const ud = await db.collection('users').doc(user.uid).get(); if(!ud.exists) return switchView('view-auth');
   const d = ud.data(), switchModeBtn = document.getElementById('switchModeHeaderBtn');
-  
-  // التحكم في ظهور الأزرار الجانبية (الإبلاغ / استقبال الطلبات)
-  const passengerReportBtn = document.getElementById('passengerReportBtn');
-  const driverRequestsBtn = document.getElementById('driverRequestsBtn');
-
   if(d.role === 'driver') {
     const dd = await db.collection('drivers').doc(user.uid).get();
     if(dd.exists) {
@@ -879,11 +797,7 @@ async function routeUserAfterAuth(user) {
       document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
       document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
       switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-      
-      // ✅ إظهار زر استقبال الطلبات وإخفاء زر الإبلاغ للراكب
-      if(driverRequestsBtn) driverRequestsBtn.style.display = 'flex';
-      if(passengerReportBtn) passengerReportBtn.style.display = 'none';
-
+      document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
       document.getElementById('mainRequestBtn').style.display = 'none';
       document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
       document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
@@ -892,15 +806,10 @@ async function routeUserAfterAuth(user) {
   } else {
     document.getElementById('userIconBtn').textContent = '👤'; document.getElementById('menuUserName').textContent = 'راكب';
     document.getElementById('settingsTabBtn').style.display = 'none'; document.getElementById('driverAvailabilityBtn').style.display = 'none';
-    
-    // ✅ إظهار زر الإبلاغ وإخفاء زر استقبال الطلبات
-    if(passengerReportBtn) passengerReportBtn.style.display = 'flex';
-    if(driverRequestsBtn) driverRequestsBtn.style.display = 'none';
-
     const ddCheck = await db.collection('drivers').doc(user.uid).get();
     if (ddCheck.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    
+    document.getElementById('passengerMyRequestsTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
     document.getElementById('mainRequestBtn').style.display = 'flex';
     switchView('view-request'); startPassengerLocationTracking(); 
   }
@@ -1536,7 +1445,7 @@ async function toggleUserRole() {
     const dd = await db.collection('drivers').doc(currentUser.uid).get();
     if (dd.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    document.getElementById('passengerMyRequestsTop').style.display = 'none'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+    document.getElementById('passengerMyRequestsTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
     document.getElementById('mainRequestBtn').style.display = 'flex';
     startPassengerLocationTracking();
   } else {
@@ -1547,7 +1456,7 @@ async function toggleUserRole() {
       document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
       document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
       switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-      document.getElementById('driverReceiveRequestsTop').style.display = 'none'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
+      document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
       document.getElementById('mainRequestBtn').style.display = 'none';
       document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
       document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
