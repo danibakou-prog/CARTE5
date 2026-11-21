@@ -54,8 +54,18 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
 
+/* ✅ زر الإضافة العائم الجديد */
+.add-fab-btn {
+  position: absolute; top: 85px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 6px 20px rgba(124, 179, 66, 0.4); display: flex; align-items: center; justify-content: center;
+  font-size: 1.5em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+}
+.add-fab-btn:hover { transform: translateY(-3px) scale(1.05) rotate(90deg); box-shadow: 0 8px 25px rgba(124, 179, 66, 0.6); }
+.add-fab-btn:active { transform: scale(0.95); }
+
 .floating-locate-btn {
-  position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+  position: absolute; top: 140px; left: 0; width: 46px; height: 46px; border-radius: 16px;
   background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
   box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
   font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
@@ -321,6 +331,10 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
+      
+      <!-- ✅ زر الإضافة العائم للراكب -->
+      <button class="add-fab-btn" id="passengerAddBtn" onclick="alert('فتح قائمة الخدمات الإضافية...')" title="خدمات إضافية">+</button>
+      
       <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
       
       <div class="dropdown-menu" id="userDropdownMenu">
@@ -328,12 +342,17 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
           <span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
         </div>
-        <div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
-          <button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);">📜 طلباتي</button>
+        
+        <!-- ✅ استبدال زر طلباتي بزر التبليغ الأصفر للراكب -->
+        <div id="passengerReportTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+          <button class="auth-btn" onclick="alert('تم إرسال بلاغك للإدارة'); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(255, 179, 0, 0.3);">⚠️ التبليغ عن مشكلة</button>
         </div>
-        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
-          <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(156, 205, 50, 0.3);">🚙 استقبال الطلبات</button>
+
+        <!-- ✅ استبدال زر استقبال الطلبات بزر التبليغ الأصفر للسائق -->
+        <div id="driverReportTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
+           <button class="auth-btn" onclick="alert('تم إرسال بلاغك للإدارة'); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(255, 179, 0, 0.3);">⚠️ التبليغ عن مشكلة</button>
         </div>
+
         <div class="dropdown-tabs">
           <button class="dropdown-tab active" onclick="switchMenuTab('history')">📜 سجل الطلبات</button>
           <button class="dropdown-tab" id="settingsTabBtn" onclick="switchMenuTab('settings')" style="display:none;">⚙️ إعدادات المركبة</button>
@@ -732,7 +751,7 @@ async function handleAuth(type) {
   finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; } 
 }
 
-async function completeDriverSetup() {
+async function completeDriver_setup() {
   const btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = '🔄 حفظ...';
   const carType = document.getElementById('setupCarType').value, carName = document.getElementById('setupCarName').value.trim() || 'سيارتي';
   let loc = {lat: 35.633994, lng: 3.224367};
@@ -809,7 +828,14 @@ async function routeUserAfterAuth(user) {
     const ddCheck = await db.collection('drivers').doc(user.uid).get();
     if (ddCheck.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    document.getElementById('passengerMyRequestsTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+    document.getElementById('passengerMyRequestsTop').style.display = 'none'; // Hidden as requested
+    document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+    
+    // ✅ إظهار زر التبليغ للراكب
+    document.getElementById('passengerReportTop').style.display = 'block';
+    // ✅ إظهار زر الإضافة العائم للراكب
+    document.getElementById('passengerAddBtn').style.display = 'flex';
+    
     document.getElementById('mainRequestBtn').style.display = 'flex';
     switchView('view-request'); startPassengerLocationTracking(); 
   }
@@ -972,8 +998,8 @@ async function showChatInterface(rid, pid, did, role, name, rd=null) {
   Utils.playSound('chatOpenSound');
   const cid=`chat_${rid}`; currentChatId=cid;
   const ex=document.getElementById('chatOverlay'); if(ex)ex.remove();
-  const stBtn=role==='driver'&&rd&&(rd.status==='accepted' || rd.status==='in_progress')?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:'';
-  const cnBtn=role==='driver'&&rd&&(rd.status==='accepted' || rd.status==='in_progress')?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:'';
+  const st_btn=role==='driver'&&rd&&(rd.status==='accepted' || rd.status==='in_progress')?`<button class="start-trip-btn" onclick="startTripNavigation('${rd.destination?.lat}','${rd.destination?.lng}','${rd.destination?.name||'الوجهة'}')">🚀 بدء الرحلة</button>`:'';
+  const cn_btn=role==='driver'&&rd&&(rd.status==='accepted' || rd.status==='in_progress')?`<button class="cancel-trip-btn" onclick="cancelActiveTrip('${rid}')">❌ إلغاء الرحلة</button>`:'';
   let distBetween = "جاري التحديد...", driverPos = role === 'driver' ? (currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null) : (rd?.driverLocation ? [rd.driverLocation.lat, rd.driverLocation.lng] : null);
   let passengerPos = role === 'passenger' ? myCurrentPos : (rd?.pickup ? [rd.pickup.lat, rd.pickup.lng] : null);
   if (driverPos && passengerPos) { let d = Utils.calculateDistance(driverPos[0], driverPos[1], passengerPos[0], passengerPos[1]); distBetween = Utils.formatDistance(d); }
@@ -982,7 +1008,7 @@ async function showChatInterface(rid, pid, did, role, name, rd=null) {
   if(role==='driver'){ ml='📍 موقع الراكب'; mp=currentDriver?.location?[currentDriver.location.lat,currentDriver.location.lng]:null; op=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } 
   else { ml='🚕 موقع السائق'; op=rd?.driverLocation?[rd.driverLocation.lat,rd.driverLocation.lng]:null; if(navigator.geolocation) try{ mp=await new Promise((r,j)=>navigator.geolocation.getCurrentPosition(p=>r([p.coords.latitude,p.coords.longitude]),j,{timeout:3000})); }catch(e){ mp=rd?.pickup?[rd.pickup.lat,rd.pickup.lng]:null; } }
   const cc=document.createElement('div'); cc.id='chatOverlay'; cc.className='chat-overlay';
-  cc.innerHTML=`<div class="chat-box"><div class="chat-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div><span style="font-weight:600">${role==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>${name?`<span style="font-size:0.85em;opacity:0.9">• ${name}</span>`:''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cnBtn}${stBtn}<button class="chat-close" onclick="closeChat()">×</button></div></div><div id="chatMessages" class="chat-messages"></div>${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}<div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')"><button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button></div></div>`;
+  cc.innerHTML=`<div class="chat-box"><div class="chat-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:35px;height:35px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">💬</div><span style="font-weight:600">${role==='passenger'?'محادثة مع السائق':'محادثة مع الراكب'}</span>${name?`<span style="font-size:0.85em;opacity:0.9">• ${name}</span>`:''}</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${cn_btn}${st_btn}<button class="chat-close" onclick="closeChat()">×</button></div></div><div id="chatMessages" class="chat-messages"></div>${mp||op?`<div class="chat-mini-map" id="chatMiniMap"><div class="map-label">${ml}</div><div class="distance-badge">📏 جاري الحساب...</div></div>`:''}<div class="chat-input-area"><input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter')sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')"><button class="chat-send-btn" onclick="sendChatMessage('${cid}','${currentDriver?.uid||currentUser.uid}','${role}')">➤</button></div></div>`;
   document.body.appendChild(cc);
   if(activeChatListener)activeChatListener();
   const uid=currentDriver?.uid||currentUser.uid;
@@ -1163,25 +1189,107 @@ function fallbackLocation() {
 function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
 function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
 
+// ✅ دالة البحث المحسنة: حفظ محلي + تنقية الأرقام والتكرار
 function setupAutocomplete(iid, rid, cb, countryOnly=true) { 
   const inp=document.getElementById(iid), res=document.getElementById(rid); 
   const performSearch = async function() { 
-    const q=inp.value.trim(); if(q.length<3){res.classList.remove('show');return;} 
+    const q=inp.value.trim(); if(q.length<2){res.classList.remove('show');return;} 
+    
+    // 1. جلب الكلمات المحفوظة محلياً ومطابقتها
+    const savedWords = JSON.parse(localStorage.getItem('yasserSavedLocations') || '[]');
+    const localMatches = savedWords.filter(w => w.toLowerCase().includes(q.toLowerCase()));
+    
+    // بناء HTML للكلمات المحلية
+    let localHtml = localMatches.map(w => 
+      `<div class="autocomplete-item" style="color:#555; font-style:italic;" onclick="selectLocalWord('${w}', '${iid}')">🕒 ${w}</div>`
+    ).join('');
+
+    if(q.length<3){
+      if(localHtml) { res.innerHTML = localHtml; res.classList.add('show'); } 
+      else { res.classList.remove('show'); }
+      return;
+    }
+
     try { 
-      const cp=countryOnly?'&countrycodes=dz':'', lim=countryOnly?5:8; 
+      const cp=countryOnly?'&countrycodes=dz':'', lim=countryOnly?10:15; 
       const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${cp}&limit=${lim}`, {headers:{'User-Agent':'YasserRidePro/1.0'}}); 
       const d=await r.json(); 
+      
       if(d.length>0){ 
-        res.innerHTML=d.map(i=>`<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">📍 ${i.display_name.length>50?i.display_name.substring(0,50)+'...':i.display_name}</div>`).join(''); 
-        res.classList.add('show'); 
-        res.querySelectorAll('.autocomplete-item').forEach(it=>{ it.onclick=()=>{res.classList.remove('show'); cb(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name);}; }); 
-      } else { res.innerHTML='<div class="autocomplete-item">🔍 لم يتم العثور</div>'; res.classList.add('show'); } 
+        // تنقية النتائج: إزالة ما يحتوي أرقام (شوارع) وإزالة التكرار
+        const seenNames = new Set();
+        const cleanResults = d.filter(item => {
+            // تجاهل النتائج التي تحتوي أرقام (عادة عناوين شوارع دقيقة)
+            if (/\d/.test(item.display_name)) return false;
+            
+            // استخراج اسم المدينة/المنطقة فقط (الجزء الأول قبل الفاصلة عادة)
+            const parts = item.display_name.split(',');
+            const areaName = parts[0].trim();
+            
+            // منع التكرار
+            if (seenNames.has(areaName)) return false;
+            seenNames.add(areaName);
+            return true;
+        });
+
+        if(cleanResults.length > 0) {
+            res.innerHTML = localHtml + cleanResults.map(i=>{
+                // استخراج الاسم الأنظف
+                const nameParts = i.display_name.split(',');
+                const displayName = nameParts[0] + ', ' + (nameParts[1] ? nameParts[1].trim() : '');
+                return `<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${displayName}">📍 ${displayName}</div>`;
+            }).join(''); 
+            res.classList.add('show'); 
+            res.querySelectorAll('.autocomplete-item[data-lat]').forEach(it=>{ it.onclick=()=>{
+                res.classList.remove('show'); 
+                cb(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name);
+                // حفظ الكلمة محلياً
+                saveLocalWord(it.dataset.name);
+            }; }); 
+        } else {
+             res.innerHTML = localHtml || '<div class="autocomplete-item">🔍 لم يتم العثور</div>'; 
+             res.classList.add('show');
+        }
+      } else { 
+          res.innerHTML = localHtml || '<div class="autocomplete-item">🔍 لم يتم العثور</div>'; 
+          res.classList.add('show'); 
+      } 
     } catch(e){ res.innerHTML='<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; res.classList.add('show'); } 
   }; 
   inp.addEventListener('input', Utils.debounce(performSearch, 400)); 
   document.addEventListener('click', e=>{if(e.target!==inp&&!res.contains(e.target))res.classList.remove('show');},{passive:true}); 
   window.addEventListener('scroll', ()=>res.classList.remove('show'),{passive:true}); 
   window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true}); 
+}
+
+// دوال مساعدة للحفظ المحلي
+function saveLocalWord(word) {
+    let saved = JSON.parse(localStorage.getItem('yasserSavedLocations') || '[]');
+    // إزالة التكرار وإضافة الجديد في البداية
+    saved = saved.filter(w => w !== word);
+    saved.unshift(word);
+    if(saved.length > 20) saved.pop(); // الاحتفاظ بآخر 20 كلمة
+    localStorage.setItem('yasserSavedLocations', JSON.stringify(saved));
+}
+
+window.selectLocalWord = function(word, inputId) {
+    document.getElementById(inputId).value = word;
+    // تحفيز البحث للحصول على الإحداثيات الدقيقة لهذا الاسم
+    const resultsId = inputId === 'pickupInput' ? 'pickupResults' : 'destResults';
+    const resDiv = document.getElementById(resultsId);
+    resDiv.classList.remove('show');
+    
+    // بحث سريع لجلب الإحداثيات
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(word)}&countrycodes=dz&limit=1`)
+    .then(r=>r.json()).then(d=>{
+        if(d.length>0) {
+            const lat = parseFloat(d[0].lat), lng = parseFloat(d[0].lon);
+            const cb = inputId === 'pickupInput' ? 
+                (la,lo,n)=>setLocation(pickupMarker,[la,lo],'pickupInput','pickupCoords',true) : 
+                (la,lo,n)=>setLocation(destMarker,[la,lo],'destInput','destCoords',false);
+            cb(lat, lng, word);
+        }
+    });
 }
 
 function drawRoute() { 
@@ -1445,7 +1553,14 @@ async function toggleUserRole() {
     const dd = await db.collection('drivers').doc(currentUser.uid).get();
     if (dd.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    document.getElementById('passengerMyRequestsTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+    
+    // تبديل الأزرار الخاصة بالوضع
+    document.getElementById('passengerReportTop').style.display = 'block';
+    document.getElementById('driverReportTop').style.display = 'none';
+    document.getElementById('passengerAddBtn').style.display = 'flex'; // إظهار زر الإضافة
+    
+    document.getElementById('passengerMyRequestsTop').style.display = 'none'; 
+    document.getElementById('driverReceiveRequestsTop').style.display = 'none';
     document.getElementById('mainRequestBtn').style.display = 'flex';
     startPassengerLocationTracking();
   } else {
@@ -1456,7 +1571,14 @@ async function toggleUserRole() {
       document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
       document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
       switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-      document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
+      
+      // تبديل الأزرار الخاصة بالوضع
+      document.getElementById('passengerReportTop').style.display = 'none';
+      document.getElementById('driverReportTop').style.display = 'block';
+      document.getElementById('passengerAddBtn').style.display = 'none'; // إخفاء زر الإضافة
+      
+      document.getElementById('driverReceiveRequestsTop').style.display = 'none'; 
+      document.getElementById('passengerMyRequestsTop').style.display = 'none';
       document.getElementById('mainRequestBtn').style.display = 'none';
       document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
       document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
