@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -20,44 +20,8 @@
   --danger: #EF5350; --warning: #FFA726; --route-driver: #FF9800; --route-passenger: #66BB6A;
   --surface: #FAFAFA; --border: #E8E8E8; --pulse-green: rgba(102, 187, 106, 0.7); --pulse-blue: rgba(66, 165, 245, 0.7);
 }
-
-/* ✅ متغيرات الوضع الليلي */
-[data-theme="dark"] {
-  --bg: #121212; --text: #E0E0E0; --card: #1E1E1E;
-  --surface: #2C2C2C; --border: #333333;
-  --primary: #81C784; --primary-dark: #66BB6A; --primary-light: #4CAF50;
-  --secondary: #FFD54F;
-}
-[data-theme="dark"] body { background: #121212; color: #E0E0E0; }
-[data-theme="dark"] .auth-view { background: #121212; }
-[data-theme="dark"] .auth-input, [data-theme="dark"] .loc-input, [data-theme="dark"] select, [data-theme="dark"] .form-group input {
-  background: #2C2C2C; color: #E0E0E0; border-color: #444;
-}
-[data-theme="dark"] .bottom-sheet { background: rgba(30, 30, 30, 0.95); border-top: 1px solid #333; }
-[data-theme="dark"] .dropdown-menu { background: #1E1E1E; color: #E0E0E0; border-color: #333; }
-[data-theme="dark"] .dropdown-header { background: linear-gradient(135deg, #2C2C2C, #1E1E1E); border-bottom-color: #333; }
-[data-theme="dark"] .dropdown-tab { color: #999; }
-[data-theme="dark"] .dropdown-tab.active { background: #2C3C2C; color: var(--primary); }
-[data-theme="dark"] .loc-row { background: #2C2C2C; border-color: #444; }
-[data-theme="dark"] .info-card { background: linear-gradient(135deg, #1B3A1B, #2C4C2C); border-color: #444; }
-[data-theme="dark"] .price-display { background: linear-gradient(135deg, #3E3518, #4A3F1A); border-color: #5D4037; color: #FFD54F; }
-[data-theme="dark"] .car-opt { background: #2C2C2C; border-color: #444; }
-[data-theme="dark"] .car-opt.selected { background: linear-gradient(135deg, #1B3A1B, #2C4C2C); border-color: var(--primary); }
-[data-theme="dark"] .request-card { background: #2C2C2C; border-color: #444; }
-[data-theme="dark"] .modal-content, [data-theme="dark"] .driver-popup-box, [data-theme="dark"] .passenger-ride-box, [data-theme="dark"] .incoming-request-box, [data-theme="dark"] .chat-box, [data-theme="dark"] .search-content {
-  background: #1E1E1E; color: #E0E0E0;
-}
-[data-theme="dark"] .chat-input { background: #2C2C2C; color: #E0E0E0; border-color: #444; }
-[data-theme="dark"] .chat-input-area { background: #1E1E1E; border-top-color: #333; }
-[data-theme="dark"] .message.other { background: #2C3E50; color: #E0E0E0; }
-[data-theme="dark"] #loadingOverlay { background: linear-gradient(135deg, #121212, #1E1E1E); }
-[data-theme="dark"] .record-card { background: #2C2C2C; border-color: #444; }
-[data-theme="dark"] .autocomplete-results { background: #1E1E1E; border-color: #444; }
-[data-theme="dark"] .autocomplete-item { border-bottom-color: #333; }
-[data-theme="dark"] .autocomplete-item:hover { background: #2C3C2C; }
-
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color: var(--text); transition: background 0.3s, color 0.3s; }
+body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color: var(--text); }
 .app { max-width: 100%; width: 100%; height: 100%; margin: 0; background: transparent; position: relative; overflow: hidden; }
 #map { height: 100vh !important; width: 100% !important; position: absolute !important; top: 0; left: 0; z-index: 1; }
 .view { display: none; animation: fadeIn 0.3s ease; height: 100%; }
@@ -67,54 +31,75 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .floating-controls { position: absolute; top: 20px; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 24px; pointer-events: none; }
 .floating-controls > * { pointer-events: auto; }
 
-/* ✅ أيقونة مستخدم عصرية، أكبر، زجاجية مع وميض أخضر */
+/* ✅ أيقونة مستخدم عصرية وأنيقة جداً (Glassmorphism + Squircle + Green Glow) */
 .user-menu-container { position: relative; order: 1; }
 .user-icon-btn { 
-  background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1)); 
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.4); 
-  width: 56px; height: 56px; border-radius: 18px; 
+  /* خلفية متدرجة خضراء شفافة */
+  background: linear-gradient(135deg, rgba(156, 205, 50, 0.15), rgba(124, 179, 66, 0.25)); 
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.8); 
+  /* الحجم أكبر قليلاً */
+  width: 56px; height: 56px; 
+  border-radius: 18px; 
   cursor: pointer; font-size: 1.6em; display: flex; align-items: center; justify-content: center; 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-  box-shadow: 0 0 15px rgba(102, 187, 106, 0.4), inset 0 1px 0 rgba(255,255,255,0.5); 
-  color: #2E7D32;
-  animation: glass-pulse-green 3s infinite;
+  /* ظل داخلي وخارجي لإعطاء عمق ولمعان */
+  box-shadow: 
+    inset 0 1px 2px rgba(255,255,255,0.9), 
+    0 4px 15px rgba(156, 205, 50, 0.2),
+    0 0 0 1px rgba(156, 205, 50, 0.1); 
+  color: #2e5c18;
+  position: relative;
+  overflow: hidden;
 }
-@keyframes glass-pulse-green {
-  0%, 100% { box-shadow: 0 0 15px rgba(102, 187, 106, 0.4), inset 0 1px 0 rgba(255,255,255,0.5); }
-  50% { box-shadow: 0 0 25px rgba(102, 187, 106, 0.7), inset 0 1px 0 rgba(255,255,255,0.8); }
+/* لمعة زجاجية متحركة */
+.user-icon-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  transform: rotate(45deg);
+  animation: glassShine 4s infinite;
+  pointer-events: none;
 }
-[data-theme="dark"] .user-icon-btn {
-  background: linear-gradient(145deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.05));
-  border-color: rgba(102, 187, 106, 0.5);
-  color: #81C784;
+@keyframes glassShine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  20%, 100% { transform: translateX(100%) rotate(45deg); }
 }
-.user-icon-btn:hover { transform: translateY(-2px) scale(1.05); }
+
+.user-icon-btn:hover { 
+  transform: translateY(-2px) scale(1.05); 
+  box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); 
+  background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35));
+  border-color: var(--primary);
+}
 .user-icon-btn:active { transform: scale(0.95); }
 
-/* ✅ زر الموقع الأزرق العائم */
+/* ✅ زر الموقع الأزرق العائم الجديد تحت أيقونة المستخدم */
 .floating-locate-btn {
-  position: absolute; top: 62px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-  background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
-  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
-  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+  position: absolute;
+  top: 68px; /* تعديل ليتناسب مع حجم الأيقونة الجديد */
+  left: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #42A5F5, #1E88E5);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
 }
 .floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(30, 136, 229, 0.6); }
 .floating-locate-btn:active { transform: scale(0.95); }
-
-/* ✅ زر تبديل الوضع الليلي/النهاري الجديد تحت زر الموقع */
-.theme-toggle-btn {
-  position: absolute; top: 114px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-  background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border: 2px solid rgba(255,255,255,0.8);
-  box-shadow: 0 6px 20px rgba(255, 179, 0, 0.4); display: flex; align-items: center; justify-content: center;
-  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
-}
-[data-theme="dark"] .theme-toggle-btn {
-  background: linear-gradient(135deg, #5C6BC0, #3949AB); color: #fff; border-color: rgba(255,255,255,0.3);
-  box-shadow: 0 6px 20px rgba(57, 73, 171, 0.4);
-}
-.theme-toggle-btn:hover { transform: translateY(-3px) scale(1.05); }
-.theme-toggle-btn:active { transform: scale(0.95); }
 
 .toggle-mode-container { position: absolute; left: 50%; transform: translateX(-50%); top: 0; order: 2; }
 .register-car-btn { 
@@ -143,7 +128,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 @keyframes pulse-orange-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); } 50% { box-shadow: 0 0 0 12px rgba(255, 152, 0, 0); } }
 @keyframes pulse-red-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); } 50% { box-shadow: 0 0 0 12px rgba(239, 83, 80, 0); } }
 
-.dropdown-menu { position: absolute; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; transform-origin: top right; transform: scale(0.95); opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid var(--border); right: 0; left: auto; top: 60px; }
+.dropdown-menu { position: absolute; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 2000; overflow: hidden; transform-origin: top right; transform: scale(0.95); opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); border: 1px solid var(--border); right: 0; left: auto; top: 65px; }
 .dropdown-menu.show { transform: scale(1); opacity: 1; visibility: visible; }
 .dropdown-header { padding: 15px; background: linear-gradient(135deg, #f9f9f9, #fff); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .dropdown-tabs { display: flex; border-bottom: 1px solid var(--border); }
@@ -152,7 +137,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .dropdown-content { max-height: 400px; overflow-y: auto; padding: 10px; background: #fff; }
 .logout-link { color: var(--danger); text-decoration: none; font-size: 0.9em; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 
-.auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 2000; position: relative; transition: background 0.3s; }
+.auth-view { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; text-align: center; background: white; z-index: 2000; position: relative; }
 .auth-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--surface); padding: 6px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid var(--border); }
 .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.25s; color: #666; }
 .auth-tab.active { background: var(--card); box-shadow: var(--shadow); color: var(--primary-dark); font-weight: 700; }
@@ -170,16 +155,44 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .marker-passenger { border-color: #66BB6A; } .marker-driver { border-color: #42A5F5; } .marker-truck { border-color: #9C27B0; }
 .marker-destination { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; font-size: 1.1em; border: none; box-shadow: 0 4px 20px rgba(239, 83, 80, 0.4); }
 
+/* ✅ تصميم عصري وسلس للنافذة المنسدلة (Bottom Sheet) */
 .bottom-sheet-container { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.5, 1); pointer-events: none; }
 .bottom-sheet { 
-  background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px); border-top-left-radius: 32px; border-top-right-radius: 32px; 
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.15); padding: 24px 24px 30px 24px; transform: translateY(110%); 
-  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); max-height: 75vh; overflow-y: auto; pointer-events: auto; border-top: 1px solid rgba(255,255,255,0.8); 
+  background: rgba(255, 255, 255, 0.98); 
+  backdrop-filter: blur(20px); 
+  border-top-left-radius: 32px; 
+  border-top-right-radius: 32px; 
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.15); 
+  padding: 24px 24px 30px 24px; 
+  transform: translateY(110%); 
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); 
+  max-height: 75vh; 
+  overflow-y: auto; 
+  pointer-events: auto; 
+  border-top: 1px solid rgba(255,255,255,0.8); 
 }
 .bottom-sheet.open { transform: translateY(0); }
-.sheet-handle { width: 60px; height: 6px; background: #E0E0E0; border-radius: 10px; margin: 0 auto 20px auto; cursor: pointer; position: relative; transition: background 0.3s; }
+.sheet-handle { 
+  width: 60px; 
+  height: 6px; 
+  background: #E0E0E0; 
+  border-radius: 10px; 
+  margin: 0 auto 20px auto; 
+  cursor: pointer;
+  position: relative;
+  transition: background 0.3s;
+}
 .sheet-handle:hover { background: #BDBDBD; }
-.sheet-handle::after { content: '▼'; position: absolute; top: 16px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #999; font-weight: bold; }
+.sheet-handle::after {
+  content: '▼';
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #999;
+  font-weight: bold;
+}
 
 .fab-request-btn { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border: none; padding: 16px 32px; border-radius: 50px; font-size: 1.1em; font-weight: 800; cursor: pointer; z-index: 999; box-shadow: 0 8px 25px rgba(124, 179, 66, 0.4); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; pointer-events: auto; }
 .fab-request-btn:hover { transform: translateX(-50%) scale(1.05); box-shadow: 0 12px 35px rgba(124, 179, 66, 0.5); }
@@ -299,6 +312,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .chat-mini-map .map-label { position: absolute; top: 10px; right: 12px; background: rgba(27,27,27,0.8); color: #fff; padding: 5px 12px; border-radius: 18px; font-size: 0.78em; z-index: 1000; } 
 .chat-mini-map .distance-badge { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; padding: 7px 16px; border-radius: 24px; font-size: 0.85em; font-weight: 700; z-index: 1000; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(124, 179, 66, 0.3); }
 
+/* ✅ زر المحادثة الأصفر الوامض الجديد */
 #floatingChatBtn { position: fixed; bottom: 85px; right: 22px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; border: none; padding: 14px 24px; border-radius: 34px; font-weight: 700; cursor: pointer; z-index: 2500; box-shadow: 0 6px 24px rgba(255, 213, 79, 0.5); display: flex; align-items: center; gap: 10px; animation: pulse-btn 2.5s infinite; }
 #floatingChatBtn.yellow-pulse-chat {
     background: linear-gradient(135deg, #FFD54F, #FFB300) !important;
@@ -374,9 +388,8 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
+      <!-- ✅ زر الموقع الأزرق العائم الجديد -->
       <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
-      <!-- ✅ زر تبديل الوضع الليلي/النهاري -->
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري">🌙</button>
       
       <div class="dropdown-menu" id="userDropdownMenu">
         <div class="dropdown-header">
@@ -413,6 +426,7 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <button id="mainRequestBtn" class="fab-request-btn" onclick="toggleBottomSheet()"><span>🚖</span> اطلب سيارة الآن</button>
 <div class="bottom-sheet-container">
 <div class="bottom-sheet" id="requestSheet">
+  <!-- ✅ مقبض النافذة المنسدلة المحسن للتصغير -->
   <div class="sheet-handle" onclick="toggleBottomSheet()" title="تصغير / تكبير"></div>
 <div class="location-box">
 <div class="loc-row">
@@ -581,27 +595,11 @@ let currentActiveRide = null, dispatchDrivers = [], dispatchIndex = 0, dispatchT
 let searchMap = null, searchMarkers = [], searchUpdateInterval = null, searchMarkerMap = {};
 let lastKnownMessageCount = 0, currentChatMyId = null, chatMiniMap = null, chatLocationUpdate = null;
 let currentPulsingMarker = null, heartbeatInterval = null, offlineUpdateQueued = false, lastOnlineState = true;
-let currentTileLayer = null; // ✅ متغير لطبقة الخريطة لتبديل الليل/النهار
 
 const MAP_CONFIG = {
-  defaultView: [35.633994, 3.224367], 
-  defaultZoom: 14,
-  
-  // ✅ الخيار 1: الوضع الليلي (Dark Mode) - استخدم هذا الرابط للأسفل
-  tileLayers: [{ 
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', 
-    attribution: '&copy; OpenStreetMap &copy; CARTO', 
-    maxZoom: 19 
-  }],
-
-  // 💡 إذا أردت الوضع النهاري العادي، استبدل الرابط أعلاه بالرابط التالي:
-  // url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-  routeStyles: { 
-    driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, 
-    passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, 
-    chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } 
-  },
+  defaultView: [35.633994, 3.224367], defaultZoom: 14,
+  tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }],
+  routeStyles: { driver: { color: '#FF9800', weight: 4, opacity: 0.9 }, passenger: { color: '#66BB6A', weight: 4, opacity: 0.9 }, chat: { color: '#42A5F5', weight: 3, opacity: 0.8, dashArray: '5, 5' } },
   markerIcons: {
     passenger: L.divIcon({ className: 'marker-base marker-passenger', html: '👤', iconSize: [36, 36], iconAnchor: [18, 36] }),
     driver: L.divIcon({ className: 'marker-base marker-driver', html: '🚕', iconSize: [36, 36], iconAnchor: [18, 36] }),
@@ -629,6 +627,7 @@ const MapUtils = {
   initMap: (id, opts={}) => {
     const c={...MAP_CONFIG, ...opts};
     const m=L.map(id, {zoomControl:false, attributionControl:true, preferCanvas:true}).setView(c.defaultView, c.defaultZoom);
+    c.tileLayers.forEach((l,i)=>{ const t=L.tileLayer(l.url, {attribution:l.attribution, maxZoom:l.maxZoom}); if(i===0)t.addTo(m); });
     return m;
   },
   createMarker: (pos, type='passenger', popup=null) => { const i=MAP_CONFIG.markerIcons[type]||MAP_CONFIG.markerIcons.passenger; const m=L.marker(pos, {icon:i}); if(popup)m.bindPopup(`<div class="custom-popup">${popup}</div>`); return m; },
@@ -636,9 +635,7 @@ const MapUtils = {
   drawDualRoute: (map, dPos, pPos, dest) => { if(driverRoute)map.removeControl(driverRoute); if(passengerRoute)map.removeControl(passengerRoute); driverRoute=MapUtils.drawRoute(map,[dPos,pPos],MAP_CONFIG.routeStyles.driver); passengerRoute=MapUtils.drawRoute(map,[pPos,dest],MAP_CONFIG.routeStyles.passenger); map.fitBounds(L.latLngBounds([dPos,pPos,dest]),{padding:[50,50]}); },
   initChatMiniMap: (id, myPos, otherPos, role) => {
     const m=L.map(id, {zoomControl:true, attributionControl:false, dragging:true, touchZoom:true, scrollWheelZoom:true}).setView(myPos||otherPos||MAP_CONFIG.defaultView, 15);
-    const savedTheme = localStorage.getItem('yasserTheme') || 'light';
-    const tileUrl = savedTheme === 'dark' ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    L.tileLayer(tileUrl, {attribution:''}).addTo(m);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(m);
     const m1=myPos?L.marker(myPos,{icon:MAP_CONFIG.markerIcons.chatMe}).addTo(m):null;
     const m2=otherPos?L.marker(otherPos,{icon:MAP_CONFIG.markerIcons.chatPulse}).addTo(m):null;
     let rc=null; 
@@ -660,27 +657,6 @@ const MapUtils = {
     return 'driver';
   }
 };
-
-// ✅ دالة تبديل الوضع الليلي/النهاري وتغيير الخريطة
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const newTheme = current === 'light' ? 'dark' : 'light';
-  applyTheme(newTheme);
-}
-
-function applyTheme(theme, save = true) {
-  document.documentElement.setAttribute('data-theme', theme);
-  if (save) localStorage.setItem('yasserTheme', theme);
-  const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-
-  if (map) {
-    if (currentTileLayer) map.removeLayer(currentTileLayer);
-    const url = theme === 'dark' ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const attr = theme === 'dark' ? '© CartoDB' : '© OpenStreetMap';
-    currentTileLayer = L.tileLayer(url, { attribution: attr, maxZoom: 19 }).addTo(map);
-  }
-}
 
 function saveToLocalLog(ride) {
   try { const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs'; let logs = JSON.parse(localStorage.getItem(key) || '[]'); if(!logs.some(l => l.id === ride.id)) { logs.unshift(ride); if(logs.length > 100) logs.pop(); localStorage.setItem(key, JSON.stringify(logs)); } } catch(e) {}
@@ -736,6 +712,7 @@ function showIncomingRequest(ride) {
   document.getElementById('incomingRequestModal').classList.add('active');
   Utils.playSound('requestSound');
 
+  // ✅ الاستماع لإلغاء الراكب للطلب لإخفاء النافذة فوراً
   if (pendingIncomingListener) pendingIncomingListener();
   pendingIncomingListener = db.collection('rideRequests').doc(ride.id).onSnapshot(doc => {
     if (doc.exists && doc.data().status === 'cancelled') {
@@ -755,7 +732,6 @@ window.handleIncomingAccept = async function() {
   const rideId = pendingIncomingRide.id, btn = document.getElementById('incAcceptBtn');
   btn.disabled = true; btn.textContent = '🔄 جاري...';
   Utils.stopSound('requestSound');
-  Utils.stopSound('searchingSound'); // ✅ ضمان عدم تشغيل صوت البحث عند قبول السائق
   try {
     const s = await db.collection('rideRequests').doc(rideId).get();
     if (!s.exists || s.data().status !== 'pending' || s.data().assignedDriverId !== currentDriver.uid) { closeIncomingRequest(); return; }
@@ -786,8 +762,7 @@ window.handleIncomingDecline = async function() {
     if (!snap.exists) { closeIncomingRequest(); return; }
     const rd = snap.data(), my = currentDriver.uid, sk = rd.skippedBy || [];
     if (!sk.includes(my)) sk.push(my);
-    // ✅ إضافة شرط isOnline لضمان عدم إرسال الطلب لسائق غير متصل
-    const ds = await db.collection('drivers').where('available', '==', true).where('isOnline', '==', true).where('carType', '==', rd.carType).get();
+    const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', rd.carType).get();
     const nb = [];
     for (const d of ds.docs) {
       const x = d.data();
@@ -991,7 +966,6 @@ window.handleAccept=async function(rideId){
   let b = event?.target; if(!b) b = document.getElementById('incAcceptBtn');
   if(b) { b.disabled=true; b.textContent='🔄 جاري...'; }
   Utils.stopSound('requestSound');
-  Utils.stopSound('searchingSound'); // ✅ ضمان عدم تشغيل صوت البحث عند قبول السائق
   try{
     const s=await db.collection('rideRequests').doc(rideId).get();
     if(!s.exists||s.data().status!=='pending'||s.data().assignedDriverId!==currentDriver.uid)return;
@@ -1019,8 +993,7 @@ window.handleDecline=async function(rideId){
     if(!snap.exists)return;
     const rd=snap.data(), my=currentDriver?.uid, sk=rd.skippedBy||[];
     if(!sk.includes(my))sk.push(my);
-    // ✅ إضافة شرط isOnline لضمان عدم إرسال الطلب لسائق غير متصل
-    const ds=await db.collection('drivers').where('available','==',true).where('isOnline', '==', true).where('carType','==',rd.carType).get();
+    const ds=await db.collection('drivers').where('available','==',true).where('carType','==',rd.carType).get();
     const nb=[];
     for(const d of ds.docs){
       const x=d.data();
@@ -1097,9 +1070,11 @@ window.closeChat=function(){
 };
 window.sendChatMessage=async function(cid,sid,st){ const i=document.getElementById('chatInput'), t=i.value.trim(); if(!t)return; await sendMessage(cid,sid,st,t); i.value=''; };
 
+// ✅ تعديل بدء الرحلة: إغلاق المحادثة، رسم المسار على الخريطة الرئيسية، وإظهار زر المحادثة الأصفر
 window.startTripNavigation=function(lat,lng,name){ 
   if(!lat||!lng)return; 
-  closeChat(); 
+  closeChat(); // إغلاق نافذة المحادثة
+  
   if(currentActiveRide?.id) {
     db.collection('rideRequests').doc(currentActiveRide.id).update({
       tripStarted:true,
@@ -1109,25 +1084,44 @@ window.startTripNavigation=function(lat,lng,name){
     const cid = `chat_${currentActiveRide.id}`;
     sendMessage(cid, currentDriver.uid, 'driver', '🚀 تم بدء الرحلة! نحن في الطريق إلى الوجهة.');
   }
+  
+  // رسم المسار من السائق إلى الراكب على خريطة السائق الرئيسية
   drawDriverToPassengerRoute();
+  
+  // إظهار أيقونة المحادثات الصفراء الوامضة
   showYellowChatButton();
 };
 
+// ✅ دالة رسم مسار السائق إلى الراكب فقط
 function drawDriverToPassengerRoute() {
   if (!currentActiveRide) return;
   let dPos = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
   let pPos = currentActiveRide.pickup ? [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng] : null;
-  if (!dPos || !pPos) { alert("تعذر تحديد موقع السائق أو الراكب حالياً"); return; }
+  
+  if (!dPos || !pPos) {
+    alert("تعذر تحديد موقع السائق أو الراكب حالياً");
+    return;
+  }
+  
+  // إزالة أي مسارات سابقة
   if (routeControl) { map.removeControl(routeControl); routeControl = null; }
   if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
   if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
+  
+  // رسم مسار جديد من السائق إلى الراكب
   driverRoute = MapUtils.drawRoute(map, [dPos, pPos], {color: '#42A5F5', weight: 5, opacity: 0.9, dashArray: '10, 10'});
   map.fitBounds(L.latLngBounds([dPos, pPos]), {padding: [60, 60]});
 }
 
+// ✅ دالة إظهار زر المحادثة الأصفر الوامض
 function showYellowChatButton() {
-  let ex = document.getElementById('floatingChatBtn'); if (ex) ex.remove();
-  let b = document.createElement('button'); b.id = 'floatingChatBtn'; b.className = 'yellow-pulse-chat'; b.innerHTML = '💬 محادثة';
+  let ex = document.getElementById('floatingChatBtn');
+  if (ex) ex.remove();
+  
+  let b = document.createElement('button');
+  b.id = 'floatingChatBtn';
+  b.className = 'yellow-pulse-chat';
+  b.innerHTML = '💬 محادثة';
   b.onclick = () => {
     if (currentActiveRide) {
       let role = currentDriver ? 'driver' : 'passenger';
@@ -1138,25 +1132,45 @@ function showYellowChatButton() {
   document.body.appendChild(b);
 }
 
+// ✅ إلغاء السائق للرحلة: حذف المسارات، حذف أيقونة المحادثة، وتحديث الحالة
 window.cancelActiveTrip=async function(rid){ 
   try{ 
-    await db.collection('rideRequests').doc(rid).update({ status:'cancelled', cancelledBy:currentDriver?.uid||currentUser.uid, cancelledAt:firebase.firestore.FieldValue.serverTimestamp() }); 
-    if(currentDriver?.uid) { await db.collection('drivers').doc(currentDriver.uid).update({available:true}); driverAvailable = true; updateAvailabilityButton(); }
+    await db.collection('rideRequests').doc(rid).update({
+      status:'cancelled', 
+      cancelledBy:currentDriver?.uid||currentUser.uid, 
+      cancelledAt:firebase.firestore.FieldValue.serverTimestamp()
+    }); 
+    if(currentDriver?.uid) { 
+      await db.collection('drivers').doc(currentDriver.uid).update({available:true}); 
+      driverAvailable = true; 
+      updateAvailabilityButton(); 
+    }
+    
+    // حذف جميع المسارات من خريطة السائق
     if (routeControl) { map.removeControl(routeControl); routeControl = null; }
     if (driverRoute) { map.removeControl(driverRoute); driverRoute = null; }
     if (passengerRoute) { map.removeControl(passengerRoute); passengerRoute = null; }
-    let chatBtn = document.getElementById('floatingChatBtn'); if (chatBtn) chatBtn.remove();
+    
+    // حذف أيقونة المحادثات
+    let chatBtn = document.getElementById('floatingChatBtn');
+    if (chatBtn) chatBtn.remove();
+    
     if (currentActiveRide?.id === rid && currentActiveRide.passengerId) {
       const cid = `chat_${rid}`;
       await sendMessage(cid, currentDriver.uid, 'driver', '⚠️ تم إلغاء الرحلة.');
     }
-    closeChat(); if(currentActiveRide?.id===rid) currentActiveRide=null; loadRequests(); 
+    closeChat(); 
+    if(currentActiveRide?.id===rid) currentActiveRide=null; 
+    loadRequests(); 
   }catch(e){console.error(e);} 
 };
 
 function showChatButton(rid, cid, role, name, rd){ 
-  const ex=document.getElementById('floatingChatBtn'); if(ex)ex.remove(); 
-  const b=document.createElement('button'); b.id='floatingChatBtn'; b.innerHTML='💬 محادثة'; 
+  const ex=document.getElementById('floatingChatBtn'); 
+  if(ex)ex.remove(); 
+  const b=document.createElement('button'); 
+  b.id='floatingChatBtn'; 
+  b.innerHTML='💬 محادثة'; 
   b.onclick=()=>showChatInterface(rid,null,currentDriver?.uid,role,name,rd); 
   document.body.appendChild(b); 
 }
@@ -1166,18 +1180,20 @@ function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classL
 function toggleBottomSheet() { 
   const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); 
   sheet.classList.toggle('open'); 
-  if(sheet.classList.contains('open')) { btn.classList.add('hidden'); } else { btn.classList.remove('hidden'); } 
+  if(sheet.classList.contains('open')) { btn.classList.add('hidden'); } 
+  else { btn.classList.remove('hidden'); } 
 }
 
 document.addEventListener('click', function(event) { 
   const sheet = document.getElementById('requestSheet'), btn = document.getElementById('mainRequestBtn'); 
-  if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) { sheet.classList.remove('open'); btn.classList.remove('hidden'); } 
+  if (sheet.classList.contains('open') && !sheet.contains(event.target) && !btn.contains(event.target)) { 
+    sheet.classList.remove('open'); 
+    btn.classList.remove('hidden'); 
+  } 
 }, {passive: true});
 
 function initMap() { 
   map=MapUtils.initMap('map'); 
-  const savedTheme = localStorage.getItem('yasserTheme') || 'light';
-  applyTheme(savedTheme, false); // ✅ تطبيق الوضع المحفوظ عند بدء الخريطة
   setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true); 
   setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true); 
   if(navigator.geolocation) useGPS(); else fallbackLocation(); 
@@ -1262,11 +1278,12 @@ async function updateNearbyDriversOnSearchMap() {
   try {
     const selectedCarOpt = document.querySelector('.car-opt.selected');
     const requestedType = selectedCarOpt ? selectedCarOpt.querySelector('.name').textContent.trim() : 'مريحة';
-    // ✅ إضافة شرط isOnline لضمان عدم عرض السائقين غير المتصلين
-    const ds = await db.collection('drivers').where('available', '==', true).where('isOnline', '==', true).where('carType', '==', requestedType).get();
+    // ✅ تعديل الشرط: يجب أن يكون السائق متاحاً AND متصل بالإنترنت (isOnline: true)
+    const ds = await db.collection('drivers').where('available', '==', true).where('carType', '==', requestedType).get();
     let foundCount = 0;
     ds.forEach(doc => {
       const d = doc.data();
+      // ✅ التأكد من الاتصال بالإنترنت قبل عرض السائق
       if(d.location && d.isOnline !== false) {
         const dist = Utils.calculateDistance(pickupPos[0], pickupPos[1], d.location.lat, d.location.lng);
         if(dist <= 20) {
@@ -1276,8 +1293,13 @@ async function updateNearbyDriversOnSearchMap() {
         }
       }
     });
-    if(foundCount === 0) { document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`; } 
-    else { document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين بدقة`; }
+    if(foundCount === 0) { 
+      document.getElementById('searchSubText').innerHTML = `⚠️ لا يوجد سائقين (${requestedType}) قريبين حالياً.<br>جرب تغيير نوع السيارة.`; 
+    } else { 
+      document.getElementById('searchSubText').textContent = `تم العثور على ${foundCount} سائقين قريبين بدقة`; 
+      // ✅ تشغيل الصوت فقط عند العثور على سائقين فعليين
+      Utils.playSound('searchingSound');
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -1309,7 +1331,7 @@ async function bookRide() {
   if(!pickupPos||!destPos)return;
   const selectedEl = document.querySelector('.car-opt.selected .name');
   const requestedCarType = selectedEl ? selectedEl.textContent.trim() : 'مريحة';
-  Utils.playSound('searchingSound'); // ✅ يصدر فقط للراكب عند بدء البحث
+  // ✅ لا نشغل الصوت هنا، سنشغله لاحقاً عند ظهور النتائج
   openSearchModal(); rideState='searching'; dispatchIndex=0; dispatchDrivers=[];
   document.getElementById('searchStatusText').textContent='جاري البحث عن سائقين...';
   document.getElementById('searchSubText').textContent = `يتم البحث عن سائقي: ${requestedCarType} بدقة عالية`;
@@ -1321,8 +1343,7 @@ async function bookRide() {
     });
     currentRideId=ref.id;
   } catch(e){ rideState='idle'; closeSearchModal(); return; }
-  // ✅ إضافة شرط isOnline لضمان عدم إرسال الطلب لسائق غير متصل
-  const ds=await db.collection('drivers').where('available','==',true).where('isOnline', '==', true).where('carType','==',requestedCarType).get();
+  const ds=await db.collection('drivers').where('available','==',true).where('carType','==',requestedCarType).get();
   ds.forEach(d=>{ const dd=d.data(); if(dd.location){ const dist=Utils.calculateDistance(pickupPos[0],pickupPos[1],dd.location.lat,dd.location.lng); if(dist<=20) dispatchDrivers.push({id:d.id,...dd,distance:dist.toFixed(2)}); } });
   dispatchDrivers.sort((a,b)=>a.distance-b.distance);
   if(dispatchDrivers.length===0){ document.getElementById('searchStatusText').textContent='لا يوجد سائقين'; document.getElementById('searchSubText').innerHTML = `لم نجد سائقين <b>${requestedCarType}</b> في منطقتك.<br>يرجى المحاولة لاحقاً أو تغيير النوع.`; setTimeout(()=>{rideState='idle';closeSearchModal();},4000); return; }
@@ -1341,8 +1362,7 @@ function listenForRideUpdate() {
       if (statusTextEl && subTextEl) { statusTextEl.textContent = `جاري الاتصال بالسائق ${currentIndex}...`; subTextEl.textContent = `متبقي ${remaining} سائقين`; }
     }
     if(data.status === 'accepted') {
-      Utils.stopSound('searchingSound'); // ✅ يتوقف الصوت فور العثور على سائق
-      rideState = 'matched';
+      Utils.stopSound('searchingSound'); rideState = 'matched';
       if(dispatchTimeoutId) clearTimeout(dispatchTimeoutId);
       closeSearchModal(); stopPulseOnCurrent();
       currentActiveRide = {id: currentRideId, ...data};
@@ -1370,13 +1390,18 @@ function listenForRideUpdate() {
 
 function updateRideStatus(s) { db.collection('rideRequests').doc(currentRideId).update({status:s}).catch(()=>{}); }
 
+// ✅ إلغاء فوري بدون أي نافذة تأكيد أو إشعار
 function cancelRide(){
   if(currentRideId){
     Utils.stopSound('searchingSound');
     updateRideStatus('cancelled'); rideState='idle';
     closeSearchModal(); closePassengerRideModal(); closeChat();
     stopPulseOnCurrent(); document.getElementById('bookBtn').disabled=false;
-    let chatBtn = document.getElementById('floatingChatBtn'); if (chatBtn) chatBtn.remove();
+    
+    // إزالة أيقونة المحادثة إذا كانت موجودة
+    let chatBtn = document.getElementById('floatingChatBtn');
+    if (chatBtn) chatBtn.remove();
+    
     currentRideId=null; currentActiveRide = null;
     if(dispatchTimeoutId)clearTimeout(dispatchTimeoutId);
     saveToLocalLog({id:currentRideId, status:'cancelled', pickup:null, destination:null, price:0, createdAt:new Date().toISOString()});
@@ -1425,7 +1450,11 @@ window.deleteRideRecord = async function(rideId, btnElement) {
     logs = logs.filter(l => l.id !== rideId);
     localStorage.setItem(key, JSON.stringify(logs));
     const card = btnElement.closest('.record-card');
-    if(card) { card.style.opacity = '0'; card.style.transform = 'translateX(20px)'; setTimeout(() => card.remove(), 200); }
+    if(card) {
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(20px)';
+      setTimeout(() => card.remove(), 200);
+    }
   } catch (e) { console.error(e); }
 }
 
