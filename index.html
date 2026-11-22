@@ -72,17 +72,17 @@ font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2
 .special-request-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(142, 36, 170, 0.6); }
 .special-request-btn:active { transform: scale(0.95); }
 
-/* ✅ زر الرحلات المحجوزة الجديد */
-.booked-trips-btn {
+/* ✅ زر الطلبات المحجوزة الجديد (أخضر أنيق) */
+.booked-special-btn {
 position: absolute; top: 180px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-background: linear-gradient(135deg, #4FC3F7, #039BE5); color: white; border: 2px solid rgba(255,255,255,0.8);
-box-shadow: 0 6px 20px rgba(3, 155, 229, 0.4); display: flex; align-items: center; justify-content: center;
+background: linear-gradient(135deg, #66BB6A, #43A047); color: white; border: 2px solid rgba(255,255,255,0.8);
+box-shadow: 0 6px 20px rgba(67, 160, 71, 0.4); display: flex; align-items: center; justify-content: center;
 font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
 }
-.booked-trips-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(3, 155, 229, 0.6); }
-.booked-trips-btn:active { transform: scale(0.95); }
+.booked-special-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(67, 160, 71, 0.6); }
+.booked-special-btn:active { transform: scale(0.95); }
 
-/* ✅ زر التبليغ الأصفر الأنيق */
+/* ✅ زر التبليغ الأصفر الأنيق (تم نقله للأسفل قليلاً لإفساح المجال) */
 .report-btn {
 position: absolute; top: 236px; left: 0; width: 46px; height: 46px; border-radius: 16px;
 background: linear-gradient(135deg, #FFD54F, #FFC107); color: #1B1B1B; border: 2px solid rgba(255,255,255,0.8);
@@ -321,35 +321,33 @@ animation: pulse-yellow-glow 2s infinite !important;
 .record-action-btn:active { transform: scale(0.95); }
 .special-record-card { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); border-right: 4px solid #AB47BC !important; }
 
-/* ✅ CSS for Notification Badges */
+/* ✅ CSS للإشعارات والأسهم */
 .notification-arrow {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2em;
-    z-index: 1001;
-    pointer-events: none;
+position: absolute;
+top: -8px;
+right: -8px;
+width: 20px;
+height: 20px;
+z-index: 10;
+pointer-events: none;
 }
 .arrow-red {
-    color: #EF5350;
-    animation: blink-arrow-red 1.5s infinite;
+color: #EF5350;
+filter: drop-shadow(0 0 5px rgba(239, 83, 80, 0.8));
+animation: arrow-blink-red 1.5s infinite;
 }
 .arrow-green {
-    color: #66BB6A;
-    animation: blink-arrow-green 1.5s infinite;
+color: #66BB6A;
+filter: drop-shadow(0 0 5px rgba(102, 187, 106, 0.8));
+animation: arrow-blink-green 1.5s infinite;
 }
-@keyframes blink-arrow-red {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
+@keyframes arrow-blink-red {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.4; transform: scale(0.8); }
 }
-@keyframes blink-arrow-green {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
+@keyframes arrow-blink-green {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.4; transform: scale(0.8); }
 }
 </style>
 </head>
@@ -390,39 +388,18 @@ animation: pulse-yellow-glow 2s infinite !important;
 <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">🛣️</button>
 <!-- ✅ زر الطلبات الخاصة للراكب -->
 <button class="special-request-btn" id="passengerSpecialReqBtn" onclick="openSpecialRequestModal()" title="طلب خاص" style="display:none;">📂➕</button>
+<!-- ✅ زر استقبال الطلبات الخاصة للسائق -->
+<button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">
+📂📨
+<span id="newReqArrow" class="notification-arrow arrow-red" style="display:none;">⬆️</span>
+</button>
+<!-- ✅ زر الطلبات المحجوزة المؤكدة (جديد) -->
+<button class="booked-special-btn" id="bookedSpecialReqBtn" onclick="openBookedSpecialRequestsModal()" title="الطلبات المحجوزة" style="display:none;">
+📂✅
+<span id="bookedReqArrow" class="notification-arrow arrow-green" style="display:none;">⬆️</span>
+</button>
 <!-- ✅ زر التبليغ الأصفر الأنيق (يظهر للراكب والسائق) -->
 <button class="report-btn" id="reportBtn" onclick="openReportModal()" title="إرسال تبليغ" style="display:none;">📢</button>
-<!-- ✅ زر الطلبات الخاصة للسائق -->
-<button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">
-    📂📨
-    <span id="specialReqBadge" class="notification-arrow arrow-red" style="display:none;">⬇️</span>
-</button>
-<!-- ✅ زر الرحلات المحجوزة للسائق (الجديد) -->
-<button class="booked-trips-btn" id="bookedTripsBtn" onclick="openBookedTripsModal()" title="الرحلات المحجوزة" style="display:none;">
-    🎫
-    <span id="bookedTripsBadge" class="notification-arrow arrow-green" style="display:none;">⬇️</span>
-</button>
-<div class="dropdown-menu" id="userDropdownMenu">
-<div class="dropdown-header">
-<span style="font-weight:700;" id="menuUserName">المستخدم</span>
-<span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
-</div>
-<div id="passengerMyRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
-<button class="auth-btn" onclick="loadUserHistory(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #4FC3F7, #29B6F6); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);">📜 طلباتي</button>
-</div>
-<!-- تم إزالة زر استقبال الطلبات من هنا حسب الطلب -->
-<div class="dropdown-tabs">
-<button class="dropdown-tab active" onclick="switchMenuTab('history')">📜 سجل الطلبات</button>
-<button class="dropdown-tab" id="settingsTabBtn" onclick="switchMenuTab('settings')" style="display:none;">⚙️ إعدادات المركبة</button>
-</div>
-<div id="menuHistoryContent" class="dropdown-content"><div class="empty-state" style="padding:20px;"><div class="icon">📂</div><p>لا توجد طلبات سابقة</p></div></div>
-<div id="menuSettingsContent" class="dropdown-content" style="display:none; padding:15px;">
-<div class="form-group"><label>نوع المركبة</label><select id="menuCarType" class="auth-input"><option value="دراجة نارية">🏍️ دراجة نارية</option><option value="مريحة" selected>🚙 مريحة</option><option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option><option value="عائلية">🚐 عائلية</option></select></div>
-<div class="form-group"><label>اسم/لوحة السيارة</label><input type="text" id="menuCarName" class="auth-input" placeholder="مثال: سيارة أحمد - 12345"></div>
-<button class="auth-btn" id="saveDriverProfileBtn" onclick="saveDriverProfileFromMenu()" style="padding:10px; font-size:0.9em; margin-top:5px;">💾 حفظ التغيرات</button>
-</div>
-</div>
-</div>
 <div class="toggle-mode-container">
 <button class="register-car-btn" id="switchModeHeaderBtn" onclick="toggleUserRole()" style="display:none;">🔄 تبديل الوضع</button>
 </div>
@@ -552,26 +529,24 @@ animation: pulse-yellow-glow 2s infinite !important;
 </div>
 </div>
 </div>
-
-<!-- ✅ نافذة الرحلات المحجوزة (الجديدة) -->
-<div id="bookedTripsModal" class="driver-popup-overlay">
+<!-- ✅ نافذة جديدة لعرض الطلبات المحجوزة (المؤكدة) -->
+<div id="bookedSpecialRequestsModal" class="driver-popup-overlay">
 <div class="driver-popup-box">
-<div class="popup-header" style="background: linear-gradient(135deg, #4FC3F7, #039BE5);">
+<div class="popup-header" style="background: linear-gradient(135deg, #66BB6A, #43A047);">
 <div style="display:flex; align-items:center; gap:10px;">
-<div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center;">🎫</div>
-<div><div style="font-weight:800; font-size:0.95em;" id="popupBookedTitle">الرحلات المحجوزة</div><div style="font-size:0.75em; opacity:0.9;" id="popupBookedSub">الرحلات المقبولة والنشطة</div></div>
+<div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center;">✅</div>
+<div><div style="font-weight:800; font-size:0.95em;">الطلبات المحجوزة</div><div style="font-size:0.75em; opacity:0.9;">الرحلات المؤكدة</div></div>
 </div>
-<div style="display:flex; gap:10px; align-items:center;"><button class="popup-close" onclick="closeBookedTripsModal()">×</button></div>
+<div style="display:flex; gap:10px; align-items:center;"><button class="popup-close" onclick="closeBookedSpecialRequestsModal()">×</button></div>
 </div>
 <div class="popup-body">
-<div class="requests-list" id="popupBookedList"><div class="empty-state"><div class="icon">🔍</div><p>لا توجد رحلات محجوزة حالياً</p><button class="refresh-btn" onclick="loadBookedTrips()">🔄 تحديث القائمة</button></div></div>
+<div class="requests-list" id="popupBookedList"><div class="empty-state"><div class="icon">📂</div><p>لا توجد طلبات محجوزة حالياً</p><button class="refresh-btn" onclick="loadBookedSpecialRequests()">🔄 تحديث القائمة</button></div></div>
 <div style="padding: 14px 0; border-top: 1px solid var(--border); background: transparent; margin-top:auto;">
-<button class="refresh-btn" onclick="loadBookedTrips()" style="background: linear-gradient(135deg, #4FC3F7, #039BE5); color: white; font-weight: 700;">🔄 تحديث الرحلات</button>
+<button class="refresh-btn" onclick="loadBookedSpecialRequests()" style="background: linear-gradient(135deg, #66BB6A, #43A047); color: white; font-weight: 700;">🔄 تحديث المحجوزات</button>
 </div>
 </div>
 </div>
 </div>
-
 <div id="driverSetupModal" class="modal-overlay">
 <div class="modal-content">
 <button class="close-modal" onclick="closeDriverSetupModal()">×</button>
@@ -758,62 +733,6 @@ function openDriverSetupModal() { document.getElementById('driverSetupModal').cl
 function closeDriverSetupModal() { document.getElementById('driverSetupModal').classList.remove('active'); }
 function openDriverRequestsModal() { if (!currentDriver || !driverAvailable) return; document.getElementById('driverRequestsModal').classList.add('active'); loadRequests(); }
 function closeDriverRequestsModal() { document.getElementById('driverRequestsModal').classList.remove('active'); }
-
-// ✅ وظائف جديدة للرحلات المحجوزة
-function openBookedTripsModal() { 
-    document.getElementById('bookedTripsModal').classList.add('active'); 
-    loadBookedTrips(); 
-}
-function closeBookedTripsModal() { document.getElementById('bookedTripsModal').classList.remove('active'); }
-
-async function loadBookedTrips() {
-    const list = document.getElementById('popupBookedList');
-    if(!currentDriver) return;
-    list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
-    try {
-        // جلب الرحلات المقبولة أو النشطة لهذا السائق
-        const snapshot = await db.collection('rideRequests')
-            .where('acceptedBy', '==', currentDriver.uid)
-            .where('status', 'in', ['accepted', 'matched', 'in_progress'])
-            .orderBy('createdAt', 'desc')
-            .limit(20)
-            .get();
-        
-        if(snapshot.empty) {
-            list.innerHTML = '<div class="empty-state"><div class="icon">🎫</div><p>لا توجد رحلات محجوزة حالياً</p></div>';
-            return;
-        }
-        
-        let html = '';
-        snapshot.forEach(doc => {
-            const r = doc.data();
-            let statusColor = '#FF9800', statusText = 'قيد التنفيذ';
-            if(r.status === 'accepted') { statusColor = '#66BB6A'; statusText = 'مقبولة'; }
-            else if(r.status === 'in_progress') { statusColor = '#2196F3'; statusText = 'جارية'; }
-            
-            html += `
-            <div class="request-card" style="border-right-color: ${statusColor};">
-                <div class="req-header">
-                    <span class="req-time">🆔 ${doc.id.substring(0,6)}</span>
-                    <span class="req-urgent" style="color:${statusColor}">${statusText}</span>
-                </div>
-                <div class="req-route">
-                    <div class="req-point"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name || 'غير محدد'}</div></div>
-                    <div class="req-point"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name || 'غير محدد'}</div></div>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666">
-                    <span>🚗 ${r.carType}</span>
-                    <span>💰 ${r.price} د.ج</span>
-                </div>
-                <div class="req-actions">
-                    <button class="req-btn accept-btn" onclick="showChatInterface('${doc.id}', '${r.passengerId}', '${currentDriver.uid}', 'driver', 'الراكب', ${JSON.stringify(r).replace(/"/g, '&quot;')}); closeBookedTripsModal();">💬 فتح المحادثة</button>
-                </div>
-            </div>`;
-        });
-        list.innerHTML = html;
-    } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
-}
-
 // ✅ وظائف جديدة للطلبات الخاصة
 function openSpecialRequestModal() {
 // ✅ إعادة تعيين حالة التعديل
@@ -834,13 +753,11 @@ document.getElementById('spDesc').value = '';
 document.getElementById('spDate').value = '';
 document.getElementById('spTime').value = '';
 }
-function openDriverSpecialRequestsModal() { 
-    document.getElementById('driverSpecialRequestsModal').classList.add('active'); 
-    loadSpecialRequestsForDriver(); 
-    // إخفاء المؤشر عند الفتح
-    document.getElementById('specialReqBadge').style.display = 'none';
-}
+function openDriverSpecialRequestsModal() { document.getElementById('driverSpecialRequestsModal').classList.add('active'); loadSpecialRequestsForDriver(); }
 function closeDriverSpecialRequestsModal() { document.getElementById('driverSpecialRequestsModal').classList.remove('active'); }
+// ✅ وظائف جديدة للطلبات المحجوزة
+function openBookedSpecialRequestsModal() { document.getElementById('bookedSpecialRequestsModal').classList.add('active'); loadBookedSpecialRequests(); }
+function closeBookedSpecialRequestsModal() { document.getElementById('bookedSpecialRequestsModal').classList.remove('active'); }
 // ✅ وظائف التبليغ
 function openReportModal() {
 document.getElementById('reportModal').classList.add('active');
@@ -1166,6 +1083,50 @@ loadSpecialRequestsForDriver();
 } catch(e) { console.error(e); alert('حدث خطأ أثناء الإلغاء'); }
 }
 };
+// ✅ وظيفة جديدة: تحميل الطلبات المحجوزة (المؤكدة)
+async function loadBookedSpecialRequests() {
+const list = document.getElementById('popupBookedList');
+if(!currentDriver) return;
+list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
+try {
+// جلب الطلبات التي تم تحويلها لرحلات (converted_to_ride) والتي قبلها هذا السائق
+const snapshot = await db.collection('specialRequests')
+.where('carType', '==', currentDriver.carType)
+.where('status', '==', 'converted_to_ride')
+.where('acceptedBy', '==', currentDriver.uid)
+.get();
+if(snapshot.empty) {
+list.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>لا توجد طلبات محجوزة حالياً</p></div>';
+return;
+}
+let html = '';
+snapshot.forEach(doc => {
+const r = doc.data();
+html += `
+<div class="request-card" style="border-right-color: #66BB6A; background: #E8F5E9;">
+<div class="req-header">
+<span class="req-time">📅 ${r.date || 'اليوم'} | ⏰ ${r.time || 'حالاً'}</span>
+<span class="req-urgent" style="color:#43A047">✅ مؤكد</span>
+</div>
+<div class="req-route">
+<div class="req-point"><div class="dot"></div><div><strong>من:</strong> ${r.pickup}</div></div>
+<div class="req-point"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination}</div></div>
+</div>
+<div style="background:#f9f9f9; padding:10px; border-radius:8px; margin:10px 0; font-size:0.9em;">
+📝 ${r.description || 'لا يوجد وصف'}
+</div>
+<div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666">
+<span>🚗 ${r.carType}</span>
+<span>💰 ${r.price} د.ج</span>
+</div>
+<div class="req-actions">
+<button class="req-btn accept-btn" style="background:linear-gradient(135deg, #42A5F5, #1E88E5)" onclick="window.location.href='tel:${r.passengerPhone}'">📞 اتصل بالراكب</button>
+</div>
+</div>`;
+});
+list.innerHTML = html;
+} catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
+}
 function openPassengerRideModal() {
 if(!currentActiveRide) return;
 document.getElementById('pPickupName').textContent = currentActiveRide.pickup?.name || '---';
@@ -1349,11 +1310,10 @@ document.getElementById('menuCarType').value = currentDriver.carType; document.g
 // ✅ إظهار زر الطلبات الخاصة للسائق
 document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
+// ✅ إظهار زر الطلبات المحجوزة للسائق
+document.getElementById('bookedSpecialReqBtn').style.display = 'flex';
 // ✅ إظهار زر التبليغ للسائق أيضاً
 document.getElementById('reportBtn').style.display = 'flex';
-// ✅ إظهار زر الرحلات المحجوزة للسائق
-document.getElementById('bookedTripsBtn').style.display = 'flex';
-
 startLocationUpdates(user.uid); startDriverRequestListener(); switchView('view-request');
 } else { openDriverSetupModal(); }
 } else {
@@ -1368,7 +1328,7 @@ document.getElementById('mainRequestBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
 document.getElementById('reportBtn').style.display = 'flex';
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
-document.getElementById('bookedTripsBtn').style.display = 'none';
+document.getElementById('bookedSpecialReqBtn').style.display = 'none';
 switchView('view-request'); startPassengerLocationTracking();
 }
 // ✅ إضافة مستمعي الأحداث لإعادة زر الحفظ لوضعه الأصلي عند تعديل الحقول
@@ -2004,7 +1964,7 @@ document.getElementById('mainRequestBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
 document.getElementById('reportBtn').style.display = 'flex';
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
-document.getElementById('bookedTripsBtn').style.display = 'none';
+document.getElementById('bookedSpecialReqBtn').style.display = 'none';
 startPassengerLocationTracking();
 } else {
 const dd = await db.collection('drivers').doc(currentUser.uid).get();
@@ -2020,9 +1980,9 @@ document.getElementById('popupDriverName').textContent = `${currentDriver.carNam
 document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
 // ✅ إظهار أزرار السائق
 document.getElementById('driverSpecialReqBtn').style.display = 'flex';
+document.getElementById('bookedSpecialReqBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex'; // ✅ إظهار التبليغ للسائق
-document.getElementById('bookedTripsBtn').style.display = 'flex';
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 } else { openDriverSetupModal(); }
 }
