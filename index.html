@@ -54,8 +54,18 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
 
+/* ✅ الأزرار الجديدة الصفراء */
+.yellow-action-btn {
+  position: absolute; top: 85px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+  background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border: 2px solid rgba(255,255,255,0.8);
+  box-shadow: 0 6px 20px rgba(255, 179, 0, 0.4); display: flex; align-items: center; justify-content: center;
+  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+}
+.yellow-action-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255, 179, 0, 0.6); }
+.yellow-action-btn:active { transform: scale(0.95); }
+
 .floating-locate-btn {
-  position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+  position: absolute; top: 140px; left: 0; width: 46px; height: 46px; border-radius: 16px;
   background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
   box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
   font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
@@ -284,17 +294,18 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 .search-sub { font-size: 0.9em; color: #666; }
 .cancel-search-btn { margin-top: 18px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.25s; font-size: 0.95em; }
 
-/* ✅ أنماط جديدة للأزرار المخصصة (تبليغ + استقبال طلبات) */
-.custom-action-btn {
-  position: absolute; left: 0; width: 46px; height: 46px; border-radius: 16px;
-  background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border: 2px solid rgba(255,255,255,0.8);
-  box-shadow: 0 6px 20px rgba(255, 179, 0, 0.4); display: flex; align-items: center; justify-content: center;
-  font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+/* Modal Styles for Reports */
+.report-modal-content {
+    background: white; width: 95%; max-width: 450px; padding: 0; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: right; position: relative; overflow: hidden;
 }
-.custom-action-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255, 179, 0, 0.6); }
-.custom-action-btn:active { transform: scale(0.95); }
-#reportBtnPassenger { top: 124px; } /* تحت زر GPS */
-#receiveRequestsBtnDriver { top: 124px; } /* تحت زر GPS */
+.report-header {
+    background: linear-gradient(135deg, #FFD54F, #FFB300); padding: 20px; color: #1B1B1B; text-align: center;
+}
+.report-body { padding: 20px; }
+.report-field { margin-bottom: 12px; }
+.report-field label { display: block; font-size: 0.85em; color: #666; margin-bottom: 4px; }
+.report-field input, .report-field textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: #f9f9f9; font-size: 0.9em; }
+.report-field textarea { resize: vertical; min-height: 80px; }
 </style>
 </head>
 <body>
@@ -333,34 +344,22 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <div class="floating-controls">
     <div class="user-menu-container">
       <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
+      
+      <!-- ✅ الأزرار الجديدة -->
+      <button class="yellow-action-btn" id="passengerReportBtn" onclick="openPassengerReportModal()" title="التبليغ عن مشكلة" style="display:none;">📂<span style="position:absolute;bottom:-2px;right:-2px;background:#fff;border-radius:50%;width:14px;height:14px;font-size:10px;display:flex;align-items:center;justify-content:center;border:1px solid #FFB300;">+</span></button>
+      
+      <button class="yellow-action-btn" id="driverRequestsBtn" onclick="openDriverReportsModal()" title="استقبال الطلبات" style="display:none;">📩</button>
+      
       <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
-      
-      <!-- ✅ زر التبليغ للراكب (أيقونة مجلد مع علامة زائد) -->
-      <button class="custom-action-btn" id="reportBtnPassenger" onclick="openReportModal()" title="التبليغ عن مشكلة" style="display:none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
-      </button>
-      
-      <!-- ✅ زر استقبال الطلبات للسائق (أيقونة صندوق وارد) -->
-      <button class="custom-action-btn" id="receiveRequestsBtnDriver" onclick="openDriverRequestsModal()" title="استقبال الطلبات" style="display:none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
-      </button>
       
       <div class="dropdown-menu" id="userDropdownMenu">
         <div class="dropdown-header">
           <span style="font-weight:700;" id="menuUserName">المستخدم</span>
-          <!-- ✅ تم استبدال زر طلباتي بزر التبليغ الأصفر -->
           <span class="logout-link" onclick="logoutUser()">خروج 🚪</span>
         </div>
         
-        <!-- ✅ زر التبليغ داخل القائمة للراكب -->
-        <div id="passengerReportTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #fffde7;">
-          <button class="auth-btn" onclick="openReportModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(255, 179, 0, 0.3);">⚠️ التبليغ عن مشكلة</button>
-        </div>
-
-        <!-- ✅ زر استقبال الطلبات داخل القائمة للسائق -->
-        <div id="driverReceiveRequestsTop" style="display:none; padding: 12px 15px; border-bottom: 1px solid var(--border); background: #f0fdf4;">
-          <button class="auth-btn" onclick="openDriverRequestsModal(); document.getElementById('userDropdownMenu').classList.remove('show');" style="width:100%; font-size:0.95em; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; border-radius: 12px; box-shadow: 0 2px 8px rgba(156, 205, 50, 0.3);">🚙 استقبال الطلبات</button>
-        </div>
+        <!-- ✅ تم إزالة زر طلباتي واستبداله بزر التبليغ داخل القائمة أيضاً اختياري أو إزالته كلياً كما طلب -->
+        <!-- تم حذف div passsengerMyRequestsTop و driverReceiveRequestsTop من هنا -->
         
         <div class="dropdown-tabs">
           <button class="dropdown-tab active" onclick="switchMenuTab('history')">📜 سجل الطلبات</button>
@@ -436,54 +435,6 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 </div>
 </div>
 
-<!-- ✅ نافذة التبليغ عن مشكلة -->
-<div id="reportModal" class="modal-overlay">
-<div class="modal-content">
-<button class="close-modal" onclick="closeReportModal()">×</button>
-<div style="font-size: 3em; margin-bottom: 10px; color: var(--secondary);">⚠️</div>
-<h3 style="color: var(--text); margin-bottom: 15px; font-weight: 700;">التبليغ عن مشكلة</h3>
-<p style="color:#666; font-size:0.9em; margin-bottom:15px;">يرجى ملء التفاصيل وسيتم إرسالها للإدارة والسائقين القريبين</p>
-
-<div class="form-group" style="text-align:right;">
-  <label>📍 موقع الانطلاق</label>
-  <input type="text" id="repPickup" class="auth-input" readonly>
-</div>
-<div class="form-group" style="text-align:right;">
-  <label>🏁 الوجهة</label>
-  <input type="text" id="repDest" class="auth-input" readonly>
-</div>
-<div class="form-group" style="text-align:right;">
-  <label>🚗 نوع المركبة</label>
-  <select id="repCarType" class="auth-input">
-    <option value="دراجة نارية">🏍️ دراجة نارية</option>
-    <option value="مريحة" selected>🚙 مريحة</option>
-    <option value="شاحنة نقل صغيرة">🚚 شاحنة نقل صغيرة</option>
-    <option value="عائلية">🚐 عائلية</option>
-  </select>
-</div>
-<div style="display:flex; gap:10px; margin-bottom:15px;">
-  <div class="form-group" style="flex:1; margin:0;">
-    <label>📅 التاريخ</label>
-    <input type="date" id="repDate" class="auth-input">
-  </div>
-  <div class="form-group" style="flex:1; margin:0;">
-    <label>🕒 الساعة</label>
-    <input type="time" id="repTime" class="auth-input">
-  </div>
-</div>
-<div class="form-group" style="text-align:right;">
-  <label>💰 السعر المقترح</label>
-  <input type="number" id="repPrice" class="auth-input" placeholder="السعر بالدينار">
-</div>
-<div class="form-group" style="text-align:right;">
-  <label>📝 تفاصيل المشكلة</label>
-  <textarea id="repMessage" class="auth-input" rows="3" placeholder="اشرح المشكلة هنا..."></textarea>
-</div>
-
-<button class="auth-btn" onclick="submitReport()" style="background: linear-gradient(135deg, #FFD54F, #FFB300); color: #1B1B1B;">📤 إرسال التبليغ</button>
-</div>
-</div>
-
 <div id="driverSetupModal" class="modal-overlay">
 <div class="modal-content">
 <button class="close-modal" onclick="closeDriverSetupModal()">×</button>
@@ -496,24 +447,25 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 </div>
 </div>
 
+<!-- ✅ تعديل النافذة المنبثقة للسائق لعرض التبليغات -->
 <div id="driverRequestsModal" class="driver-popup-overlay">
 <div class="driver-popup-box">
-<div class="popup-header">
+<div class="popup-header" style="background: linear-gradient(135deg, #FFD54F, #FFB300);">
 <div style="display:flex; align-items:center; gap:10px;">
-<div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center;">👨✈️</div>
+<div style="width:35px; height:35px; border-radius:50%; background:rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center;">📩</div>
 <div><div style="font-weight:800; font-size:0.95em;" id="popupDriverName">اسم السائق</div><div style="font-size:0.75em; opacity:0.9;" id="popupDriverArea">منطقة العمل</div></div>
 </div>
 <div style="display:flex; gap:10px; align-items:center;"><button class="popup-close" onclick="closeDriverRequestsModal()">×</button></div>
 </div>
 <div class="popup-body">
-<div style="padding: 10px; background: linear-gradient(135deg, #E8F5E9, #F1F8E9); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px;">
-<span style="font-weight: 600;">📋 سجل الطلبات</span>
-<span id="popupRequestsCount" style="background: var(--primary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
+<div style="padding: 10px; background: linear-gradient(135deg, #FFF9C4, #FFF59D); font-size: 0.88em; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px;">
+<span style="font-weight: 600; color: #5D4037;">📋 التبليغات والطلبات</span>
+<span id="popupRequestsCount" style="background: var(--secondary); color: #1B1B1B; padding: 4px 12px; border-radius: 16px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">0</span>
 </div>
-<div class="requests-list" id="popupRequestsList"><div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات حالياً</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث القائمة</button></div></div>
+<div class="requests-list" id="popupRequestsList"><div class="empty-state"><div class="icon">🔍</div><p>لا توجد بلاغات حالياً</p><button class="refresh-btn" onclick="loadDriverReports()">🔄 تحديث القائمة</button></div></div>
 <div style="padding: 14px 0; border-top: 1px solid var(--border); background: transparent; margin-top:auto;">
-<button class="refresh-btn" onclick="loadRequests()" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">🔄 تحديث الطلبات</button>
-<button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">👤 العودة لوضع الراكب</button>
+<button class="refresh-btn" onclick="loadDriverReports()" style="background: linear-gradient(135deg, var(--secondary), #FFB74D); color: #1B1B1B; font-weight: 700;">🔄 تحديث البلاغات</button>
+<button class="refresh-btn" onclick="switchToPassengerMode()" style="margin-top: 10px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #1B1B1B; font-weight: 700;">👤 العودة لوضع الراكب</button>
 </div>
 </div>
 </div>
@@ -585,6 +537,48 @@ body { background: #f0f0f0; height: 100vh; width: 100vw; overflow: hidden; color
 <button class="cancel-search-btn" onclick="cancelRide()">❌ إلغاء الطلب</button>
 </div>
 </div>
+</div>
+
+<!-- ✅ نافذة التبليغ للراكب -->
+<div id="passengerReportModal" class="modal-overlay">
+    <div class="report-modal-content">
+        <div class="report-header">
+            <h3 style="margin:0; font-weight:800;">📂 تبليغ عن مشكلة / طلب خاص</h3>
+            <p style="font-size:0.85em; margin-top:5px; opacity:0.9;">سيتم إرسال هذا البلاغ لجميع السائقين القريبين</p>
+        </div>
+        <div class="report-body">
+            <div class="report-field">
+                <label>📍 من (الانطلاق)</label>
+                <input type="text" id="repPickup" readonly>
+            </div>
+            <div class="report-field">
+                <label>🏁 إلى (الوجهة)</label>
+                <input type="text" id="repDest" readonly>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="report-field" style="flex:1">
+                    <label>🚗 نوع المركبة</label>
+                    <input type="text" id="repCarType" readonly>
+                </div>
+                <div class="report-field" style="flex:1">
+                    <label>💰 السعر المقترح</label>
+                    <input type="text" id="repPrice" readonly>
+                </div>
+            </div>
+            <div class="report-field">
+                <label>📅 التاريخ والوقت</label>
+                <input type="text" id="repDateTime" readonly>
+            </div>
+            <div class="report-field">
+                <label>📝 تفاصيل المشكلة أو الملاحظة</label>
+                <textarea id="repMessage" placeholder="اكتب تفاصيل المشكلة هنا..."></textarea>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="auth-btn" onclick="submitReport()" style="flex:1; padding:12px;">✅ إرسال التبليغ</button>
+                <button class="auth-btn alt" onclick="closePassengerReportModal()" style="flex:1; padding:12px; background:#eee; color:#333;">إغلاق</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <audio id="requestSound" preload="auto"><source src="https://bigsoundbank.com/UPLOAD/ogg/2365.ogg" type="audio/ogg"><source src="https://bigsoundbank.com/UPLOAD/mp3/2365.mp3" type="audio/mpeg"></audio>
@@ -679,52 +673,8 @@ function updateAvailabilityButton() {
 
 function openDriverSetupModal() { document.getElementById('driverSetupModal').classList.add('active'); }
 function closeDriverSetupModal() { document.getElementById('driverSetupModal').classList.remove('active'); }
-function openDriverRequestsModal() { if (!currentDriver || !driverAvailable) return; document.getElementById('driverRequestsModal').classList.add('active'); loadRequests(); }
+function openDriverReportsModal() { if (!currentDriver || !driverAvailable) return; document.getElementById('driverRequestsModal').classList.add('active'); loadDriverReports(); }
 function closeDriverRequestsModal() { document.getElementById('driverRequestsModal').classList.remove('active'); }
-
-// ✅ دوال التبليغ
-window.openReportModal = function() {
-  document.getElementById('repPickup').value = document.getElementById('pickupInput').value || 'موقعي الحالي';
-  document.getElementById('repDest').value = document.getElementById('destInput').value || 'غير محدد';
-  
-  const now = new Date();
-  document.getElementById('repDate').valueAsDate = now;
-  document.getElementById('repTime').value = now.toTimeString().substring(0,5);
-  
-  document.getElementById('reportModal').classList.add('active');
-};
-
-window.closeReportModal = function() {
-  document.getElementById('reportModal').classList.remove('active');
-};
-
-window.submitReport = async function() {
-  const msg = document.getElementById('repMessage').value.trim();
-  if(!msg) { alert("يرجى كتابة تفاصيل المشكلة"); return; }
-  
-  const reportData = {
-    pickup: document.getElementById('repPickup').value,
-    destination: document.getElementById('repDest').value,
-    carType: document.getElementById('repCarType').value,
-    date: document.getElementById('repDate').value,
-    time: document.getElementById('repTime').value,
-    price: document.getElementById('repPrice').value,
-    message: msg,
-    userId: currentUser.uid,
-    userEmail: currentUser.email,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    status: 'new'
-  };
-
-  try {
-    await db.collection('تبليغات').add(reportData);
-    alert("تم إرسال التبليغ بنجاح!");
-    closeReportModal();
-  } catch(e) {
-    console.error(e);
-    alert("حدث خطأ أثناء الإرسال");
-  }
-};
 
 function openPassengerRideModal() {
   if(!currentActiveRide) return;
@@ -749,6 +699,56 @@ function openPassengerRideModal() {
 }
 function closePassengerRideModal() { document.getElementById('passengerRideModal').classList.remove('active'); }
 function openChatFromModal() { closePassengerRideModal(); if(currentActiveRide && currentActiveRide.assignedDriverId) { showChatInterface(currentActiveRide.id, currentUser.uid, currentActiveRide.assignedDriverId, 'passenger', document.getElementById('pDriverName').textContent, currentActiveRide); } }
+
+// ✅ وظائف التبليغ للراكب
+function openPassengerReportModal() {
+    const modal = document.getElementById('passengerReportModal');
+    const pickupVal = document.getElementById('pickupInput').value || 'غير محدد';
+    const destVal = document.getElementById('destInput').value || 'غير محدد';
+    const carTypeEl = document.querySelector('.car-opt.selected .name');
+    const carType = carTypeEl ? carTypeEl.textContent.trim() : 'مريحة';
+    const priceEl = document.getElementById('priceBox');
+    const priceText = priceEl.innerText.match(/\d+/) ? priceEl.innerText.match(/\d+/)[0] + ' د.ج' : 'حسب الاتفاق';
+    
+    const now = new Date();
+    const dateTimeStr = now.toLocaleDateString('ar-DZ') + ' ' + now.toLocaleTimeString('ar-DZ');
+
+    document.getElementById('repPickup').value = pickupVal;
+    document.getElementById('repDest').value = destVal;
+    document.getElementById('repCarType').value = carType;
+    document.getElementById('repPrice').value = priceText;
+    document.getElementById('repDateTime').value = dateTimeStr;
+    document.getElementById('repMessage').value = '';
+
+    modal.classList.add('active');
+}
+function closePassengerReportModal() { document.getElementById('passengerReportModal').classList.remove('active'); }
+
+async function submitReport() {
+    const msg = document.getElementById('repMessage').value;
+    if(!msg.trim()) { alert('يرجى كتابة تفاصيل المشكلة'); return; }
+    
+    const reportData = {
+        passengerId: currentUser.uid,
+        pickup: { name: document.getElementById('repPickup').value },
+        destination: { name: document.getElementById('repDest').value },
+        carType: document.getElementById('repCarType').value,
+        price: document.getElementById('repPrice').value,
+        dateTime: document.getElementById('repDateTime').value,
+        message: msg,
+        status: 'new',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+        await db.collection('reports').add(reportData);
+        alert('تم إرسال التبليغ بنجاح! سيتم إشعار السائقين.');
+        closePassengerReportModal();
+    } catch(e) {
+        console.error(e);
+        alert('حدث خطأ أثناء الإرسال');
+    }
+}
 
 let pendingIncomingRide = null;
 let pendingIncomingListener = null;
@@ -800,7 +800,7 @@ window.handleIncomingAccept = async function() {
     showChatButton(rideId, cid, 'driver', dn, currentActiveRide);
     if (currentDriver?.location && r.pickup?.lat) { MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [r.pickup.lat, r.pickup.lng], [r.destination.lat, r.destination.lng]); }
   } catch (e) { console.error(e); } 
-  finally { btn.disabled = false; btn.textContent = '✅ قبول الطلب'; loadRequests(); }
+  finally { btn.disabled = false; btn.textContent = '✅ قبول الطلب'; loadDriverReports(); }
 };
 
 window.handleIncomingDecline = async function() {
@@ -829,7 +829,7 @@ window.handleIncomingDecline = async function() {
     } else { await ref.update({ status: 'expired', skippedBy: sk }); }
     saveToLocalLog({ id: rideId, status: 'declined', pickup: rd.pickup, destination: rd.destination, price: rd.price, createdAt: rd.createdAt?.toDate?.() || new Date().toISOString() });
   } catch (e) { console.error(e); } 
-  finally { if (btn) { btn.disabled = false; btn.textContent = '❌ رفض'; } closeIncomingRequest(); loadRequests(); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = '❌ رفض'; } closeIncomingRequest(); loadDriverReports(); }
 };
 
 function switchAuthTab(tab) { 
@@ -866,7 +866,11 @@ async function completeDriverSetup() {
   document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = carName;
   document.getElementById('settingsTabBtn').style.display = 'block'; driverAvailabilityBtn.style.display = 'flex';
   switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-  document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerReportTop').style.display = 'none';
+  
+  // ✅ إظهار زر استقبال الطلبات وإخفاء زر التبليغ للراكب
+  document.getElementById('driverRequestsBtn').style.display = 'flex';
+  document.getElementById('passengerReportBtn').style.display = 'none';
+  
   document.getElementById('mainRequestBtn').style.display = 'none';
   document.getElementById('popupDriverName').textContent = `${carName} | ${carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${carType}`;
   document.getElementById('menuCarType').value = carType; document.getElementById('menuCarName').value = carName;
@@ -899,7 +903,7 @@ function initFirebase() {
       lastOnlineState = true;
       if(currentDriver?.uid) {
         if(offlineUpdateQueued) { try { await db.collection('drivers').doc(currentDriver.uid).update({ isOnline: true, connectionStatus: 'online', lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); offlineUpdateQueued = false; } catch(e) {} }
-        if(driverAvailable) { try { await db.collection('drivers').doc(currentDriver.uid).update({ available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); startLocationUpdates(currentDriver.uid); loadRequests(); } catch(e) {} }
+        if(driverAvailable) { try { await db.collection('drivers').doc(currentDriver.uid).update({ available: true, isOnline: true, lastUpdate: firebase.firestore.FieldValue.serverTimestamp() }); startLocationUpdates(currentDriver.uid); loadDriverReports(); } catch(e) {} }
       }
     }, { passive: true });
     setInterval(() => { if(currentDriver?.uid && lastOnlineState !== navigator.onLine) { if(!navigator.onLine) setDriverOfflineImmediately(currentDriver.uid); lastOnlineState = navigator.onLine; } }, 3000);
@@ -916,7 +920,11 @@ async function routeUserAfterAuth(user) {
       document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
       document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
       switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-      document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerReportTop').style.display = 'none';
+      
+      // ✅ إظهار زر استقبال الطلبات وإخفاء زر التبليغ
+      document.getElementById('driverRequestsBtn').style.display = 'flex';
+      document.getElementById('passengerReportBtn').style.display = 'none';
+      
       document.getElementById('mainRequestBtn').style.display = 'none';
       document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
       document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
@@ -928,7 +936,11 @@ async function routeUserAfterAuth(user) {
     const ddCheck = await db.collection('drivers').doc(user.uid).get();
     if (ddCheck.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    document.getElementById('passengerReportTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+    
+    // ✅ إظهار زر التبليغ وإخفاء زر استقبال الطلبات
+    document.getElementById('passengerReportBtn').style.display = 'flex';
+    document.getElementById('driverRequestsBtn').style.display = 'none';
+    
     document.getElementById('mainRequestBtn').style.display = 'flex';
     switchView('view-request'); startPassengerLocationTracking(); 
   }
@@ -988,7 +1000,7 @@ function toggleDriverStatus() {
   driverAvailable = !driverAvailable;
   db.collection('drivers').doc(currentDriver.uid).update({ available: driverAvailable, lastUpdate: firebase.firestore.FieldValue.serverTimestamp(), isOnline: navigator.onLine });
   updateAvailabilityButton();
-  if(!driverAvailable) loadRequests();
+  if(!driverAvailable) loadDriverReports();
 }
 
 function startDriverRequestListener() {
@@ -1002,27 +1014,32 @@ function startDriverRequestListener() {
   }, e => { console.error(e); });
 }
 
-function loadRequests() {
+// ✅ تحميل التبليغات للسائق
+function loadDriverReports() {
   const l = document.getElementById('popupRequestsList'), c = document.getElementById('popupRequestsCount');
   if (!currentDriver || !driverAvailable) { if (document.getElementById('driverRequestsModal').classList.contains('active')) { l.innerHTML = '<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; } return; }
   if (document.getElementById('driverRequestsModal').classList.contains('active')) {
-    db.collection('rideRequests').where('status', '==', 'pending').where('carType', '==', currentDriver.carType).limit(20).get().then(s => {
-      const r = []; s.forEach(d => { const x = d.data(); if (x.skippedBy?.includes(currentDriver.uid)) return; if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') { r.push({ id: d.id, ...x }); } });
-      renderRequests(r, l, c);
+    db.collection('reports').where('carType', '==', currentDriver.carType).orderBy('createdAt', 'desc').limit(20).get().then(s => {
+      const r = []; s.forEach(d => { r.push({ id: d.id, ...d.data() }); });
+      renderReports(r, l, c);
     }).catch(e => { console.error(e); });
   }
 }
 
-function renderRequests(reqs,l,c){
+function renderReports(reqs,l,c){
   c.textContent=reqs.length;
-  if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات جديدة</p><button class="refresh-btn" onclick="loadRequests()">🔄 تحديث</button></div>';return;}
+  if(reqs.length===0){l.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>لا توجد بلاغات جديدة</p><button class="refresh-btn" onclick="loadDriverReports()">🔄 تحديث</button></div>';return;}
   l.innerHTML=reqs.map(r=>{
-    const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000);
+    const cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000);
     let d='---'; if(currentDriver?.location&&r.pickup?.lat){ const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); d=ds.toFixed(1); }
-    const rej=r.skippedBy?.length||0;
-    return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;
+    return `<div class="request-card"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span></div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الرسالة:</strong> ${r.message||'لا يوجد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>💰 السعر:</strong> ${r.price||'---'}</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>📅 ${r.dateTime||''}</span></div><div class="req-actions"><button class="req-btn accept-btn" onclick="handleReportAccept('${r.id}')">✅ تواصل</button></div></div>`;
   }).join('');
 }
+
+window.handleReportAccept = async function(reportId) {
+    alert("تم استلام البلاغ، يمكنك التواصل مع الراكب إذا كانت البيانات متاحة.");
+    // يمكن إضافة منطق تحويله لرحلة هنا إذا أردت
+};
 
 window.handleAccept=async function(rideId){
   if(!currentDriver?.uid)return;
@@ -1045,7 +1062,7 @@ window.handleAccept=async function(rideId){
     showChatButton(rideId,cid,'driver',dn,currentActiveRide);
     if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]);
   }catch(e){console.error(e);}
-  finally{if(b){b.disabled=false;b.textContent=b.id==='incAcceptBtn'?'✅ قبول الطلب':'✅ قبول';}loadRequests();}
+  finally{if(b){b.disabled=false;b.textContent=b.id==='incAcceptBtn'?'✅ قبول الطلب':'✅ قبول';}loadDriverReports();}
 };
 
 window.handleDecline=async function(rideId){
@@ -1070,7 +1087,7 @@ window.handleDecline=async function(rideId){
     else { await ref.update({status:'expired',skippedBy:sk}); }
     saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()});
   }catch(e){console.error(e);}
-  finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadRequests();}
+  finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadDriverReports();}
 };
 
 async function createChat(rid, pid, did) { const cid=`chat_${rid}`; await db.collection('chats').doc(cid).set({rideId:rid, passengerId:pid, driverId:did, createdAt:firebase.firestore.FieldValue.serverTimestamp(), lastMessage:null, lastUpdate:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}); return cid; }
@@ -1213,7 +1230,7 @@ window.cancelActiveTrip=async function(rid){
     }
     closeChat(); 
     if(currentActiveRide?.id===rid) currentActiveRide=null; 
-    loadRequests(); 
+    loadDriverReports(); 
   }catch(e){console.error(e);} 
 };
 
@@ -1557,10 +1574,14 @@ async function toggleUserRole() {
     clearInterval(driverLocationInterval); if (activeRequestListener) { activeRequestListener(); activeRequestListener = null; }
     document.getElementById('userIconBtn').textContent = '👤'; document.getElementById('menuUserName').textContent = 'راكب';
     document.getElementById('settingsTabBtn').style.display = 'none'; document.getElementById('driverAvailabilityBtn').style.display = 'none';
+    
+    // ✅ التبديل لراكب
+    document.getElementById('passengerReportBtn').style.display = 'flex';
+    document.getElementById('driverRequestsBtn').style.display = 'none';
+    
     const dd = await db.collection('drivers').doc(currentUser.uid).get();
     if (dd.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; } 
     else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-    document.getElementById('passengerReportTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
     document.getElementById('mainRequestBtn').style.display = 'flex';
     startPassengerLocationTracking();
   } else {
@@ -1571,7 +1592,11 @@ async function toggleUserRole() {
       document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
       document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
       switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-      document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerReportTop').style.display = 'none';
+      
+      // ✅ التبديل لسائق
+      document.getElementById('driverRequestsBtn').style.display = 'flex';
+      document.getElementById('passengerReportBtn').style.display = 'none';
+      
       document.getElementById('mainRequestBtn').style.display = 'none';
       document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
       document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
