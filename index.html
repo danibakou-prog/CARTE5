@@ -244,6 +244,8 @@ transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1); max-height: 75vh; ov
 .cancel-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--danger), #C62828); color: #fff; border: none; border-radius: 16px; margin-top: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(239, 83, 80, 0.3); }
 .autocomplete { position: relative; } .autocomplete-results { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 14px; max-height: 250px; overflow-y: auto; z-index: 2000; box-shadow: var(--shadow); display: none; } .autocomplete-results.show { display: block; }
 .autocomplete-item { padding: 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #f5f5f5; transition: 0.15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .autocomplete-item:hover { background: linear-gradient(135deg, #F1F8E9, #E8F5E9); }
+.autocomplete-item.fixed-location { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); font-weight: 700; color: #1565C0; }
+.autocomplete-item.fixed-location:hover { background: linear-gradient(135deg, #BBDEFB, #90CAF9); }
 .form-group { margin-bottom: 18px; text-align: right; } .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95em; color: #333; }
 .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; font-size: 0.95em; outline: none; transition: 0.25s; background: #FFF; }
 .form-group input:focus, .form-group select:focus { border-color: var(--secondary); box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2); } .auth-btn.alt { background: linear-gradient(135deg, #9E9E9E, #757575); }
@@ -347,13 +349,56 @@ animation: pulse-yellow-glow 2s infinite !important;
 .search-text { font-size: 1.2em; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .search-sub { font-size: 0.9em; color: #666; }
 .cancel-search-btn { margin-top: 18px; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: var(--danger); border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.25s; font-size: 0.95em; }
-.special-modal-content { max-width: 500px; text-align: right; }
-.special-modal-content h3 { color: var(--primary-dark); margin-bottom: 20px; font-weight: 800; text-align: center; }
-.special-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* ✅ نافذة الطلب الخاصة - تصميم صغير وأنيق واحترافي */
+.special-modal-content { 
+    max-width: 380px; 
+    text-align: right; 
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.special-modal-content h3 { 
+    color: var(--primary-dark); 
+    margin-bottom: 16px; 
+    font-weight: 800; 
+    text-align: center; 
+    font-size: 1.2em;
+}
+.special-form-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 10px; 
+}
 .special-full-width { grid-column: span 2; }
-.special-textarea { width: 100%; height: 80px; resize: none; border: 2px solid var(--border); border-radius: 14px; padding: 12px; font-family: inherit; outline: none; transition: 0.25s; }
+.special-form-grid .form-group { margin-bottom: 10px; }
+.special-form-grid .form-group label { font-size: 0.85em; margin-bottom: 6px; }
+.special-form-grid .form-group input,
+.special-form-grid .form-group select { 
+    padding: 10px 12px; 
+    font-size: 0.9em; 
+    border-radius: 12px;
+}
+.special-textarea { 
+    width: 100%; 
+    height: 70px; 
+    resize: none; 
+    border: 2px solid var(--border); 
+    border-radius: 12px; 
+    padding: 10px; 
+    font-family: inherit; 
+    outline: none; 
+    transition: 0.25s; 
+    font-size: 0.9em;
+}
 .special-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(156, 205, 50, 0.2); }
-.special-submit-btn { background: linear-gradient(135deg, #AB47BC, #8E24AA); color: white; box-shadow: 0 4px 15px rgba(171, 71, 188, 0.4); }
+.special-submit-btn { 
+    background: linear-gradient(135deg, #AB47BC, #8E24AA); 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(171, 71, 188, 0.4); 
+    margin-top: 10px;
+    padding: 14px;
+    font-size: 0.95em;
+}
 .special-submit-btn:hover { background: linear-gradient(135deg, #8E24AA, #6A1B9A); }
 .report-modal-content { max-width: 500px; text-align: right; }
 .report-modal-content h3 { color: #F57C00; margin-bottom: 20px; font-weight: 800; text-align: center; }
@@ -369,50 +414,95 @@ animation: pulse-yellow-glow 2s infinite !important;
 .record-action-btn.delete:hover { background: linear-gradient(135deg, #C62828, #B71C1C); }
 .record-action-btn:active { transform: scale(0.95); }
 .special-record-card { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); border-right: 4px solid #AB47BC !important; }
-
 /* ✅ أنماط جديدة للطلبات الملغاة من السائق */
 .record-card.cancelled-by-driver {
-    border-right-color: #EF5350 !important;
-    background: linear-gradient(135deg, #FFEBEE, #FFCDD2) !important;
-    animation: cancelledFlash 1.5s ease-in-out 4;
-    box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7);
+border-right-color: #EF5350 !important;
+background: linear-gradient(135deg, #FFEBEE, #FFCDD2) !important;
+animation: cancelledFlash 1.5s ease-in-out 4;
+box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7);
 }
 @keyframes cancelledFlash {
-    0%, 100% { 
-        opacity: 1; 
-        transform: scale(1);
-        box-shadow: 0 2px 12px rgba(239, 83, 80, 0.3);
-    }
-    50% { 
-        opacity: 0.7; 
-        transform: scale(0.98);
-        box-shadow: 0 0 25px rgba(239, 83, 80, 0.8);
-    }
+0%, 100% {
+opacity: 1;
+transform: scale(1);
+box-shadow: 0 2px 12px rgba(239, 83, 80, 0.3);
+}
+50% {
+opacity: 0.7;
+transform: scale(0.98);
+box-shadow: 0 0 25px rgba(239, 83, 80, 0.8);
+}
 }
 .cancelled-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: linear-gradient(135deg, #EF5350, #C62828);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.78em;
-    font-weight: 700;
-    animation: pulse-badge 1.5s infinite;
+display: inline-flex;
+align-items: center;
+gap: 5px;
+background: linear-gradient(135deg, #EF5350, #C62828);
+color: white;
+padding: 4px 12px;
+border-radius: 12px;
+font-size: 0.78em;
+font-weight: 700;
+animation: pulse-badge 1.5s infinite;
 }
 @keyframes pulse-badge {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); }
-    50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 83, 80, 0); }
+0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); }
+50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 83, 80, 0); }
 }
 .cancel-saved-btn {
-    background: linear-gradient(135deg, #EF5350, #C62828) !important;
-    color: white !important;
-    box-shadow: 0 3px 12px rgba(239, 83, 80, 0.4);
+background: linear-gradient(135deg, #EF5350, #C62828) !important;
+color: white !important;
+box-shadow: 0 3px 12px rgba(239, 83, 80, 0.4);
 }
 .cancel-saved-btn:hover {
-    background: linear-gradient(135deg, #C62828, #B71C1C) !important;
-    transform: translateY(-1px);
+background: linear-gradient(135deg, #C62828, #B71C1C) !important;
+transform: translateY(-1px);
+}
+/* ✅ نظام الإشعارات المنبثقة الاحترافي (Toast) */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+    width: 90%;
+    max-width: 400px;
+}
+.toast {
+    background: white;
+    padding: 14px 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 0.95em;
+    animation: toastSlideDown 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    pointer-events: auto;
+    border-right: 4px solid;
+    backdrop-filter: blur(10px);
+}
+.toast.success { border-right-color: #66BB6A; color: #2E7D32; background: linear-gradient(135deg, #ffffff, #E8F5E9); }
+.toast.error { border-right-color: #EF5350; color: #C62828; background: linear-gradient(135deg, #ffffff, #FFEBEE); }
+.toast.warning { border-right-color: #FFA726; color: #E65100; background: linear-gradient(135deg, #ffffff, #FFF3E0); }
+.toast.info { border-right-color: #42A5F5; color: #1565C0; background: linear-gradient(135deg, #ffffff, #E3F2FD); }
+.toast-icon { font-size: 1.5em; flex-shrink: 0; }
+.toast-message { flex: 1; line-height: 1.4; }
+@keyframes toastSlideDown {
+    from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastSlideUp {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-30px) scale(0.9); }
+}
+.toast.hiding {
+    animation: toastSlideUp 0.3s ease forwards;
 }
 </style>
 </head>
@@ -552,7 +642,7 @@ animation: pulse-yellow-glow 2s infinite !important;
 <option value="عائلية">🚐 عائلية</option>
 </select>
 </div>
-<div class="form-group"><label>💰 السعر المقترح</label><input type="number" id="spPrice" class="auth-input" placeholder="السعر"></div>
+<div class="form-group"><label>💰 السعر</label><input type="number" id="spPrice" class="auth-input" placeholder="السعر"></div>
 <div class="form-group"><label>📅 التاريخ</label><input type="date" id="spDate" class="auth-input"></div>
 <div class="form-group"><label>⏰ الساعة</label><input type="time" id="spTime" class="auth-input"></div>
 <div class="form-group special-full-width"><label>📞 رقم الهاتف</label><input type="tel" id="spPhone" class="auth-input" placeholder="رقم للتواصل"></div>
@@ -751,6 +841,21 @@ let savedFirstLoad = true;
 // ✅ متغيرات جديدة لإشعارات الراكب
 let passengerSpecialListener = null;
 let lastSeenCancelledSpecials = new Set();
+
+// ✅ قائمة المواقع الثابتة (01-10) - سيتم استبدالها لاحقاً بإحداثيات حقيقية
+const FIXED_LOCATIONS = [
+    { id: '01', name: '01', lat: 35.633994, lng: 3.224367 },
+    { id: '02', name: '02', lat: 35.640000, lng: 3.230000 },
+    { id: '03', name: '03', lat: 35.645000, lng: 3.235000 },
+    { id: '04', name: '04', lat: 35.650000, lng: 3.240000 },
+    { id: '05', name: '05', lat: 35.655000, lng: 3.245000 },
+    { id: '06', name: '06', lat: 35.660000, lng: 3.250000 },
+    { id: '07', name: '07', lat: 35.665000, lng: 3.255000 },
+    { id: '08', name: '08', lat: 35.670000, lng: 3.260000 },
+    { id: '09', name: '09', lat: 35.675000, lng: 3.265000 },
+    { id: '10', name: '10', lat: 35.680000, lng: 3.270000 }
+];
+
 const MAP_CONFIG = {
 defaultView: [35.633994, 3.224367], defaultZoom: 14,
 tileLayers: [{ url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '© OpenStreetMap', maxZoom: 19 }],
@@ -776,6 +881,29 @@ debounce: (func, delay) => { let timeout; return (...args) => { clearTimeout(tim
 playSound: (id) => { const a=document.getElementById(id); if(a){ a.currentTime=0; a.play().catch(()=>{ const h=()=>{a.play().catch(()=>{}); document.removeEventListener('click',h); document.removeEventListener('touchstart',h); }; document.addEventListener('click',h,{once:true}); document.addEventListener('touchstart',h,{once:true}); }); } },
 stopSound: (id) => { const a=document.getElementById(id); if(a){a.pause(); a.currentTime=0;} }
 };
+
+// ✅ نظام الإشعارات المنبثقة الاحترافي (Toast)
+function showToast(message, type = 'info', duration = 3500) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span><span class="toast-message">${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 300);
+    }, duration);
+}
+
 const MapUtils = {
 initMap: (id, opts={}) => {
 const c={...MAP_CONFIG, ...opts};
@@ -943,9 +1071,9 @@ hasNewCancelled = true;
 lastSeenCancelledSpecials.add(doc.id);
 // ✅ تشغيل صوت إشعار
 Utils.playSound('requestSound');
-// ✅ تنبيه فوري للراكب
+// ✅ تنبيه فوري للراكب عبر Toast
 setTimeout(() => {
-alert(`⚠️ تنبيه مهم!\n\nقام السائق بإلغاء طلبك الخاص:\n📍 من: ${data.pickup || 'غير محدد'}\n🏁 إلى: ${data.destination || 'غير محدد'}\n\nنعتذر عن هذا الإزعاج. يمكنك إعادة نشر الطلب أو البحث عن سائق آخر.`);
+    showToast(`⚠️ قام السائق بإلغاء طلبك الخاص: من ${data.pickup || 'غير محدد'} إلى ${data.destination || 'غير محدد'}. يمكنك إعادة نشر الطلب.`, 'warning', 5000);
 // ✅ تحديث السجل إذا كانت القائمة مفتوحة
 const historyContainer = document.getElementById('menuHistoryContent');
 if (historyContainer && document.getElementById('userDropdownMenu').classList.contains('show')) {
@@ -1021,10 +1149,10 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 // ✅ دالة جديدة: إلغاء الطلب المحجوز من السائق
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\n\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح')) return;
+if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح')) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
-if (!doc.exists) { alert('الطلب غير موجود'); return; }
+if (!doc.exists) { showToast('الطلب غير موجود', 'error'); return; }
 const data = doc.data();
 // ✅ تحديث حالة الطلب الخاص
 await db.collection('specialRequests').doc(reqId).update({
@@ -1056,15 +1184,15 @@ lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
 });
 driverAvailable = true;
 updateAvailabilityButton();
-alert('✅ تم إلغاء الطلب بنجاح\nتم إشعار الراكب فوراً');
+showToast('✅ تم إلغاء الطلب بنجاح وتم إشعار الراكب فوراً', 'success');
 loadDriverSavedSpecialRequests();
 } catch(e) {
 console.error(e);
-alert('حدث خطأ أثناء الإلغاء: ' + e.message);
+showToast('حدث خطأ أثناء الإلغاء: ' + e.message, 'error');
 }
 };
 window.viewSavedRide = function(rideId) {
-if (!rideId) { alert('لا توجد رحلة مرتبطة'); return; }
+if (!rideId) { showToast('لا توجد رحلة مرتبطة', 'warning'); return; }
 closeDriverSavedSpecialModal();
 db.collection('rideRequests').doc(rideId).get().then(doc => {
 if (doc.exists) {
@@ -1078,18 +1206,18 @@ if (currentDriver?.location && ride.pickup?.lat) {
 MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [ride.pickup.lat, ride.pickup.lng], [ride.destination.lat, ride.destination.lng]);
 }
 } else {
-alert('الرحلة غير موجودة');
+showToast('الرحلة غير موجودة', 'error');
 }
 }).catch(e => {
 console.error(e);
-alert('حدث خطأ في تحميل الرحلة');
+showToast('حدث خطأ في تحميل الرحلة', 'error');
 });
 };
 window.contactPassengerFromSaved = function(phone) {
 if (phone) {
 window.location.href = `tel:${phone}`;
 } else {
-alert('رقم الهاتف غير متوفر');
+showToast('رقم الهاتف غير متوفر', 'warning');
 }
 };
 function saveToLocalLog(ride) {
@@ -1142,8 +1270,8 @@ async function submitReport() {
 const type = document.getElementById('reportType').value;
 const desc = document.getElementById('reportDesc').value.trim();
 const email = document.getElementById('reportEmail').value.trim();
-if (!desc) { alert('⚠️ يرجى كتابة وصف التبليغ'); return; }
-if (desc.length < 10) { alert('⚠️ الوصف قصير جداً، يرجى التفصيل أكثر'); return; }
+if (!desc) { showToast('⚠️ يرجى كتابة وصف التبليغ', 'warning'); return; }
+if (desc.length < 10) { showToast('⚠️ الوصف قصير جداً، يرجى التفصيل أكثر', 'warning'); return; }
 try {
 await db.collection('reports').add({
 userId: currentUser.uid,
@@ -1155,20 +1283,20 @@ description: desc,
 status: 'new',
 createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-alert('✅ تم إرسال التبليغ بنجاح! سنقوم بمراجعته في أقرب وقت.');
+showToast('✅ تم إرسال التبليغ بنجاح! سنقوم بمراجعته في أقرب وقت.', 'success');
 closeReportModal();
 } catch(e) {
 console.error(e);
-alert('❌ حدث خطأ أثناء إرسال التبليغ');
+showToast('❌ حدث خطأ أثناء إرسال التبليغ', 'error');
 }
 }
 async function editSpecialRequest(reqId) {
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
-if (!doc.exists) { alert('الطلب غير موجود'); return; }
+if (!doc.exists) { showToast('الطلب غير موجود', 'error'); return; }
 const data = doc.data();
 if (data.status === 'accepted') {
-alert('⚠️ لا يمكن تعديل طلب تم قبوله من سائق');
+showToast('⚠️ لا يمكن تعديل طلب تم قبوله من سائق', 'warning');
 return;
 }
 document.getElementById('spPickup').value = data.pickup || '';
@@ -1185,14 +1313,14 @@ document.getElementById('specialSubmitBtn').textContent = '💾 حفظ التع�
 document.getElementById('specialRequestModal').classList.add('active');
 } catch(e) {
 console.error(e);
-alert('حدث خطأ أثناء تحميل البيانات');
+showToast('حدث خطأ أثناء تحميل البيانات', 'error');
 }
 }
 async function repostSpecialRequest(reqId) {
 if (!confirm('هل تريد إعادة نشر هذا الطلب كطلب جديد؟')) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
-if (!doc.exists) { alert('الطلب غير موجود'); return; }
+if (!doc.exists) { showToast('الطلب غير موجود', 'error'); return; }
 const data = doc.data();
 await db.collection('specialRequests').add({
 passengerId: currentUser.uid,
@@ -1207,11 +1335,11 @@ description: data.description,
 status: 'pending',
 createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-alert('✅ تم إعادة نشر الطلب بنجاح!');
+showToast('✅ تم إعادة نشر الطلب بنجاح!', 'success');
 loadUserHistory();
 } catch(e) {
 console.error(e);
-alert('حدث خطأ أثناء إعادة النشر');
+showToast('حدث خطأ أثناء إعادة النشر', 'error');
 }
 }
 async function deleteSpecialRequest(reqId, btnElement) {
@@ -1224,9 +1352,10 @@ card.style.opacity = '0';
 card.style.transform = 'translateX(20px)';
 setTimeout(() => card.remove(), 200);
 }
+showToast('✅ تم حذف الطلب', 'success');
 } catch(e) {
 console.error(e);
-alert('حدث خطأ أثناء الحذف');
+showToast('حدث خطأ أثناء الحذف', 'error');
 }
 }
 async function submitSpecialRequest() {
@@ -1238,7 +1367,7 @@ const date = document.getElementById('spDate').value;
 const time = document.getElementById('spTime').value;
 const phone = document.getElementById('spPhone').value.trim();
 const desc = document.getElementById('spDesc').value.trim();
-if(!pickup || !dest || !price || !phone) { alert("يرجى ملء جميع الحقول الأساسية"); return; }
+if(!pickup || !dest || !price || !phone) { showToast("يرجى ملء جميع الحقول الأساسية", 'warning'); return; }
 const data = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
@@ -1257,16 +1386,16 @@ await db.collection('specialRequests').doc(currentEditingSpecialId).update({
 ...data,
 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-alert("✅ تم تعديل الطلب الخاص بنجاح!");
+showToast("✅ تم تعديل الطلب الخاص بنجاح!", 'success');
 } else {
 data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
 await db.collection('specialRequests').add(data);
-alert("تم إرسال طلبك الخاص بنجاح! سيظهر لدى السائقين المناسبين.");
+showToast("تم إرسال طلبك الخاص بنجاح! سيظهر لدى السائقين المناسبين.", 'success');
 }
 closeSpecialRequestModal();
 } catch(e) {
 console.error(e);
-alert("حدث خطأ أثناء الإرسال");
+showToast("حدث خطأ أثناء الإرسال", 'error');
 }
 }
 async function loadSpecialRequestsForDriver() {
@@ -1344,9 +1473,7 @@ list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
-رقم الهاتف: ${phone}
-سيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -1354,7 +1481,7 @@ negotiatingWith: currentDriver.uid
 });
 window.location.href = `tel:${phone}`;
 loadSpecialRequestsForDriver();
-} catch(e) { console.error(e); alert('حدث خطأ أثناء بدء التفاوض'); }
+} catch(e) { console.error(e); showToast('حدث خطأ أثناء بدء التفاوض', 'error'); }
 }
 };
 window.confirmSpecialRequest = async function(reqId) {
@@ -1413,12 +1540,12 @@ destination: { name: spData.destination },
 price: spData.price,
 createdAt: new Date().toISOString()
 });
-alert('✅ تم تأكيد الحجز بنجاح! ظهر الطلب في قائمة استقبال الطلبات وتم إشعار الراكب.');
+showToast('✅ تم تأكيد الحجز بنجاح! ظهر الطلب في قائمة استقبال الطلبات وتم إشعار الراكب.', 'success');
 closeDriverSpecialRequestsModal();
 loadRequests();
 } catch(e) {
 console.error(e);
-alert('حدث خطأ أثناء التأكيد: ' + e.message);
+showToast('حدث خطأ أثناء التأكيد: ' + e.message, 'error');
 }
 }
 };
@@ -1429,9 +1556,9 @@ await db.collection('specialRequests').doc(reqId).update({
 status: 'pending',
 negotiatingWith: null
 });
-alert('تم إلغاء التفاوض وعاد الطلب للقائمة العامة.');
+showToast('تم إلغاء التفاوض وعاد الطلب للقائمة العامة.', 'info');
 loadSpecialRequestsForDriver();
-} catch(e) { console.error(e); alert('حدث خطأ أثناء الإلغاء'); }
+} catch(e) { console.error(e); showToast('حدث خطأ أثناء الإلغاء', 'error'); }
 }
 };
 function openPassengerRideModal() {
@@ -1502,7 +1629,8 @@ closeIncomingRequest();
 showChatInterface(rideId, r.passengerId, currentDriver.uid, 'driver', dn, currentActiveRide);
 showChatButton(rideId, cid, 'driver', dn, currentActiveRide);
 if (currentDriver?.location && r.pickup?.lat) { MapUtils.drawDualRoute(map, [currentDriver.location.lat, currentDriver.location.lng], [r.pickup.lat, r.pickup.lng], [r.destination.lat, r.destination.lng]); }
-} catch (e) { console.error(e); }
+showToast('✅ تم قبول الطلب بنجاح', 'success');
+} catch (e) { console.error(e); showToast('حدث خطأ أثناء قبول الطلب', 'error'); }
 finally { btn.disabled = false; btn.textContent = '✅ قبول الطلب'; loadRequests(); }
 };
 window.handleIncomingDecline = async function() {
@@ -1547,7 +1675,10 @@ const pass = type==='login'?document.getElementById('loginPassword').value:docum
 try {
 if(type==='login') await auth.signInWithEmailAndPassword(email, pass);
 else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); }
-} catch(e) { console.error(e); }
+} catch(e) { 
+    console.error(e); 
+    showToast('❌ ' + (e.message || 'خطأ في المصادقة'), 'error');
+}
 finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; }
 }
 async function completeDriverSetup() {
@@ -1575,6 +1706,7 @@ document.getElementById('reportBtn').style.display = 'flex';
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 startSpecialRequestsNotificationListener();
 routeUserAfterAuth(currentUser);
+showToast('✅ تم تفعيل حسابك كسائق بنجاح!', 'success');
 }
 async function skipToPassenger() { await db.collection('users').doc(currentUser.uid).update({role: 'passenger'}); closeDriverSetupModal(); routeUserAfterAuth(currentUser); }
 async function switchToPassengerMode() { if(!currentUser)return; try{ await db.collection('users').doc(currentUser.uid).update({role:'passenger'}); closeDriverRequestsModal(); switchView('view-request'); startPassengerLocationTracking(); }catch(e){console.error(e);} }
@@ -1756,7 +1888,8 @@ saveToLocalLog({id:rideId, status:'accepted', pickup:r.pickup, destination:r.des
 showChatInterface(rideId,r.passengerId,currentDriver.uid,'driver',dn,currentActiveRide);
 showChatButton(rideId,cid,'driver',dn,currentActiveRide);
 if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]);
-}catch(e){console.error(e);}
+showToast('✅ تم قبول الطلب', 'success');
+}catch(e){console.error(e); showToast('حدث خطأ', 'error');}
 finally{if(b){b.disabled=false;b.textContent=b.id==='incAcceptBtn'?'✅ قبول الطلب':'✅ قبول';}loadRequests();}
 };
 window.handleDecline=async function(rideId){
@@ -1859,7 +1992,7 @@ if (!currentActiveRide) return;
 let dPos = currentDriver?.location ? [currentDriver.location.lat, currentDriver.location.lng] : null;
 let pPos = currentActiveRide.pickup ? [currentActiveRide.pickup.lat, currentActiveRide.pickup.lng] : null;
 if (!dPos || !pPos) {
-alert("تعذر تحديد موقع السائق أو الراكب حالياً");
+showToast("تعذر تحديد موقع السائق أو الراكب حالياً", 'warning');
 return;
 }
 if (routeControl) { map.removeControl(routeControl); routeControl = null; }
@@ -1908,6 +2041,7 @@ await sendMessage(cid, currentDriver.uid, 'driver', '⚠️ تم إلغاء ال
 closeChat();
 if(currentActiveRide?.id===rid) currentActiveRide=null;
 loadRequests();
+showToast('تم إلغاء الرحلة', 'info');
 }catch(e){console.error(e);}
 };
 function showChatButton(rid, cid, role, name, rd){
@@ -1939,6 +2073,9 @@ setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pick
 setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true);
 if(navigator.geolocation) useGPS(); else fallbackLocation();
 map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); });
+// ✅ عرض المواقع الثابتة عند التركيز على حقل الانطلاق
+document.getElementById('pickupInput').addEventListener('focus', showFixedLocations);
+document.getElementById('pickupInput').addEventListener('click', showFixedLocations);
 }
 function setLocation(m, pos, iid, cid, isP) {
 if(isP) pickupPos=pos; else destPos=pos;
@@ -1954,7 +2091,12 @@ pickupPos=[p.coords.latitude,p.coords.longitude]; document.getElementById('picku
 document.getElementById('pickupCoords').innerHTML=`<span class="coords-badge">📍 ${Utils.formatCoords(pickupPos[0],pickupPos[1])}</span>`;
 if(pickupMarker)map.removeLayer(pickupMarker); pickupMarker=MapUtils.createMarker(pickupPos,'passenger').addTo(map); map.setView(pickupPos,16);
 if(destPos)drawRoute(); b.textContent='🛰️ GPS';b.disabled=false;
-},()=>{b.textContent='❌';setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);},{enableHighAccuracy:true,timeout:10000});
+showToast('✅ تم تحديد موقعك بنجاح', 'success');
+},()=>{
+    b.textContent='❌';
+    showToast('❌ تعذر تحديد الموقع', 'error');
+    setTimeout(()=>{b.textContent='🛰️ GPS';b.disabled=false;},2000);
+},{enableHighAccuracy:true,timeout:10000});
 }
 function fallbackLocation() {
 pickupPos = [35.633994, 3.224367];
@@ -1965,25 +2107,68 @@ if(destPos) drawRoute();
 }
 function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
 function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
+
+// ✅ دالة عرض المواقع الثابتة (01-10) في حقل الانطلاق
+function showFixedLocations() {
+    const res = document.getElementById('pickupResults');
+    res.innerHTML = FIXED_LOCATIONS.map(loc => 
+        `<div class="autocomplete-item fixed-location" data-lat="${loc.lat}" data-lng="${loc.lng}" data-name="${loc.name}">📍 ${loc.name}</div>`
+    ).join('');
+    res.classList.add('show');
+    res.querySelectorAll('.autocomplete-item').forEach(it=>{ 
+        it.onclick=()=>{
+            res.classList.remove('show'); 
+            document.getElementById('pickupInput').value = it.dataset.name;
+            setLocation(pickupMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng)], 'pickupInput', 'pickupCoords', true);
+        }; 
+    });
+}
+
+// ✅ دالة الإكمال التلقائي المحسّنة - تعرض اسم المدينة فقط
 function setupAutocomplete(iid, rid, cb, countryOnly=true) {
-const inp=document.getElementById(iid), res=document.getElementById(rid);
-const performSearch = async function() {
-const q=inp.value.trim(); if(q.length<3){res.classList.remove('show');return;}
-try {
-const cp=countryOnly?'&countrycodes=dz':'', lim=countryOnly?5:8;
-const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${cp}&limit=${lim}`, {headers:{'User-Agent':'YasserRidePro/1.0'}});
-const d=await r.json();
-if(d.length>0){
-res.innerHTML=d.map(i=>`<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${i.display_name}">📍 ${i.display_name.length>50?i.display_name.substring(0,50)+'...':i.display_name}</div>`).join('');
-res.classList.add('show');
-res.querySelectorAll('.autocomplete-item').forEach(it=>{ it.onclick=()=>{res.classList.remove('show'); cb(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name);}; });
-} else { res.innerHTML='<div class="autocomplete-item">🔍 لم يتم العثور</div>'; res.classList.add('show'); }
-} catch(e){ res.innerHTML='<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; res.classList.add('show'); }
-};
-inp.addEventListener('input', Utils.debounce(performSearch, 400));
-document.addEventListener('click', e=>{if(e.target!==inp&&!res.contains(e.target))res.classList.remove('show');},{passive:true});
-window.addEventListener('scroll', ()=>res.classList.remove('show'),{passive:true});
-window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true});
+    const inp=document.getElementById(iid), res=document.getElementById(rid);
+    const performSearch = async function() {
+        const q=inp.value.trim(); 
+        if(q.length<2){res.classList.remove('show');return;}
+        
+        // ✅ إذا كان حقل الانطلاق وكان النص رقماً، لا تبحث (المواقع الثابتة فقط)
+        if (iid === 'pickupInput' && /^\d+$/.test(q)) {
+            showFixedLocations();
+            return;
+        }
+        
+        try {
+            const cp=countryOnly?'&countrycodes=dz':'', lim=countryOnly?5:8;
+            const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}${cp}&limit=${lim}&addressdetails=1`, {headers:{'User-Agent':'YasserRidePro/1.0'}});
+            const d=await r.json();
+            if(d.length>0){
+                res.innerHTML=d.map(i=>{
+                    // ✅ استخراج اسم المدينة فقط (بدون الحي الرئيسي)
+                    const cityName = i.address?.city || i.address?.town || i.address?.village || i.address?.municipality || i.address?.county || i.display_name.split(',')[0].trim();
+                    return `<div class="autocomplete-item" data-lat="${i.lat}" data-lng="${i.lon}" data-name="${cityName}" data-full="${i.display_name}">📍 ${cityName}</div>`;
+                }).join('');
+                res.classList.add('show');
+                res.querySelectorAll('.autocomplete-item').forEach(it=>{ 
+                    it.onclick=()=>{
+                        res.classList.remove('show'); 
+                        // ✅ ملء الحقل باسم المدينة المختارة (الإكمال التلقائي)
+                        inp.value = it.dataset.name;
+                        cb(parseFloat(it.dataset.lat),parseFloat(it.dataset.lng),it.dataset.name);
+                    }; 
+                });
+            } else { 
+                res.innerHTML='<div class="autocomplete-item">🔍 لم يتم العثور</div>'; 
+                res.classList.add('show'); 
+            }
+        } catch(e){ 
+            res.innerHTML='<div class="autocomplete-item">⚠️ خطأ في الاتصال</div>'; 
+            res.classList.add('show'); 
+        }
+    };
+    inp.addEventListener('input', Utils.debounce(performSearch, 400));
+    document.addEventListener('click', e=>{if(e.target!==inp&&!res.contains(e.target))res.classList.remove('show');},{passive:true});
+    window.addEventListener('scroll', ()=>res.classList.remove('show'),{passive:true});
+    window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true});
 }
 function drawRoute() {
 if(!pickupPos||!destPos)return;
@@ -2177,17 +2362,17 @@ if (r.type === 'special') {
 let statusColor = '#EF5350', statusText = '❌ ملغي';
 let statusClass = '';
 let extraInfo = '';
-if (r.status === 'accepted' || r.status === 'converted_to_ride') { 
-statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; 
+if (r.status === 'accepted' || r.status === 'converted_to_ride') {
+statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة';
 }
-else if (r.status === 'pending') { 
-statusColor = '#FFA726'; statusText = '⏳ قيد الانتظار'; 
+else if (r.status === 'pending') {
+statusColor = '#FFA726'; statusText = '⏳ قيد الانتظار';
 }
-else if (r.status === 'negotiating') { 
-statusColor = '#FF9800'; statusText = '🤝 قيد التفاوض'; 
+else if (r.status === 'negotiating') {
+statusColor = '#FF9800'; statusText = '🤝 قيد التفاوض';
 }
 else if (r.status === 'cancelled_by_driver') {
-statusColor = '#EF5350'; 
+statusColor = '#EF5350';
 statusText = '❌ ألغاه السائق';
 statusClass = 'cancelled-by-driver';
 extraInfo = `<div style="background: linear-gradient(135deg, #FFEBEE, #FFCDD2); padding: 10px; border-radius: 10px; margin-top: 8px; border: 1px solid #EF9A9A;">
@@ -2249,8 +2434,14 @@ card.style.opacity = '0';
 card.style.transform = 'translateX(20px)';
 setTimeout(() => card.remove(), 200);
 }
-} catch (e) { console.error(e); }
+showToast('✅ تم الحذف', 'success');
+} catch (e) { 
+    console.error(e); 
+    showToast('حدث خطأ أثناء الحذف', 'error');
 }
+}
+
+// ✅ دالة حفظ الإعدادات - تُغلق القائمة بعد الحفظ
 async function saveDriverProfileFromMenu() {
 const btn = document.getElementById('saveDriverProfileBtn');
 const originalText = "💾 حفظ التغيرات";
@@ -2269,18 +2460,26 @@ window.driverMarker = MapUtils.createMarker([currentDriver.location.lat, current
 }
 startDriverRequestListener();
 document.getElementById('popupDriverName').textContent = `${newName} | ${newType}`;
+
+// ✅ عرض رسالة "تم الحفظ"
 btn.textContent = '✅ تم الحفظ';
 btn.style.background = 'linear-gradient(135deg, #66BB6A, #43A047)';
+
+// ✅ بعد ثانيتين: إغلاق القائمة وإعادة الزر لحالته الأصلية
 setTimeout(() => {
-btn.disabled = false;
-btn.textContent = originalText;
-btn.style.background = '';
+    document.getElementById('userDropdownMenu').classList.remove('show');
+    btn.disabled = false;
+    btn.textContent = originalText;
+    btn.style.background = '';
 }, 2000);
+
+showToast('✅ تم حفظ التغيرات بنجاح', 'success');
 } catch (e) {
 console.error(e);
 btn.disabled = false;
 btn.textContent = originalText;
 btn.style.background = '';
+showToast('❌ ' + (e.message || 'حدث خطأ أثناء الحفظ'), 'error');
 }
 }
 async function toggleUserRole() {
@@ -2304,6 +2503,7 @@ document.getElementById('reportBtn').style.display = 'flex';
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
 document.getElementById('driverSavedSpecialBtn').style.display = 'none';
 startPassengerLocationTracking();
+showToast('تم التبديل إلى وضع الراكب', 'info');
 } else {
 const dd = await db.collection('drivers').doc(currentUser.uid).get();
 if (dd.exists) {
@@ -2323,6 +2523,7 @@ document.getElementById('reportBtn').style.display = 'flex';
 stopPassengerSpecialRequestsListener();
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 startSpecialRequestsNotificationListener();
+showToast('تم التبديل إلى وضع السائق', 'info');
 } else { openDriverSetupModal(); }
 }
 }
