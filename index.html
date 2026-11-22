@@ -51,14 +51,18 @@ transform: rotate(45deg); animation: glassShine 4s infinite; pointer-events: non
 @keyframes glassShine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
+/* ✅ تعديل أيقونة تحديد المسار لتكون أكثر أناقة */
 .floating-locate-btn {
 position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
-box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
-font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+background: linear-gradient(135deg, #29B6F6, #0288D1); /* لون أزرق سماوي متدرج أجمل */
+color: white; border: 2px solid rgba(255,255,255,0.9);
+box-shadow: 0 6px 20px rgba(2, 136, 209, 0.4); 
+display: flex; align-items: center; justify-content: center;
+font-size: 1.4em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
 }
-.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(30, 136, 229, 0.6); }
+.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(2, 136, 209, 0.6); }
 .floating-locate-btn:active { transform: scale(0.95); }
+
 /* ✅ تنسيق الأزرار الجديدة (الطلبات الخاصة) */
 .special-request-btn {
 position: absolute; top: 124px; left: 0; width: 46px; height: 46px; border-radius: 16px;
@@ -340,7 +344,8 @@ animation: pulse-yellow-glow 2s infinite !important;
 <div class="floating-controls">
 <div class="user-menu-container">
 <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-<button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
+<!-- ✅ تغيير الأيقونة هنا -->
+<button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">🛣️</button>
 <!-- ✅ زر الطلبات الخاصة للراكب -->
 <button class="special-request-btn" id="passengerSpecialReqBtn" onclick="openSpecialRequestModal()" title="طلب خاص" style="display:none;">📂➕</button>
 <!-- ✅ زر التبليغ الأصفر الأنيق (يظهر للراكب والسائق) -->
@@ -863,20 +868,17 @@ const snapshot = await db.collection('specialRequests')
 .where('carType', '==', currentDriver.carType)
 .where('status', '==', 'pending')
 .get();
-
 // جلب الطلبات التي أنا أتفاوض عليها حالياً (negotiating)
 const negotiatingSnapshot = await db.collection('specialRequests')
 .where('carType', '==', currentDriver.carType)
 .where('status', '==', 'negotiating')
 .where('negotiatingWith', '==', currentDriver.uid)
 .get();
-
 if(snapshot.empty && negotiatingSnapshot.empty) {
 list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات خاصة لنوع مركبتك</p></div>';
 return;
 }
 let html = '';
-
 // عرض الطلبات المعلقة
 snapshot.forEach(doc => {
 const r = doc.data();
@@ -902,7 +904,6 @@ html += `
 </div>
 </div>`;
 });
-
 // عرض الطلبات قيد التفاوض (التي قام بها هذا السائق)
 negotiatingSnapshot.forEach(doc => {
 const r = doc.data();
@@ -929,11 +930,9 @@ html += `
 </div>
 </div>`;
 });
-
 list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
-
 // ✅ وظيفة جديدة: الاتصال للتفاوض
 window.negotiateSpecialRequest = async function(reqId, phone) {
 if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
@@ -941,9 +940,9 @@ if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
 سيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 // تحديث الحالة إلى negotiating وحجزها للسائق الحالي
-await db.collection('specialRequests').doc(reqId).update({ 
-status: 'negotiating', 
-negotiatingWith: currentDriver.uid 
+await db.collection('specialRequests').doc(reqId).update({
+status: 'negotiating',
+negotiatingWith: currentDriver.uid
 });
 // فتح تطبيق الهاتف
 window.location.href = `tel:${phone}`;
@@ -952,36 +951,102 @@ loadSpecialRequestsForDriver();
 } catch(e) { console.error(e); alert('حدث خطأ أثناء بدء التفاوض'); }
 }
 };
-
-// ✅ وظيفة جديدة: تأكيد الحجز بعد التفاوض
+// ✅ وظيفة جديدة ومعدلة: تأكيد الحجز بعد التفاوض (تحويله لرحلة حقيقية)
 window.confirmSpecialRequest = async function(reqId) {
-if(confirm('هل أنت متأكد من تأكيد هذا الطلب؟ سيتم تحويله إلى رحلة مقبولة.')) {
+if(confirm('هل أنت متأكد من تأكيد هذا الطلب؟ سيتم تحويله إلى رحلة مقبولة وإنشاء محادثة.')) {
 try {
-await db.collection('specialRequests').doc(reqId).update({ 
-status: 'accepted', 
+// 1. جلب بيانات الطلب الخاص
+const doc = await db.collection('specialRequests').doc(reqId).get();
+if (!doc.exists) throw new Error('الطلب غير موجود');
+const spData = doc.data();
+
+// 2. إنشاء طلب رحلة جديد (Ride Request) بناءً على البيانات
+const rideRef = await db.collection('rideRequests').add({
+passengerId: spData.passengerId,
+passengerPhone: spData.passengerPhone,
+pickup: { name: spData.pickup, lat: null, lng: null }, // يمكن تحسينها بإحداثيات لاحقاً
+destination: { name: spData.destination, lat: null, lng: null },
+carType: spData.carType,
+price: spData.price,
+distance: 0, // مسافة تقديرية صفر لأننا نعتمد على الاتفاق
+time: 0,
+status: 'accepted', // قبول مباشر
+assignedDriverId: currentDriver.uid,
+acceptedBy: currentDriver.uid,
+acceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+skippedBy: [],
+isSpecialRequest: true // علامة تميز أنه جاء من طلب خاص
+});
+
+const rideId = rideRef.id;
+
+// 3. تحديث حالة الطلب الخاص ليعرف أنه تم تحويله
+await db.collection('specialRequests').doc(reqId).update({
+status: 'converted_to_ride',
+convertedRideId: rideId,
 acceptedBy: currentDriver.uid,
 acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-alert('✅ تم تأكيد الطلب بنجاح! سيظهر في سجلاتك وسجلات الراكب.');
-loadSpecialRequestsForDriver();
-} catch(e) { console.error(e); alert('حدث خطأ أثناء التأكيد'); }
-}
+
+// 4. تحديث حالة السائق إلى غير متاح
+await db.collection('drivers').doc(currentDriver.uid).update({
+available: false,
+lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+});
+driverAvailable = false;
+updateAvailabilityButton();
+
+// 5. إنشاء محادثة
+const cid = await createChat(rideId, spData.passengerId, currentDriver.uid);
+const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
+await sendMessage(cid, currentDriver.uid, 'driver', `✅ تم قبول طلبك الخاص! أنا في الطريق.`);
+
+// 6. تحديث الواجهة المحلية
+currentActiveRide = {
+id: rideId,
+passengerId: spData.passengerId,
+pickup: { name: spData.pickup },
+destination: { name: spData.destination },
+price: spData.price,
+carType: spData.carType,
+status: 'accepted',
+assignedDriverId: currentDriver.uid
 };
 
+saveToLocalLog({
+id: rideId, status: 'accepted',
+pickup: { name: spData.pickup },
+destination: { name: spData.destination },
+price: spData.price,
+createdAt: new Date().toISOString()
+});
+
+alert('✅ تم تأكيد الحجز بنجاح! ظهر الطلب في قائمة استقبال الطلبات وتم إشعار الراكب.');
+
+// إغلاق النافذة وتحديث القوائم
+closeDriverSpecialRequestsModal();
+loadRequests(); // لتحديث العداد في نافذة استقبال الطلبات العادية
+
+} catch(e) { 
+console.error(e); 
+alert('حدث خطأ أثناء التأكيد: ' + e.message); 
+}
+}
+};
 // ✅ وظيفة جديدة: إلغاء التفاوض (رفض)
 window.cancelNegotiation = async function(reqId) {
 if(confirm('هل تريد إلغاء التفاوض؟ سيعود الطلب متاحاً لجميع السائقين.')) {
 try {
-await db.collection('specialRequests').doc(reqId).update({ 
-status: 'pending', 
-negotiatingWith: null 
+await db.collection('specialRequests').doc(reqId).update({
+status: 'pending',
+negotiatingWith: null
 });
 alert('تم إلغاء التفاوض وعاد الطلب للقائمة العامة.');
 loadSpecialRequestsForDriver();
 } catch(e) { console.error(e); alert('حدث خطأ أثناء الإلغاء'); }
 }
 };
-
 function openPassengerRideModal() {
 if(!currentActiveRide) return;
 document.getElementById('pPickupName').textContent = currentActiveRide.pickup?.name || '---';
@@ -1712,10 +1777,9 @@ if (r.type === 'special') {
 // ✅ بطاقة الطلب الخاص مع أزرار التعديل وإعادة النشر
 // تعديل اللون للنص حسب الحالة الجديدة (negotiating)
 let statusColor = '#EF5350', statusText = '❌ ملغي';
-if (r.status === 'accepted') { statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; }
+if (r.status === 'accepted' || r.status === 'converted_to_ride') { statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; }
 else if (r.status === 'pending') { statusColor = '#FFA726'; statusText = '⏳ قيد الانتظار'; }
 else if (r.status === 'negotiating') { statusColor = '#FF9800'; statusText = '🤝 قيد التفاوض'; }
-
 const canEdit = r.status === 'pending';
 html += `<div class="record-card special-record-card" style="margin-bottom:10px; position: relative;">
 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
