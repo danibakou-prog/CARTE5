@@ -343,9 +343,9 @@ animation: pulse-yellow-glow 2s infinite !important;
 <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">📍</button>
 <!-- ✅ زر الطلبات الخاصة للراكب -->
 <button class="special-request-btn" id="passengerSpecialReqBtn" onclick="openSpecialRequestModal()" title="طلب خاص" style="display:none;">📂➕</button>
-<!-- ✅ زر التبليغ الأصفر الأنيق -->
+<!-- ✅ زر التبليغ الأصفر الأنيق (يظهر للراكب والسائق) -->
 <button class="report-btn" id="reportBtn" onclick="openReportModal()" title="إرسال تبليغ" style="display:none;">📢</button>
-<!-- ✅ زر الطلبات الخاصة للسائق (تم نقله هنا ليكون تحت أيقونة تحديد المسار) -->
+<!-- ✅ زر الطلبات الخاصة للسائق -->
 <button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">📂📨</button>
 <div class="dropdown-menu" id="userDropdownMenu">
 <div class="dropdown-header">
@@ -858,15 +858,26 @@ const list = document.getElementById('popupSpecialList');
 if(!currentDriver) return;
 list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
 try {
+// جلب الطلبات المعلقة (pending) فقط
 const snapshot = await db.collection('specialRequests')
 .where('carType', '==', currentDriver.carType)
 .where('status', '==', 'pending')
 .get();
-if(snapshot.empty) {
+
+// جلب الطلبات التي أنا أتفاوض عليها حالياً (negotiating)
+const negotiatingSnapshot = await db.collection('specialRequests')
+.where('carType', '==', currentDriver.carType)
+.where('status', '==', 'negotiating')
+.where('negotiatingWith', '==', currentDriver.uid)
+.get();
+
+if(snapshot.empty && negotiatingSnapshot.empty) {
 list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات خاصة لنوع مركبتك</p></div>';
 return;
 }
 let html = '';
+
+// عرض الطلبات المعلقة
 snapshot.forEach(doc => {
 const r = doc.data();
 html += `
@@ -887,23 +898,90 @@ html += `
 <span>💰 ${r.price} د.ج</span>
 </div>
 <div class="req-actions">
-<button class="req-btn accept-btn" onclick="acceptSpecialRequest('${doc.id}', '${r.passengerPhone}')">✅ قبول واتصال</button>
+<button class="req-btn accept-btn" style="background:linear-gradient(135deg, #42A5F5, #1E88E5)" onclick="negotiateSpecialRequest('${doc.id}', '${r.passengerPhone}')">📞 اتصال للتفاوض</button>
 </div>
 </div>`;
 });
+
+// عرض الطلبات قيد التفاوض (التي قام بها هذا السائق)
+negotiatingSnapshot.forEach(doc => {
+const r = doc.data();
+html += `
+<div class="request-card" style="border-right-color: #FF9800; background: #FFF3E0;">
+<div class="req-header">
+<span class="req-time">📅 ${r.date || 'اليوم'} | ⏰ ${r.time || 'حالاً'}</span>
+<span class="req-urgent" style="color:#FF9800">🤝 قيد التفاوض</span>
+</div>
+<div class="req-route">
+<div class="req-point"><div class="dot"></div><div><strong>من:</strong> ${r.pickup}</div></div>
+<div class="req-point"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination}</div></div>
+</div>
+<div style="background:#f9f9f9; padding:10px; border-radius:8px; margin:10px 0; font-size:0.9em;">
+📝 ${r.description || 'لا يوجد وصف'}
+</div>
+<div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666">
+<span>🚗 ${r.carType}</span>
+<span>💰 ${r.price} د.ج</span>
+</div>
+<div class="req-actions">
+<button class="req-btn accept-btn" onclick="confirmSpecialRequest('${doc.id}')">✅ تأكيد الحجز</button>
+<button class="req-btn decline-btn" onclick="cancelNegotiation('${doc.id}')">❌ إلغاء التفاوض</button>
+</div>
+</div>`;
+});
+
 list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
-window.acceptSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد قبول هذا الطلب والاتصال بالعميل؟
-رقم الهاتف: ${phone}`)) {
+
+// ✅ وظيفة جديدة: الاتصال للتفاوض
+window.negotiateSpecialRequest = async function(reqId, phone) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
+رقم الهاتف: ${phone}
+سيتم حجز الطلب لك مؤقتاً.`)) {
 try {
-await db.collection('specialRequests').doc(reqId).update({ status: 'accepted', acceptedBy: currentDriver.uid });
+// تحديث الحالة إلى negotiating وحجزها للسائق الحالي
+await db.collection('specialRequests').doc(reqId).update({ 
+status: 'negotiating', 
+negotiatingWith: currentDriver.uid 
+});
+// فتح تطبيق الهاتف
 window.location.href = `tel:${phone}`;
+// إعادة تحميل القائمة لإظهار الطلب في قسم التفاوض
 loadSpecialRequestsForDriver();
-} catch(e) { console.error(e); }
+} catch(e) { console.error(e); alert('حدث خطأ أثناء بدء التفاوض'); }
 }
 };
+
+// ✅ وظيفة جديدة: تأكيد الحجز بعد التفاوض
+window.confirmSpecialRequest = async function(reqId) {
+if(confirm('هل أنت متأكد من تأكيد هذا الطلب؟ سيتم تحويله إلى رحلة مقبولة.')) {
+try {
+await db.collection('specialRequests').doc(reqId).update({ 
+status: 'accepted', 
+acceptedBy: currentDriver.uid,
+acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+alert('✅ تم تأكيد الطلب بنجاح! سيظهر في سجلاتك وسجلات الراكب.');
+loadSpecialRequestsForDriver();
+} catch(e) { console.error(e); alert('حدث خطأ أثناء التأكيد'); }
+}
+};
+
+// ✅ وظيفة جديدة: إلغاء التفاوض (رفض)
+window.cancelNegotiation = async function(reqId) {
+if(confirm('هل تريد إلغاء التفاوض؟ سيعود الطلب متاحاً لجميع السائقين.')) {
+try {
+await db.collection('specialRequests').doc(reqId).update({ 
+status: 'pending', 
+negotiatingWith: null 
+});
+alert('تم إلغاء التفاوض وعاد الطلب للقائمة العامة.');
+loadSpecialRequestsForDriver();
+} catch(e) { console.error(e); alert('حدث خطأ أثناء الإلغاء'); }
+}
+};
+
 function openPassengerRideModal() {
 if(!currentActiveRide) return;
 document.getElementById('pPickupName').textContent = currentActiveRide.pickup?.name || '---';
@@ -1084,10 +1162,11 @@ document.getElementById('driverReceiveRequestsTop').style.display = 'block'; doc
 document.getElementById('mainRequestBtn').style.display = 'none';
 document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
 document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
-// ✅ إظهار زر الطلبات الخاصة للسائق (تم نقله)
+// ✅ إظهار زر الطلبات الخاصة للسائق
 document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
-document.getElementById('reportBtn').style.display = 'none';
+// ✅ إظهار زر التبليغ للسائق أيضاً
+document.getElementById('reportBtn').style.display = 'flex';
 startLocationUpdates(user.uid); startDriverRequestListener(); switchView('view-request');
 } else { openDriverSetupModal(); }
 } else {
@@ -1631,8 +1710,12 @@ allRecords.forEach(r => {
 const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('ar-DZ') : '';
 if (r.type === 'special') {
 // ✅ بطاقة الطلب الخاص مع أزرار التعديل وإعادة النشر
-const statusColor = r.status === 'accepted' ? '#66BB6A' : (r.status === 'pending' ? '#FFA726' : '#EF5350');
-const statusText = r.status === 'accepted' ? '✅ مقبول' : (r.status === 'pending' ? '⏳ قيد الانتظار' : '❌ ملغي');
+// تعديل اللون للنص حسب الحالة الجديدة (negotiating)
+let statusColor = '#EF5350', statusText = '❌ ملغي';
+if (r.status === 'accepted') { statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; }
+else if (r.status === 'pending') { statusColor = '#FFA726'; statusText = '⏳ قيد الانتظار'; }
+else if (r.status === 'negotiating') { statusColor = '#FF9800'; statusText = '🤝 قيد التفاوض'; }
+
 const canEdit = r.status === 'pending';
 html += `<div class="record-card special-record-card" style="margin-bottom:10px; position: relative;">
 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
@@ -1750,7 +1833,7 @@ document.getElementById('menuCarType').value = currentDriver.carType; document.g
 // ✅ إظهار أزرار السائق
 document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
-document.getElementById('reportBtn').style.display = 'none';
+document.getElementById('reportBtn').style.display = 'flex'; // ✅ إظهار التبليغ للسائق
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 } else { openDriverSetupModal(); }
 }
