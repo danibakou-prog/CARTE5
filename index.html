@@ -51,14 +51,18 @@ transform: rotate(45deg); animation: glassShine 4s infinite; pointer-events: non
 @keyframes glassShine { 0% { transform: translateX(-100%) rotate(45deg); } 20%, 100% { transform: translateX(100%) rotate(45deg); } }
 .user-icon-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 25px rgba(156, 205, 50, 0.4); background: linear-gradient(135deg, rgba(156, 205, 50, 0.25), rgba(124, 179, 66, 0.35)); border-color: var(--primary); }
 .user-icon-btn:active { transform: scale(0.95); }
+/* ✅ تعديل أيقونة تحديد المسار لتكون أكثر أناقة */
 .floating-locate-btn {
 position: absolute; top: 68px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-background: linear-gradient(135deg, #42A5F5, #1E88E5); color: white; border: 2px solid rgba(255,255,255,0.8);
-box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4); display: flex; align-items: center; justify-content: center;
-font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+background: linear-gradient(135deg, #29B6F6, #0288D1); /* لون أزرق سماوي متدرج أجمل */
+color: white; border: 2px solid rgba(255,255,255,0.9);
+box-shadow: 0 6px 20px rgba(2, 136, 209, 0.4); 
+display: flex; align-items: center; justify-content: center;
+font-size: 1.4em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
 }
-.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(30, 136, 229, 0.6); }
+.floating-locate-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(2, 136, 209, 0.6); }
 .floating-locate-btn:active { transform: scale(0.95); }
+
 /* ✅ تنسيق الأزرار الجديدة (الطلبات الخاصة) */
 .special-request-btn {
 position: absolute; top: 124px; left: 0; width: 46px; height: 46px; border-radius: 16px;
@@ -340,8 +344,8 @@ animation: pulse-yellow-glow 2s infinite !important;
 <div class="floating-controls">
 <div class="user-menu-container">
 <button class="user-icon-btn" id="userIconBtn" onclick="toggleUserMenu(event)">👤</button>
-<!-- ✅ تم تغيير الأيقونة هنا لتكون أكثر أناقة -->
-<button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار الرحلة">🧭</button>
+<!-- ✅ تغيير الأيقونة هنا -->
+<button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">🛣️</button>
 <!-- ✅ زر الطلبات الخاصة للراكب -->
 <button class="special-request-btn" id="passengerSpecialReqBtn" onclick="openSpecialRequestModal()" title="طلب خاص" style="display:none;">📂➕</button>
 <!-- ✅ زر التبليغ الأصفر الأنيق (يظهر للراكب والسائق) -->
@@ -947,18 +951,87 @@ loadSpecialRequestsForDriver();
 } catch(e) { console.error(e); alert('حدث خطأ أثناء بدء التفاوض'); }
 }
 };
-// ✅ وظيفة جديدة: تأكيد الحجز بعد التفاوض
+// ✅ وظيفة جديدة ومعدلة: تأكيد الحجز بعد التفاوض (تحويله لرحلة حقيقية)
 window.confirmSpecialRequest = async function(reqId) {
-if(confirm('هل أنت متأكد من تأكيد هذا الطلب؟ سيتم تحويله إلى رحلة مقبولة.')) {
+if(confirm('هل أنت متأكد من تأكيد هذا الطلب؟ سيتم تحويله إلى رحلة مقبولة وإنشاء محادثة.')) {
 try {
+// 1. جلب بيانات الطلب الخاص
+const doc = await db.collection('specialRequests').doc(reqId).get();
+if (!doc.exists) throw new Error('الطلب غير موجود');
+const spData = doc.data();
+
+// 2. إنشاء طلب رحلة جديد (Ride Request) بناءً على البيانات
+const rideRef = await db.collection('rideRequests').add({
+passengerId: spData.passengerId,
+passengerPhone: spData.passengerPhone,
+pickup: { name: spData.pickup, lat: null, lng: null }, // يمكن تحسينها بإحداثيات لاحقاً
+destination: { name: spData.destination, lat: null, lng: null },
+carType: spData.carType,
+price: spData.price,
+distance: 0, // مسافة تقديرية صفر لأننا نعتمد على الاتفاق
+time: 0,
+status: 'accepted', // قبول مباشر
+assignedDriverId: currentDriver.uid,
+acceptedBy: currentDriver.uid,
+acceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+skippedBy: [],
+isSpecialRequest: true // علامة تميز أنه جاء من طلب خاص
+});
+
+const rideId = rideRef.id;
+
+// 3. تحديث حالة الطلب الخاص ليعرف أنه تم تحويله
 await db.collection('specialRequests').doc(reqId).update({
-status: 'accepted',
+status: 'converted_to_ride',
+convertedRideId: rideId,
 acceptedBy: currentDriver.uid,
 acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
 });
-alert('✅ تم تأكيد الطلب بنجاح! سيظهر في سجلاتك وسجلات الراكب.');
-loadSpecialRequestsForDriver();
-} catch(e) { console.error(e); alert('حدث خطأ أثناء التأكيد'); }
+
+// 4. تحديث حالة السائق إلى غير متاح
+await db.collection('drivers').doc(currentDriver.uid).update({
+available: false,
+lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
+});
+driverAvailable = false;
+updateAvailabilityButton();
+
+// 5. إنشاء محادثة
+const cid = await createChat(rideId, spData.passengerId, currentDriver.uid);
+const dn = currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق';
+await sendMessage(cid, currentDriver.uid, 'driver', `✅ تم قبول طلبك الخاص! أنا في الطريق.`);
+
+// 6. تحديث الواجهة المحلية
+currentActiveRide = {
+id: rideId,
+passengerId: spData.passengerId,
+pickup: { name: spData.pickup },
+destination: { name: spData.destination },
+price: spData.price,
+carType: spData.carType,
+status: 'accepted',
+assignedDriverId: currentDriver.uid
+};
+
+saveToLocalLog({
+id: rideId, status: 'accepted',
+pickup: { name: spData.pickup },
+destination: { name: spData.destination },
+price: spData.price,
+createdAt: new Date().toISOString()
+});
+
+alert('✅ تم تأكيد الحجز بنجاح! ظهر الطلب في قائمة استقبال الطلبات وتم إشعار الراكب.');
+
+// إغلاق النافذة وتحديث القوائم
+closeDriverSpecialRequestsModal();
+loadRequests(); // لتحديث العداد في نافذة استقبال الطلبات العادية
+
+} catch(e) { 
+console.error(e); 
+alert('حدث خطأ أثناء التأكيد: ' + e.message); 
+}
 }
 };
 // ✅ وظيفة جديدة: إلغاء التفاوض (رفض)
@@ -1243,17 +1316,8 @@ function loadRequests() {
 const l = document.getElementById('popupRequestsList'), c = document.getElementById('popupRequestsCount');
 if (!currentDriver || !driverAvailable) { if (document.getElementById('driverRequestsModal').classList.contains('active')) { l.innerHTML = '<div class="empty-state"><div class="icon">⏸️</div><p>أنت غير متاح حالياً</p><button class="refresh-btn" onclick="toggleDriverStatus()">🟢 تفعيل</button></div>'; } return; }
 if (document.getElementById('driverRequestsModal').classList.contains('active')) {
-// ✅ تم تعديل الاستعلام ليشمل الطلبات المقبولة أيضاً لكي تظهر في السجل
-db.collection('rideRequests').where('status', 'in', ['pending', 'accepted']).where('carType', '==', currentDriver.carType).limit(50).get().then(s => {
-const r = []; 
-s.forEach(d => { 
-    const x = d.data(); 
-    // ✅ شرط العرض: إما معلقة ومخصصة لي، أو مقبولة من قبلي
-    if ((x.assignedDriverId === currentDriver.uid && x.status === 'pending') || 
-        (x.acceptedBy === currentDriver.uid && x.status === 'accepted')) { 
-        r.push({ id: d.id, ...x }); 
-    } 
-});
+db.collection('rideRequests').where('status', '==', 'pending').where('carType', '==', currentDriver.carType).limit(20).get().then(s => {
+const r = []; s.forEach(d => { const x = d.data(); if (x.skippedBy?.includes(currentDriver.uid)) return; if (x.assignedDriverId === currentDriver.uid && x.status === 'pending') { r.push({ id: d.id, ...x }); } });
 renderRequests(r, l, c);
 }).catch(e => { console.error(e); });
 }
@@ -1265,26 +1329,7 @@ l.innerHTML=reqs.map(r=>{
 const u=r.time<=15, cr=r.createdAt?.toDate?.()||new Date(), m=Math.floor((Date.now()-cr)/60000);
 let d='---'; if(currentDriver?.location&&r.pickup?.lat){ const ds=Utils.calculateDistance(currentDriver.location.lat,currentDriver.location.lng,r.pickup.lat,r.pickup.lng); d=ds.toFixed(1); }
 const rej=r.skippedBy?.length||0;
-
-// ✅ تحديد النص والألوان بناءً على حالة الطلب (جديد أم مقبول)
-const isAccepted = r.status === 'accepted';
-const statusBadge = isAccepted 
-    ? `<span class="req-urgent" style="color:#66BB6A; background:#E8F5E9; padding:2px 8px; border-radius:12px;">✅ مقبول</span>` 
-    : (u ? '<span class="req-urgent">⚡ عاجل</span>' : '');
-
-const actionsHtml = isAccepted 
-    ? `<div class="req-actions"><button class="req-btn" style="background:#ECEFF1; color:#666; cursor:default;">تم القبول</button></div>`
-    : `<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div>`;
-
-return `<div class="request-card ${u&&!isAccepted?'urgent':''}" style="${isAccepted ? 'border-right-color: #66BB6A; background: #F1F8E9;' : ''}">
-<div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${statusBadge}</div>
-${!isAccepted ? `<div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div>` : ''}
-<div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div>
-<div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div>
-<div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>
-${rej>0 && !isAccepted ?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}
-${actionsHtml}
-</div>`;
+return `<div class="request-card ${u?'urgent':''}"><div class="req-header"><span class="req-time">🕐 منذ ${m} د</span>${u?'<span class="req-urgent">⚡ عاجل</span>':''}</div><div class="req-distance-badge">🚶 الراكب ينتظر على بعد ${d} كم</div><div class="req-route"><div class="req-point pickup"><div class="dot"></div><div><strong>من:</strong> ${r.pickup?.name||'موقع'}</div></div><div class="req-point dest"><div class="dot"></div><div><strong>إلى:</strong> ${r.destination?.name||'موقع'}</div></div></div><div class="req-destination-info"><strong>🎯 الوجهة:</strong> ${r.destination?.name||'غير محدد'}<br><strong>📏 مسافة الرحلة:</strong> ${r.distance||'---'} كم • <strong>⏱️ الوقت:</strong> ${r.time||'---'} د</div><div style="display:flex;justify-content:space-between;margin:10px 0;font-size:0.9em;color:#666"><span>🚗 ${r.carType}</span><span>💰 ${r.price} د.ج</span></div>${rej>0?`<div style="margin-bottom:8px"><span class="resend-indicator">🔄 رُفض ${rej} مرة</span></div>`:''}<div class="req-actions"><button class="req-btn accept-btn" onclick="handleAccept('${r.id}')">✅ قبول</button><button class="req-btn decline-btn" onclick="handleDecline('${r.id}')">❌ رفض</button></div></div>`;
 }).join('');
 }
 window.handleAccept=async function(rideId){
@@ -1732,7 +1777,7 @@ if (r.type === 'special') {
 // ✅ بطاقة الطلب الخاص مع أزرار التعديل وإعادة النشر
 // تعديل اللون للنص حسب الحالة الجديدة (negotiating)
 let statusColor = '#EF5350', statusText = '❌ ملغي';
-if (r.status === 'accepted') { statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; }
+if (r.status === 'accepted' || r.status === 'converted_to_ride') { statusColor = '#66BB6A'; statusText = '✅ تمت الموافقة'; }
 else if (r.status === 'pending') { statusColor = '#FFA726'; statusText = '⏳ قيد الانتظار'; }
 else if (r.status === 'negotiating') { statusColor = '#FF9800'; statusText = '🤝 قيد التفاوض'; }
 const canEdit = r.status === 'pending';
