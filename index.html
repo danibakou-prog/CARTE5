@@ -1001,96 +1001,59 @@ if (countEl) countEl.remove();
 }
 // ✅ دالة نظام الإشعارات المحسّنة - تعمل لجميع أنواع المركبات
 function startSpecialRequestsNotificationListener() {
-    // ✅ التحقق المشدد من وجود بيانات السائق ونوع المركبة
-    if (!currentDriver?.uid || !currentDriver?.carType) {
-        console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
-        return;
-    }
-    
-    console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: [${currentDriver.carType}]`);
-    
-    // إيقاف أي مستمع سابق لتجنب التكرار
-    if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
-    if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
-    
-    specialFirstLoad = true;
-    savedFirstLoad = true;
-    lastSpecialRequestsIds = new Set();
-    lastSavedSpecialIds = new Set();
-    
-    // ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
-    // نستخدم where مرتين للتأكد من المطابقة الدقيقة لنوع المركبة والحالة
-    specialRequestsListener = db.collection('specialRequests')
-        .where('carType', '==', currentDriver.carType) // مطابقة النوع (دراجة، شاحنة، الخ)
-        .where('status', '==', 'pending')
-        .onSnapshot(snapshot => {
-            const currentIds = new Set();
-            snapshot.forEach(doc => currentIds.add(doc.id));
-            
-            console.log(`📊 عدد الطلبات الخاصة لـ (${currentDriver.carType}): ${currentIds.size}`);
-            
-            // ✅ تحديث العداد دائماً
-            updateSpecialRequestsCount(currentIds.size);
-            
-            if (specialFirstLoad) {
-                lastSpecialRequestsIds = currentIds;
-                specialFirstLoad = false;
-                console.log('✅ التحميل الأول مكتمل');
-                return;
-            }
-            
-            let hasNew = false;
-            let newCount = 0;
-            
-            // اكتشاف الطلبات الجديدة
-            currentIds.forEach(id => {
-                if (!lastSpecialRequestsIds.has(id)) {
-                    hasNew = true;
-                    newCount++;
-                }
-            });
-            
-            lastSpecialRequestsIds = currentIds;
-            
-            if (hasNew && currentIds.size > 0) {
-                console.log(`🔔 طلب جديد! العدد: ${newCount}`);
-                // إظهار السهم الأحمر
-                showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
-                // تشغيل الصوت
-                Utils.playSound('requestSound');
-                // إظهار التنبيه النصي
-                showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
-            }
-        }, err => {
-            console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
-        });
-        
-    // ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
-    savedSpecialListener = db.collection('specialRequests')
-        .where('acceptedBy', '==', currentDriver.uid)
-        .where('status', '==', 'converted_to_ride')
-        .onSnapshot(snapshot => {
-            const currentIds = new Set();
-            snapshot.forEach(doc => currentIds.add(doc.id));
-            updateSavedSpecialCount(currentIds.size);
-            
-            if (savedFirstLoad) {
-                lastSavedSpecialIds = currentIds;
-                savedFirstLoad = false;
-                return;
-            }
-            
-            let hasNew = false;
-            currentIds.forEach(id => {
-                if (!lastSavedSpecialIds.has(id)) hasNew = true;
-            });
-            lastSavedSpecialIds = currentIds;
-            
-            if (hasNew && currentIds.size > 0) {
-                showNotificationArrow('driverSavedSpecialBtn', 'savedSpecialArrow', 'green', '🔻');
-            }
-        }, err => console.error('خطأ في مستمع الطلبات المحجوزة:', err));
+if (!currentDriver?.uid || !currentDriver?.carType) {
+console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
+return;
 }
+
+console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: ${currentDriver.carType}`);
+
+if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
+if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
+specialFirstLoad = true;
+savedFirstLoad = true;
+lastSpecialRequestsIds = new Set();
+lastSavedSpecialIds = new Set();
+
+// ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
+specialRequestsListener = db.collection('specialRequests')
+.where('carType', '==', currentDriver.carType)
+.where('status', '==', 'pending')
+.onSnapshot(snapshot => {
+const currentIds = new Set();
+snapshot.forEach(doc => currentIds.add(doc.id));
+
+console.log(`📊 عدد الطلبات الخاصة (${currentDriver.carType}): ${currentIds.size}`);
+
+// ✅ تحديث العداد دائماً
+updateSpecialRequestsCount(currentIds.size);
+
+if (specialFirstLoad) {
+lastSpecialRequestsIds = currentIds;
+specialFirstLoad = false;
+console.log('✅ التحميل الأول مكتمل');
+return;
+}
+
+let hasNew = false;
+let newCount = 0;
+currentIds.forEach(id => {
+if (!lastSpecialRequestsIds.has(id)) {
+hasNew = true;
+newCount++;
+}
+});
+lastSpecialRequestsIds = currentIds;
+
+if (hasNew && currentIds.size > 0) {
+console.log(`🔔 طلب جديد! العدد: ${newCount}`);
+showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
+Utils.playSound('requestSound');
+showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
+}
+}, err => {
+console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
+});
 
 // ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
 savedSpecialListener = db.collection('specialRequests')
@@ -1431,60 +1394,44 @@ showToast('حدث خطأ أثناء الحذف', 'error');
 }
 }
 async function submitSpecialRequest() {
-    const pickup = document.getElementById('spPickup').value.trim();
-    const dest = document.getElementById('spDest').value.trim();
-    const carType = document.getElementById('spCarType').value;
-    const price = document.getElementById('spPrice').value;
-    const date = document.getElementById('spDate').value;
-    const time = document.getElementById('spTime').value;
-    const phone = document.getElementById('spPhone').value.trim();
-    const desc = document.getElementById('spDesc').value.trim();
-    
-    if(!pickup || !dest || !price || !phone) { 
-        showToast("يرجى ملء جميع الحقول الأساسية", 'warning'); 
-        return; 
-    }
-    
-    const data = {
-        passengerId: currentUser.uid,
-        passengerPhone: phone,
-        pickup: pickup,
-        destination: dest,
-        carType: carType, // تأكد من حفظ نوع المركبة المختار بدقة
-        price: parseFloat(price),
-        date: date,
-        time: time,
-        description: desc,
-        status: 'pending',
-    };
-    
-    try {
-        if (currentEditingSpecialId) {
-            await db.collection('specialRequests').doc(currentEditingSpecialId).update({
-                ...data,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showToast("✅ تم تعديل الطلب الخاص بنجاح!", 'success');
-        } else {
-            data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            // إضافة الطلب لقاعدة البيانات
-            await db.collection('specialRequests').add(data);
-            showToast("تم إرسال طلبك الخاص بنجاح! سيظهر لدى السائقين المناسبين.", 'success');
-            
-            // ✅ حل المشكلة: محاولة إعادة تشغيل مستمع الإشعارات للسائقين المتصلين حالياً
-            // هذا يضمن أنه إذا كان هناك سائق متصل بنفس نوع المركبة، سيتم تنبيهه فوراً
-            if (window.currentDriver && window.currentDriver.carType === carType) {
-                 stopSpecialRequestsNotificationListener();
-                 setTimeout(() => {
-                     startSpecialRequestsNotificationListener();
-                 }, 500);
-            }
-        }
-        closeSpecialRequestModal();
-    } catch(e) {
-        console.error(e);
-        showToast("حدث خطأ أثناء الإرسال", 'error');
-    }
+const pickup = document.getElementById('spPickup').value.trim();
+const dest = document.getElementById('spDest').value.trim();
+const carType = document.getElementById('spCarType').value;
+const price = document.getElementById('spPrice').value;
+const date = document.getElementById('spDate').value;
+const time = document.getElementById('spTime').value;
+const phone = document.getElementById('spPhone').value.trim();
+const desc = document.getElementById('spDesc').value.trim();
+if(!pickup || !dest || !price || !phone) { showToast("يرجى ملء جميع الحقول الأساسية", 'warning'); return; }
+const data = {
+passengerId: currentUser.uid,
+passengerPhone: phone,
+pickup: pickup,
+destination: dest,
+carType: carType,
+price: parseFloat(price),
+date: date,
+time: time,
+description: desc,
+status: 'pending',
+};
+try {
+if (currentEditingSpecialId) {
+await db.collection('specialRequests').doc(currentEditingSpecialId).update({
+...data,
+updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+showToast("✅ تم تعديل الطلب الخاص بنجاح!", 'success');
+} else {
+data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+await db.collection('specialRequests').add(data);
+showToast("تم إرسال طلبك الخاص بنجاح! سيظهر لدى السائقين المناسبين.", 'success');
+}
+closeSpecialRequestModal();
+} catch(e) {
+console.error(e);
+showToast("حدث خطأ أثناء الإرسال", 'error');
+}
 }
 async function loadSpecialRequestsForDriver() {
 const list = document.getElementById('popupSpecialList');
