@@ -1198,11 +1198,11 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 // ✅ دالة جديدة: إلغاء الطلب المحجوز من السائق (بدون إشعار)
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
+if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
 سيتم:
 • إزالة الطلب من قائمتك
 • إشعار الراكب فوراً بالإلغاء
-• إعادة تفعيل حسابك كمتاح')) return;
+• إعادة تفعيل حسابك كمتاح`)) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
