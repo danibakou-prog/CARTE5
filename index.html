@@ -90,17 +90,6 @@ animation: pulse-yellow-soft 3s infinite;
 }
 .report-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255, 193, 7, 0.7); }
 .report-btn:active { transform: scale(0.95); }
-
-/* ✅ زر المحادثات الجديد */
-.chat-list-btn {
-position: absolute; top: 292px; left: 0; width: 46px; height: 46px; border-radius: 16px;
-background: linear-gradient(135deg, #4FC3F7, #0288D1); color: white; border: 2px solid rgba(255,255,255,0.8);
-box-shadow: 0 6px 20px rgba(2, 136, 209, 0.45); display: flex; align-items: center; justify-content: center;
-font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
-}
-.chat-list-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(2, 136, 209, 0.7); }
-.chat-list-btn:active { transform: scale(0.95); }
-
 .btn-notification-arrow {
 position: absolute;
 top: -10px;
@@ -515,88 +504,6 @@ to { opacity: 0; transform: translateY(-30px) scale(0.9); }
 .toast.hiding {
 animation: toastSlideUp 0.3s ease forwards;
 }
-
-/* ✅ أنماط قائمة المحادثات */
-.chat-list-modal {
-    max-width: 450px;
-    padding: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
-}
-.chat-list-header {
-    padding: 20px;
-    background: linear-gradient(135deg, #4FC3F7, #0288D1);
-    color: white;
-    text-align: center;
-    font-weight: 800;
-    font-size: 1.2em;
-    position: relative;
-}
-.chat-list-body {
-    padding: 10px;
-    overflow-y: auto;
-    background: #f9f9f9;
-}
-.chat-item {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: 0.2s;
-    cursor: pointer;
-}
-.chat-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-color: #4FC3F7;
-}
-.chat-item-info {
-    flex: 1;
-    text-align: right;
-}
-.chat-item-name {
-    font-weight: 700;
-    color: #333;
-    font-size: 1em;
-    margin-bottom: 4px;
-}
-.chat-item-last-msg {
-    font-size: 0.85em;
-    color: #666;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-}
-.chat-item-time {
-    font-size: 0.75em;
-    color: #999;
-    margin-top: 4px;
-}
-.chat-delete-btn {
-    background: #FFEBEE;
-    color: #EF5350;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: 0.2s;
-}
-.chat-delete-btn:hover {
-    background: #EF5350;
-    color: white;
-}
 </style>
 </head>
 <body>
@@ -635,8 +542,6 @@ animation: toastSlideUp 0.3s ease forwards;
 <button class="floating-locate-btn" id="locateRouteBtn" onclick="drawDriverToPassengerRoute()" title="عرض مسار السائق للراكب">🛣️</button>
 <button class="special-request-btn" id="passengerSpecialReqBtn" onclick="openSpecialRequestModal()" title="طلب خاص" style="display:none;">📂➕</button>
 <button class="report-btn" id="reportBtn" onclick="openReportModal()" title="إرسال تبليغ" style="display:none;">📢</button>
-<!-- ✅ زر المحادثات الجديد -->
-<button class="chat-list-btn" id="chatListBtn" onclick="openChatListModal()" title="المحادثات" style="display:none;">💬</button>
 <button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">📂📨</button>
 <button class="saved-special-btn" id="driverSavedSpecialBtn" onclick="openDriverSavedSpecialModal()" title="الطلبات المحجوزة المؤكدة" style="display:none;">💼✅</button>
 <div class="dropdown-menu" id="userDropdownMenu">
@@ -783,22 +688,6 @@ animation: toastSlideUp 0.3s ease forwards;
 <button class="auth-btn report-submit-btn" onclick="submitReport()">📤 إرسال التبليغ</button>
 </div>
 </div>
-
-<!-- ✅ نافذة قائمة المحادثات -->
-<div id="chatListModal" class="modal-overlay">
-    <div class="modal-content chat-list-modal">
-        <div class="chat-list-header">
-            💬 سجل المحادثات
-            <button class="close-modal" onclick="closeChatListModal()" style="top: 10px; left: 10px; background: rgba(255,255,255,0.2); color: white;">×</button>
-        </div>
-        <div class="chat-list-body" id="chatListBody">
-            <div style="text-align:center; padding: 20px; color: #666;">
-                <span class="spinner"></span> جاري تحميل المحادثات...
-            </div>
-        </div>
-    </div>
-</div>
-
 <div id="driverSpecialRequestsModal" class="driver-popup-overlay">
 <div class="driver-popup-box">
 <div class="popup-header" style="background: linear-gradient(135deg, #AB47BC, #8E24AA);">
@@ -1110,38 +999,62 @@ countEl.textContent = count;
 if (countEl) countEl.remove();
 }
 }
+// ✅ دالة نظام الإشعارات المحسّنة - تعمل لجميع أنواع المركبات
 function startSpecialRequestsNotificationListener() {
-if (!currentDriver?.uid || !currentDriver?.carType) return;
+if (!currentDriver?.uid || !currentDriver?.carType) {
+console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
+return;
+}
+
+console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: ${currentDriver.carType}`);
+
 if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
 if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
 specialFirstLoad = true;
 savedFirstLoad = true;
 lastSpecialRequestsIds = new Set();
 lastSavedSpecialIds = new Set();
-// ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر
+
+// ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
 specialRequestsListener = db.collection('specialRequests')
 .where('carType', '==', currentDriver.carType)
 .where('status', '==', 'pending')
 .onSnapshot(snapshot => {
 const currentIds = new Set();
 snapshot.forEach(doc => currentIds.add(doc.id));
+
+console.log(`📊 عدد الطلبات الخاصة (${currentDriver.carType}): ${currentIds.size}`);
+
 // ✅ تحديث العداد دائماً
 updateSpecialRequestsCount(currentIds.size);
+
 if (specialFirstLoad) {
 lastSpecialRequestsIds = currentIds;
 specialFirstLoad = false;
+console.log('✅ التحميل الأول مكتمل');
 return;
 }
+
 let hasNew = false;
+let newCount = 0;
 currentIds.forEach(id => {
-if (!lastSpecialRequestsIds.has(id)) hasNew = true;
+if (!lastSpecialRequestsIds.has(id)) {
+hasNew = true;
+newCount++;
+}
 });
 lastSpecialRequestsIds = currentIds;
+
 if (hasNew && currentIds.size > 0) {
+console.log(`🔔 طلب جديد! العدد: ${newCount}`);
 showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
 Utils.playSound('requestSound');
+showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
 }
-}, err => console.error('Special requests listener error:', err));
+}, err => {
+console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
+});
+
 // ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
 savedSpecialListener = db.collection('specialRequests')
 .where('acceptedBy', '==', currentDriver.uid)
@@ -1150,21 +1063,25 @@ savedSpecialListener = db.collection('specialRequests')
 const currentIds = new Set();
 snapshot.forEach(doc => currentIds.add(doc.id));
 updateSavedSpecialCount(currentIds.size);
+
 if (savedFirstLoad) {
 lastSavedSpecialIds = currentIds;
 savedFirstLoad = false;
 return;
 }
+
 let hasNew = false;
 currentIds.forEach(id => {
 if (!lastSavedSpecialIds.has(id)) hasNew = true;
 });
 lastSavedSpecialIds = currentIds;
+
 if (hasNew && currentIds.size > 0) {
 showNotificationArrow('driverSavedSpecialBtn', 'savedSpecialArrow', 'green', '🔻');
 }
-}, err => console.error('Saved special listener error:', err));
+}, err => console.error('خطأ في مستمع الطلبات المحجوزة:', err));
 }
+
 function stopSpecialRequestsNotificationListener() {
 if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
 if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
@@ -1268,11 +1185,7 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 // ✅ دالة جديدة: إلغاء الطلب المحجوز من السائق (بدون إشعار)
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
-سيتم:
-• إزالة الطلب من قائمتك
-• إشعار الراكب فوراً بالإلغاء
-• إعادة تفعيل حسابك كمتاح')) return;
+if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح')) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -1596,9 +1509,7 @@ list.innerHTML = html;
 }
 // ✅ دالة التفاوض بدون إشعار
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
-رقم الهاتف: ${phone}
-سيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -1825,7 +1736,6 @@ document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('chatListBtn').style.display = 'flex'; // إظهار زر المحادثات للسائق
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 startSpecialRequestsNotificationListener();
 routeUserAfterAuth(currentUser);
@@ -1887,7 +1797,6 @@ document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('chatListBtn').style.display = 'flex'; // إظهار زر المحادثات للسائق
 startLocationUpdates(user.uid); startDriverRequestListener();
 startSpecialRequestsNotificationListener();
 stopPassengerSpecialRequestsListener();
@@ -1903,7 +1812,6 @@ document.getElementById('passengerMyRequestsTop').style.display = 'block'; docum
 document.getElementById('mainRequestBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
 document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('chatListBtn').style.display = 'flex'; // إظهار زر المحادثات للراكب
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
 document.getElementById('driverSavedSpecialBtn').style.display = 'none';
 stopSpecialRequestsNotificationListener();
@@ -2191,8 +2099,8 @@ btn.classList.remove('hidden');
 }, {passive: true});
 function initMap() {
 map=MapUtils.initMap('map');
-setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true), true);
-setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false), true);
+setupAutocomplete('pickupInput','pickupResults',(lat,lng,name)=>setLocation(pickupMarker,[lat,lng],'pickupInput','pickupCoords',true, name), true);
+setupAutocomplete('destInput','destResults',(lat,lng,name)=>setLocation(destMarker,[lat,lng],'destInput','destCoords',false, name), true);
 if(navigator.geolocation) useGPS(); else fallbackLocation();
 map.on('click', e=>{ if(mapClickEnabled&&rideState==='idle')selectDestinationFromMap(e.latlng.lat,e.latlng.lng); });
 // ✅ عرض المواقع الثابتة عند التركيز على حقل الانطلاق + مسح كلمة "موقعي الحالي"
@@ -2212,15 +2120,18 @@ showFixedLocations();
 document.getElementById('destInput').addEventListener('focus', showFixedLocationsForDest);
 document.getElementById('destInput').addEventListener('click', showFixedLocationsForDest);
 }
-function setLocation(m, pos, iid, cid, isP) {
+
+// ✅ دالة setLocation المحسّنة - تقبل اسم الموقع كوسيط
+function setLocation(m, pos, iid, cid, isP, locationName = null) {
 if(isP) pickupPos=pos; else destPos=pos;
-// ✅ إصلاح: استخدام اسم الموقع الفعلي بدلاً من النص الثابت
-const locationName = isP ? (pos.name || 'موقعي الحالي') : (pos.name || 'محدد');
-document.getElementById(iid).value = locationName;
+// ✅ إذا كان هناك اسم موقع محدد، استخدمه بدلاً من "موقعي الحالي"
+const displayName = locationName || (isP ? 'موقعي الحالي' : (document.getElementById(iid).value || 'محدد'));
+document.getElementById(iid).value = displayName;
 document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Utils.formatCoords(pos[0],pos[1])}</span><button class="coords-copy-btn" onclick="Utils.copyToClipboard('${Utils.formatCoords(pos[0],pos[1])}')">📋 نسخ</button>`;
 if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16);
 if(pickupPos&&destPos) drawRoute(); return m;
 }
+
 function useGPS() {
 const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...';
 navigator.geolocation.getCurrentPosition(p=>{
@@ -2244,6 +2155,7 @@ if(destPos) drawRoute();
 }
 function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
 function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
+
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الانطلاق
 function showFixedLocations() {
 const res = document.getElementById('pickupResults');
@@ -2254,11 +2166,13 @@ res.classList.add('show');
 res.querySelectorAll('.autocomplete-item').forEach(it=>{
 it.onclick=()=>{
 res.classList.remove('show');
-// ✅ تمرير الاسم الصحيح إلى setLocation
-setLocation(pickupMarker, {lat: parseFloat(it.dataset.lat), lng: parseFloat(it.dataset.lng), name: it.dataset.name}, 'pickupInput', 'pickupCoords', true);
+const locName = it.dataset.name;
+// ✅ تمرير اسم الموقع إلى setLocation
+setLocation(pickupMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng)], 'pickupInput', 'pickupCoords', true, locName);
 };
 });
 }
+
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الوجهة
 function showFixedLocationsForDest() {
 const res = document.getElementById('destResults');
@@ -2269,11 +2183,13 @@ res.classList.add('show');
 res.querySelectorAll('.autocomplete-item').forEach(it=>{
 it.onclick=()=>{
 res.classList.remove('show');
-// ✅ تمرير الاسم الصحيح إلى setLocation
-setLocation(destMarker, {lat: parseFloat(it.dataset.lat), lng: parseFloat(it.dataset.lng), name: it.dataset.name}, 'destInput', 'destCoords', false);
+const locName = it.dataset.name;
+document.getElementById('destInput').value = locName;
+setLocation(destMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng)], 'destInput', 'destCoords', false, locName);
 };
 });
 }
+
 // ✅ دالة الإكمال التلقائي المحسّنة - تعرض اسم المدينة فقط
 function setupAutocomplete(iid, rid, cb, countryOnly=true) {
 const inp=document.getElementById(iid), res=document.getElementById(rid);
@@ -2377,7 +2293,8 @@ console.error(e);
 };
 inp.addEventListener('input', Utils.debounce(performSearch, 400));
 }
-// ✅ دالة عرض المواقع الثابتة في نافذة الطلب الخاص
+
+// ✅ دالة عرض المواقع الثابتة في نافذة الطلب الخاص - مع إصلاح اسم الموقع
 function showFixedLocationsInSpecial(iid, rid) {
 const res = document.getElementById(rid);
 res.innerHTML = FIXED_LOCATIONS.map(loc =>
@@ -2388,7 +2305,7 @@ res.querySelectorAll('.autocomplete-item').forEach(it => {
 it.onclick = () => {
 res.classList.remove('show');
 const inp = document.getElementById(iid);
-inp.value = it.dataset.name;
+inp.value = it.dataset.name; // ✅ استخدام اسم الموقع الفعلي
 };
 });
 }
@@ -2718,7 +2635,6 @@ document.getElementById('passengerMyRequestsTop').style.display = 'block'; docum
 document.getElementById('mainRequestBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
 document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('chatListBtn').style.display = 'flex';
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
 document.getElementById('driverSavedSpecialBtn').style.display = 'none';
 startPassengerLocationTracking();
@@ -2739,7 +2655,6 @@ document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('chatListBtn').style.display = 'flex';
 stopPassengerSpecialRequestsListener();
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
 startSpecialRequestsNotificationListener();
@@ -2751,112 +2666,6 @@ document.addEventListener('click', function(e) {
 const menu = document.getElementById('userDropdownMenu'); const btn = document.getElementById('userIconBtn');
 if (menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) { menu.classList.remove('show'); }
 }, {passive: true});
-
-// ✅ دوال قائمة المحادثات الجديدة
-window.openChatListModal = async function() {
-    document.getElementById('chatListModal').classList.add('active');
-    const listBody = document.getElementById('chatListBody');
-    listBody.innerHTML = '<div style="text-align:center; padding: 20px; color: #666;"><span class="spinner"></span> جاري تحميل المحادثات...</div>';
-    
-    try {
-        const uid = currentUser.uid;
-        // جلب المحادثات التي شاركت فيها
-        const chatsSnapshot = await db.collection('chats')
-            .where(firebase.firestore.FieldPath.documentId(), '>=', `chat_`)
-            .get();
-            
-        let html = '';
-        let count = 0;
-        
-        for (const doc of chatsSnapshot.docs) {
-            const chatData = doc.data();
-            // التحقق مما إذا كان المستخدم طرفاً في المحادثة
-            if (chatData.passengerId === uid || chatData.driverId === uid) {
-                const otherId = chatData.passengerId === uid ? chatData.driverId : chatData.passengerId;
-                const otherRole = chatData.passengerId === uid ? 'driver' : 'passenger';
-                
-                // جلب اسم الطرف الآخر
-                let otherName = 'مستخدم';
-                if (otherRole === 'driver') {
-                    const dDoc = await db.collection('drivers').doc(otherId).get();
-                    if (dDoc.exists) otherName = dDoc.data().carName || 'سائق';
-                } else {
-                    // للراكب يمكن استخدام البريد أو اسم افتراضي
-                    otherName = 'راكب'; 
-                }
-                
-                const lastMsg = chatData.lastMessage || 'لا توجد رسائل';
-                const lastUpdate = chatData.lastUpdate ? chatData.lastUpdate.toDate().toLocaleTimeString('ar-DZ', {hour: '2-digit', minute:'2-digit'}) : '';
-                
-                html += `
-                <div class="chat-item" onclick="openChatFromList('${doc.id}', '${otherId}', '${otherRole}', '${otherName}')">
-                    <div class="chat-item-info">
-                        <div class="chat-item-name">${otherName}</div>
-                        <div class="chat-item-last-msg">${lastMsg}</div>
-                        <div class="chat-item-time">${lastUpdate}</div>
-                    </div>
-                    <button class="chat-delete-btn" onclick="event.stopPropagation(); deleteChat('${doc.id}')" title="حذف المحادثة">🗑️</button>
-                </div>`;
-                count++;
-            }
-        }
-        
-        if (count === 0) {
-            listBody.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="icon">💬</div><p>لا توجد محادثات سابقة</p></div>';
-        } else {
-            listBody.innerHTML = html;
-        }
-        
-    } catch (e) {
-        console.error(e);
-        listBody.innerHTML = '<div style="text-align:center; color: red;">حدث خطأ في تحميل المحادثات</div>';
-    }
-};
-
-window.closeChatListModal = function() {
-    document.getElementById('chatListModal').classList.remove('active');
-};
-
-window.openChatFromList = async function(chatDocId, otherId, otherRole, otherName) {
-    closeChatListModal();
-    // استخراج معرف الرحلة من معرف المحادثة
-    const rideId = chatDocId.replace('chat_', '');
-    
-    // جلب تفاصيل الرحلة لعرضها في الشات
-    let rideData = null;
-    try {
-        const rideDoc = await db.collection('rideRequests').doc(rideId).get();
-        if (rideDoc.exists) rideData = rideDoc.data();
-    } catch(e) {}
-    
-    // فتح واجهة الشات
-    showChatInterface(rideId, currentUser.uid, otherId, currentUser.role || (currentDriver ? 'driver' : 'passenger'), otherName, rideData);
-};
-
-window.deleteChat = async function(chatId) {
-    if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟')) return;
-    try {
-        // حذف الرسائل أولاً
-        const messagesRef = db.collection('chats').doc(chatId).collection('messages');
-        const messagesSnap = await messagesRef.get();
-        const batch = db.batch();
-        messagesSnap.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        await batch.commit();
-        
-        // حذف وثيقة المحادثة الرئيسية
-        await db.collection('chats').doc(chatId).delete();
-        
-        // إعادة تحميل القائمة
-        openChatListModal();
-        showToast('✅ تم حذف المحادثة', 'success');
-    } catch (e) {
-        console.error(e);
-        showToast('❌ حدث خطأ أثناء الحذف', 'error');
-    }
-};
-
 window.onload=initFirebase;
 </script>
 </body>
