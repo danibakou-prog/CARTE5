@@ -1001,85 +1001,98 @@ if (countEl) countEl.remove();
 }
 // ✅ دالة نظام الإشعارات المحسّنة - تعمل لجميع أنواع المركبات
 function startSpecialRequestsNotificationListener() {
-if (!currentDriver?.uid || !currentDriver?.carType) {
-console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
-return;
-}
+    if (!currentDriver?.uid || !currentDriver?.carType) {
+        console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
+        return;
+    }
+    
+    // تنظيف الاسم لضمان المطابقة (إزالة المسافات الزائدة)
+    const myCarType = currentDriver.carType.trim();
+    console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: ${myCarType}`);
+    
+    if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
+    if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
+    
+    specialFirstLoad = true;
+    savedFirstLoad = true;
+    lastSpecialRequestsIds = new Set();
+    lastSavedSpecialIds = new Set();
 
-console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: ${currentDriver.carType}`);
+    // ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
+    // تم تعديل الاستماع ليجلب جميع الطلبات المعلقة ثم يفلترها محلياً لضمان عدم ضياع أي طلب بسبب اختلاف بسيط في النص
+    specialRequestsListener = db.collection('specialRequests')
+    .where('status', '==', 'pending')
+    .onSnapshot(snapshot => {
+        const currentIds = new Set();
+        let matchCount = 0;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // مقارنة مرنة لنوع المركبة
+            if (data.carType && data.carType.trim() === myCarType) {
+                currentIds.add(doc.id);
+                matchCount++;
+            }
+        });
+        
+        console.log(`📊 عدد الطلبات الخاصة المطابقة (${myCarType}): ${matchCount}`);
+        
+        // ✅ تحديث العداد دائماً
+        updateSpecialRequestsCount(matchCount);
+        
+        if (specialFirstLoad) {
+            lastSpecialRequestsIds = currentIds;
+            specialFirstLoad = false;
+            console.log('✅ التحميل الأول مكتمل');
+            return;
+        }
+        
+        let hasNew = false;
+        let newCount = 0;
+        currentIds.forEach(id => {
+            if (!lastSpecialRequestsIds.has(id)) {
+                hasNew = true;
+                newCount++;
+            }
+        });
+        
+        lastSpecialRequestsIds = currentIds;
+        
+        if (hasNew && matchCount > 0) {
+            console.log(`🔔 طلب جديد! العدد: ${newCount}`);
+            showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
+            Utils.playSound('requestSound');
+            showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
+        }
+    }, err => {
+        console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
+    });
 
-if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
-if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
-specialFirstLoad = true;
-savedFirstLoad = true;
-lastSpecialRequestsIds = new Set();
-lastSavedSpecialIds = new Set();
-
-// ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
-specialRequestsListener = db.collection('specialRequests')
-.where('carType', '==', currentDriver.carType)
-.where('status', '==', 'pending')
-.onSnapshot(snapshot => {
-const currentIds = new Set();
-snapshot.forEach(doc => currentIds.add(doc.id));
-
-console.log(`📊 عدد الطلبات الخاصة (${currentDriver.carType}): ${currentIds.size}`);
-
-// ✅ تحديث العداد دائماً
-updateSpecialRequestsCount(currentIds.size);
-
-if (specialFirstLoad) {
-lastSpecialRequestsIds = currentIds;
-specialFirstLoad = false;
-console.log('✅ التحميل الأول مكتمل');
-return;
-}
-
-let hasNew = false;
-let newCount = 0;
-currentIds.forEach(id => {
-if (!lastSpecialRequestsIds.has(id)) {
-hasNew = true;
-newCount++;
-}
-});
-lastSpecialRequestsIds = currentIds;
-
-if (hasNew && currentIds.size > 0) {
-console.log(`🔔 طلب جديد! العدد: ${newCount}`);
-showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
-Utils.playSound('requestSound');
-showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
-}
-}, err => {
-console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
-});
-
-// ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
-savedSpecialListener = db.collection('specialRequests')
-.where('acceptedBy', '==', currentDriver.uid)
-.where('status', '==', 'converted_to_ride')
-.onSnapshot(snapshot => {
-const currentIds = new Set();
-snapshot.forEach(doc => currentIds.add(doc.id));
-updateSavedSpecialCount(currentIds.size);
-
-if (savedFirstLoad) {
-lastSavedSpecialIds = currentIds;
-savedFirstLoad = false;
-return;
-}
-
-let hasNew = false;
-currentIds.forEach(id => {
-if (!lastSavedSpecialIds.has(id)) hasNew = true;
-});
-lastSavedSpecialIds = currentIds;
-
-if (hasNew && currentIds.size > 0) {
-showNotificationArrow('driverSavedSpecialBtn', 'savedSpecialArrow', 'green', '🔻');
-}
-}, err => console.error('خطأ في مستمع الطلبات المحجوزة:', err));
+    // ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
+    savedSpecialListener = db.collection('specialRequests')
+    .where('acceptedBy', '==', currentDriver.uid)
+    .where('status', '==', 'converted_to_ride')
+    .onSnapshot(snapshot => {
+        const currentIds = new Set();
+        snapshot.forEach(doc => currentIds.add(doc.id));
+        updateSavedSpecialCount(currentIds.size);
+        
+        if (savedFirstLoad) {
+            lastSavedSpecialIds = currentIds;
+            savedFirstLoad = false;
+            return;
+        }
+        
+        let hasNew = false;
+        currentIds.forEach(id => {
+            if (!lastSavedSpecialIds.has(id)) hasNew = true;
+        });
+        lastSavedSpecialIds = currentIds;
+        
+        if (hasNew && currentIds.size > 0) {
+            showNotificationArrow('driverSavedSpecialBtn', 'savedSpecialArrow', 'green', '🔻');
+        }
+    }, err => console.error('خطأ في مستمع الطلبات المحجوزة:', err));
 }
 
 function stopSpecialRequestsNotificationListener() {
@@ -1185,7 +1198,11 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 // ✅ دالة جديدة: إلغاء الطلب المحجوز من السائق (بدون إشعار)
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح')) return;
+if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
+سيتم:
+• إزالة الطلب من قائمتك
+• إشعار الراكب فوراً بالإلغاء
+• إعادة تفعيل حسابك كمتاح')) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -1439,25 +1456,38 @@ const countEl = document.getElementById('popupSpecialCount');
 if(!currentDriver) return;
 list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
 try {
-const snapshot = await db.collection('specialRequests')
-.where('carType', '==', currentDriver.carType)
-.where('status', '==', 'pending')
-.get();
-const negotiatingSnapshot = await db.collection('specialRequests')
-.where('carType', '==', currentDriver.carType)
-.where('status', '==', 'negotiating')
-.where('negotiatingWith', '==', currentDriver.uid)
-.get();
-const totalCount = snapshot.size + negotiatingSnapshot.size;
-if (countEl) countEl.textContent = totalCount;
-if(snapshot.empty && negotiatingSnapshot.empty) {
-list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات خاصة لنوع مركبتك</p></div>';
-return;
-}
-let html = '';
-snapshot.forEach(doc => {
-const r = doc.data();
-html += `
+    // ✅ تعديل الاستعلام لجلب جميع الطلبات المعلقة ثم الفلترة محلياً لضمان عملها مع كل الأنواع
+    const snapshot = await db.collection('specialRequests')
+    .where('status', '==', 'pending')
+    .get();
+    
+    const myCarType = currentDriver.carType.trim();
+    const matchingDocs = [];
+    const negotiatingDocs = [];
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        // فلترة محلية دقيقة
+        if (data.carType && data.carType.trim() === myCarType) {
+            if (data.status === 'pending') {
+                matchingDocs.push({ id: doc.id, ...data });
+            } else if (data.status === 'negotiating' && data.negotiatingWith === currentDriver.uid) {
+                negotiatingDocs.push({ id: doc.id, ...data });
+            }
+        }
+    });
+
+    const totalCount = matchingDocs.length + negotiatingDocs.length;
+    if (countEl) countEl.textContent = totalCount;
+    
+    if(matchingDocs.length === 0 && negotiatingDocs.length === 0) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد طلبات خاصة لنوع مركبتك</p></div>';
+        return;
+    }
+    
+    let html = '';
+    matchingDocs.forEach(r => {
+        html += `
 <div class="request-card">
 <div class="req-header">
 <span class="req-time">📅 ${r.date || 'اليوم'} | ⏰ ${r.time || 'حالاً'}</span>
@@ -1475,13 +1505,12 @@ html += `
 <span>💰 ${r.price} د.ج</span>
 </div>
 <div class="req-actions">
-<button class="req-btn accept-btn" style="background:linear-gradient(135deg, #42A5F5, #1E88E5)" onclick="negotiateSpecialRequest('${doc.id}', '${r.passengerPhone}')">📞 اتصال للتفاوض</button>
+<button class="req-btn accept-btn" style="background:linear-gradient(135deg, #42A5F5, #1E88E5)" onclick="negotiateSpecialRequest('${r.id}', '${r.passengerPhone}')">📞 اتصال للتفاوض</button>
 </div>
 </div>`;
-});
-negotiatingSnapshot.forEach(doc => {
-const r = doc.data();
-html += `
+    });
+    negotiatingDocs.forEach(r => {
+        html += `
 <div class="request-card" style="border-right-color: #FF9800; background: #FFF3E0;">
 <div class="req-header">
 <span class="req-time">📅 ${r.date || 'اليوم'} | ⏰ ${r.time || 'حالاً'}</span>
@@ -1499,17 +1528,19 @@ html += `
 <span>💰 ${r.price} د.ج</span>
 </div>
 <div class="req-actions">
-<button class="req-btn accept-btn" onclick="confirmSpecialRequest('${doc.id}')">✅ تأكيد الحجز</button>
-<button class="req-btn decline-btn" onclick="cancelNegotiation('${doc.id}')">❌ إلغاء التفاوض</button>
+<button class="req-btn accept-btn" onclick="confirmSpecialRequest('${r.id}')">✅ تأكيد الحجز</button>
+<button class="req-btn decline-btn" onclick="cancelNegotiation('${r.id}')">❌ إلغاء التفاوض</button>
 </div>
 </div>`;
-});
-list.innerHTML = html;
+    });
+    list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
 // ✅ دالة التفاوض بدون إشعار
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
+رقم الهاتف: ${phone}
+سيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -2120,7 +2151,6 @@ showFixedLocations();
 document.getElementById('destInput').addEventListener('focus', showFixedLocationsForDest);
 document.getElementById('destInput').addEventListener('click', showFixedLocationsForDest);
 }
-
 // ✅ دالة setLocation المحسّنة - تقبل اسم الموقع كوسيط
 function setLocation(m, pos, iid, cid, isP, locationName = null) {
 if(isP) pickupPos=pos; else destPos=pos;
@@ -2131,7 +2161,6 @@ document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Util
 if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16);
 if(pickupPos&&destPos) drawRoute(); return m;
 }
-
 function useGPS() {
 const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...';
 navigator.geolocation.getCurrentPosition(p=>{
@@ -2155,7 +2184,6 @@ if(destPos) drawRoute();
 }
 function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
 function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
-
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الانطلاق
 function showFixedLocations() {
 const res = document.getElementById('pickupResults');
@@ -2172,7 +2200,6 @@ setLocation(pickupMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng
 };
 });
 }
-
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الوجهة
 function showFixedLocationsForDest() {
 const res = document.getElementById('destResults');
@@ -2189,7 +2216,6 @@ setLocation(destMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng)]
 };
 });
 }
-
 // ✅ دالة الإكمال التلقائي المحسّنة - تعرض اسم المدينة فقط
 function setupAutocomplete(iid, rid, cb, countryOnly=true) {
 const inp=document.getElementById(iid), res=document.getElementById(rid);
@@ -2293,7 +2319,6 @@ console.error(e);
 };
 inp.addEventListener('input', Utils.debounce(performSearch, 400));
 }
-
 // ✅ دالة عرض المواقع الثابتة في نافذة الطلب الخاص - مع إصلاح اسم الموقع
 function showFixedLocationsInSpecial(iid, rid) {
 const res = document.getElementById(rid);
