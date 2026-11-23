@@ -1005,16 +1005,13 @@ if (!currentDriver?.uid || !currentDriver?.carType) {
 console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
 return;
 }
-
 console.log(`🔔 بدء الاستماع للطلبات الخاصة لنوع: ${currentDriver.carType}`);
-
 if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
 if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
 specialFirstLoad = true;
 savedFirstLoad = true;
 lastSpecialRequestsIds = new Set();
 lastSavedSpecialIds = new Set();
-
 // ✅ الاستماع للطلبات الخاصة المعلقة - عداد + سهم أحمر + صوت
 specialRequestsListener = db.collection('specialRequests')
 .where('carType', '==', currentDriver.carType)
@@ -1022,19 +1019,15 @@ specialRequestsListener = db.collection('specialRequests')
 .onSnapshot(snapshot => {
 const currentIds = new Set();
 snapshot.forEach(doc => currentIds.add(doc.id));
-
 console.log(`📊 عدد الطلبات الخاصة (${currentDriver.carType}): ${currentIds.size}`);
-
 // ✅ تحديث العداد دائماً
 updateSpecialRequestsCount(currentIds.size);
-
 if (specialFirstLoad) {
 lastSpecialRequestsIds = currentIds;
 specialFirstLoad = false;
 console.log('✅ التحميل الأول مكتمل');
 return;
 }
-
 let hasNew = false;
 let newCount = 0;
 currentIds.forEach(id => {
@@ -1044,7 +1037,6 @@ newCount++;
 }
 });
 lastSpecialRequestsIds = currentIds;
-
 if (hasNew && currentIds.size > 0) {
 console.log(`🔔 طلب جديد! العدد: ${newCount}`);
 showNotificationArrow('driverSpecialReqBtn', 'newSpecialArrow', 'red', '🔻');
@@ -1054,7 +1046,6 @@ showToast(`🔔 لديك ${newCount} طلب خاص جديد!`, 'info', 3000);
 }, err => {
 console.error('❌ خطأ في مستمع الطلبات الخاصة:', err);
 });
-
 // ✅ الاستماع للطلبات المحجوزة المؤكدة - عداد + سهم أخضر
 savedSpecialListener = db.collection('specialRequests')
 .where('acceptedBy', '==', currentDriver.uid)
@@ -1063,25 +1054,21 @@ savedSpecialListener = db.collection('specialRequests')
 const currentIds = new Set();
 snapshot.forEach(doc => currentIds.add(doc.id));
 updateSavedSpecialCount(currentIds.size);
-
 if (savedFirstLoad) {
 lastSavedSpecialIds = currentIds;
 savedFirstLoad = false;
 return;
 }
-
 let hasNew = false;
 currentIds.forEach(id => {
 if (!lastSavedSpecialIds.has(id)) hasNew = true;
 });
 lastSavedSpecialIds = currentIds;
-
 if (hasNew && currentIds.size > 0) {
 showNotificationArrow('driverSavedSpecialBtn', 'savedSpecialArrow', 'green', '🔻');
 }
 }, err => console.error('خطأ في مستمع الطلبات المحجوزة:', err));
 }
-
 function stopSpecialRequestsNotificationListener() {
 if (specialRequestsListener) { specialRequestsListener(); specialRequestsListener = null; }
 if (savedSpecialListener) { savedSpecialListener(); savedSpecialListener = null; }
@@ -1185,7 +1172,11 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 // ✅ دالة جديدة: إلغاء الطلب المحجوز من السائق (بدون إشعار)
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح')) return;
+if (!confirm('⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
+سيتم:
+• إزالة الطلب من قائمتك
+• إشعار الراكب فوراً بالإلغاء
+• إعادة تفعيل حسابك كمتاح')) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -1509,7 +1500,9 @@ list.innerHTML = html;
 }
 // ✅ دالة التفاوض بدون إشعار
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
+رقم الهاتف: ${phone}
+سيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -2120,7 +2113,6 @@ showFixedLocations();
 document.getElementById('destInput').addEventListener('focus', showFixedLocationsForDest);
 document.getElementById('destInput').addEventListener('click', showFixedLocationsForDest);
 }
-
 // ✅ دالة setLocation المحسّنة - تقبل اسم الموقع كوسيط
 function setLocation(m, pos, iid, cid, isP, locationName = null) {
 if(isP) pickupPos=pos; else destPos=pos;
@@ -2131,7 +2123,6 @@ document.getElementById(cid).innerHTML = `<span class="coords-badge">📍 ${Util
 if(m) map.removeLayer(m); m = MapUtils.createMarker(pos, isP?'passenger':'destination').addTo(map); map.setView(pos,16);
 if(pickupPos&&destPos) drawRoute(); return m;
 }
-
 function useGPS() {
 const b=document.getElementById('gpsBtn'); b.disabled=true; b.textContent='🔄...';
 navigator.geolocation.getCurrentPosition(p=>{
@@ -2155,7 +2146,6 @@ if(destPos) drawRoute();
 }
 function enableMapClick() { mapClickEnabled=true; const b=document.getElementById('mapBtn'); b.textContent='✅ انقر';b.style.background='#66BB6A'; setTimeout(()=>{mapClickEnabled=false;b.textContent='🗺️ خريطة';b.style.background='';},10000); }
 function selectDestinationFromMap(lat,lng) { destPos=[lat,lng]; document.getElementById('destCoords').textContent=Utils.formatCoords(lat,lng); document.getElementById('destInput').value='محدد عبر الخريطة'; if(destMarker)map.removeLayer(destMarker); destMarker=MapUtils.createMarker(destPos,'destination').addTo(map); map.setView(destPos,16); mapClickEnabled=false; document.getElementById('mapBtn').textContent='🗺️ خريطة'; document.getElementById('mapBtn').style.background=''; if(pickupPos)drawRoute(); }
-
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الانطلاق
 function showFixedLocations() {
 const res = document.getElementById('pickupResults');
@@ -2172,7 +2162,6 @@ setLocation(pickupMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng
 };
 });
 }
-
 // ✅ دالة عرض المواقع الثابتة (01-10) في حقل الوجهة
 function showFixedLocationsForDest() {
 const res = document.getElementById('destResults');
@@ -2189,7 +2178,6 @@ setLocation(destMarker, [parseFloat(it.dataset.lat), parseFloat(it.dataset.lng)]
 };
 });
 }
-
 // ✅ دالة الإكمال التلقائي المحسّنة - تعرض اسم المدينة فقط
 function setupAutocomplete(iid, rid, cb, countryOnly=true) {
 const inp=document.getElementById(iid), res=document.getElementById(rid);
@@ -2293,7 +2281,6 @@ console.error(e);
 };
 inp.addEventListener('input', Utils.debounce(performSearch, 400));
 }
-
 // ✅ دالة عرض المواقع الثابتة في نافذة الطلب الخاص - مع إصلاح اسم الموقع
 function showFixedLocationsInSpecial(iid, rid) {
 const res = document.getElementById(rid);
@@ -2597,6 +2584,8 @@ const dType = MapUtils.getDriverIconType(newType);
 window.driverMarker = MapUtils.createMarker([currentDriver.location.lat, currentDriver.location.lng], dType, `<b>${newName}</b><br>${newType}`).addTo(map);
 }
 startDriverRequestListener();
+// ✅ إصلاح المشكلة: إعادة تشغيل مستمع الطلبات الخاصة مع نوع المركبة الجديد
+startSpecialRequestsNotificationListener();
 document.getElementById('popupDriverName').textContent = `${newName} | ${newType}`;
 // ✅ عرض رسالة "تم الحفظ"
 btn.textContent = '✅ تم الحفظ';
