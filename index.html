@@ -90,7 +90,6 @@ animation: pulse-yellow-soft 3s infinite;
 }
 .report-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255, 193, 7, 0.7); }
 .report-btn:active { transform: scale(0.95); }
-
 /* ✅ زر إنشاء رحلة جماعية للسائق */
 .create-trip-btn {
 position: absolute; top: 292px; left: 0; width: 46px; height: 46px; border-radius: 16px;
@@ -106,7 +105,6 @@ animation: pulse-orange-soft 3s infinite;
 }
 .create-trip-btn:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 25px rgba(230, 74, 25, 0.7); }
 .create-trip-btn:active { transform: scale(0.95); }
-
 /* ✅ زر عرض رحلات السائق للراكب */
 .view-trips-btn {
 position: absolute; top: 292px; left: 0; width: 46px; height: 46px; border-radius: 16px;
@@ -121,7 +119,6 @@ animation: pulse-indigo-soft 3s infinite;
 }
 .view-trips-btn:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 25px rgba(57, 73, 171, 0.7); }
 .view-trips-btn:active { transform: scale(0.95); }
-
 .btn-notification-arrow {
 position: absolute;
 top: -10px;
@@ -545,7 +542,6 @@ to { opacity: 0; transform: translateY(-30px) scale(0.9); }
 .toast.hiding {
 animation: toastSlideUp 0.3s ease forwards;
 }
-
 /* ✅ أنماط جديدة لنافذة إنشاء رحلة السائق */
 .create-trip-modal-content {
 max-width: 420px;
@@ -570,7 +566,6 @@ padding: 14px;
 font-size: 0.95em;
 }
 .create-trip-submit-btn:hover { background: linear-gradient(135deg, #E64A19, #D84315); }
-
 /* ✅ أنماط جديدة لنافذة عرض رحلات السائق للراكب */
 .view-trips-modal {
 position: fixed;
@@ -706,7 +701,6 @@ align-items: center;
 gap: 5px;
 }
 .complete-trip-btn:hover { background: linear-gradient(135deg, #2E7D32, #1B5E20); }
-
 /* ✅ بطاقة راكب محجوز */
 .booked-passenger-card {
 background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
@@ -915,7 +909,6 @@ gap: 5px;
 <button class="auth-btn special-submit-btn" id="specialSubmitBtn" onclick="submitSpecialRequest()">✅ إرسال الطلب للسائقين</button>
 </div>
 </div>
-
 <!-- ✅ نافذة إنشاء رحلة جماعية للسائق -->
 <div id="createTripModal" class="modal-overlay">
 <div class="modal-content create-trip-modal-content">
@@ -960,7 +953,6 @@ gap: 5px;
 <button class="auth-btn create-trip-submit-btn" onclick="submitCreateTrip()">✅ نشر الرحلة للركاب</button>
 </div>
 </div>
-
 <!-- ✅ نافذة عرض رحلات السائق للراكب -->
 <div id="viewTripsModal" class="view-trips-modal">
 <div class="view-trips-box">
@@ -987,7 +979,6 @@ gap: 5px;
 </div>
 </div>
 </div>
-
 <!-- ✅ نافذة تأكيد الحجز (إدخال رقم الهاتف) -->
 <div id="bookTripModal" class="modal-overlay">
 <div class="modal-content" style="max-width: 380px;">
@@ -995,17 +986,21 @@ gap: 5px;
 <div style="font-size: 3em; margin-bottom: 10px;">🎫</div>
 <h3 style="color: #3949AB; margin-bottom: 15px; font-weight: 800;">تأكيد الحجز</h3>
 <p style="color: #555; margin-bottom: 20px; font-size: 0.92em; line-height: 1.5;">
-أدخل رقم هاتفك ليتمكن السائق من التواصل معك
+أدخل رقم هاتفك وعدد المقاعد ليتمكن السائق من التواصل معك
 </p>
 <div class="form-group">
 <label>📞 رقم هاتفك</label>
 <input type="tel" id="bookTripPhone" class="auth-input" placeholder="مثال: 0555123456">
 </div>
+<!-- ✅ إضافة حقل عدد المقاعد -->
+<div class="form-group">
+<label>💺 عدد المقاعد المطلوبة</label>
+<input type="number" id="bookTripSeats" class="auth-input" placeholder="1" min="1" value="1">
+</div>
 <div id="bookTripSummary" style="background: #E8EAF6; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 0.88em; text-align: right;"></div>
 <button class="auth-btn" style="background: linear-gradient(135deg, #5C6BC0, #3949AB); color: white;" onclick="confirmBookTrip()">✅ تأكيد الحجز</button>
 </div>
 </div>
-
 <div id="reportModal" class="modal-overlay">
 <div class="modal-content report-modal-content">
 <button class="close-modal" onclick="closeReportModal()">×</button>
@@ -1072,7 +1067,6 @@ gap: 5px;
 </div>
 </div>
 </div>
-
 <!-- ✅ نافذة عرض حجوزات رحلة السائق (مع الركاب المحجوزين وزر مكتمل) -->
 <div id="driverTripBookingsModal" class="driver-popup-overlay">
 <div class="driver-popup-box">
@@ -1101,7 +1095,6 @@ gap: 5px;
 </div>
 </div>
 </div>
-
 <div id="driverSetupModal" class="modal-overlay">
 <div class="modal-content">
 <button class="close-modal" onclick="closeDriverSetupModal()">×</button>
@@ -1225,7 +1218,6 @@ let specialFirstLoad = true;
 let savedFirstLoad = true;
 let passengerSpecialListener = null;
 let lastSeenCancelledSpecials = new Set();
-
 // ✅ متغيرات جديدة لنظام الرحلات الجماعية
 let driverTripsListener = null;
 let lastDriverTripsIds = new Set();
@@ -1233,7 +1225,6 @@ let driverTripsFirstLoad = true;
 let currentBookingTripId = null;
 let currentViewingTripId = null;
 let driverTripBookingsListener = null;
-
 const FIXED_LOCATIONS = [
 { id: '01', name: 'وسط المدينة', lat: 35.633438, lng: 3.222985 },
 { id: 'مستشفى 60 سرير', name: 'مستشفى 60 سرير', lat: 35.620169, lng: 3.213308 },
@@ -1376,7 +1367,6 @@ countEl.textContent = count;
 if (countEl) countEl.remove();
 }
 }
-
 // ✅ دالة جديدة: تحديث عداد الرحلات الجماعية للراكب
 function updateDriverTripsCount(count) {
 const btn = document.getElementById('passengerViewTripsBtn');
@@ -1394,7 +1384,6 @@ countEl.textContent = count;
 if (countEl) countEl.remove();
 }
 }
-
 // ✅ دالة جديدة: تحديث عداد حجوزات الرحلة للسائق
 function updateTripBookingsCount(count, totalSeats) {
 const countEl = document.getElementById('driverTripBookingsCount');
@@ -1402,7 +1391,6 @@ if (countEl) {
 countEl.textContent = `${count}/${totalSeats}`;
 }
 }
-
 function startSpecialRequestsNotificationListener() {
 if (!currentDriver?.uid || !currentDriver?.carType) {
 console.warn('⚠️ لا يمكن بدء المستمع: currentDriver أو carType غير محدد');
@@ -1486,14 +1474,12 @@ if (countEl1) countEl1.remove();
 const countEl2 = document.getElementById('specialReqCount');
 if (countEl2) countEl2.remove();
 }
-
 // ✅ دالة جديدة: بدء الاستماع للرحلات الجماعية (للسائق والراكب)
 function startDriverTripsListener() {
 if (!currentUser?.uid) return;
 if (driverTripsListener) { driverTripsListener(); driverTripsListener = null; }
 driverTripsFirstLoad = true;
 lastDriverTripsIds = new Set();
-
 driverTripsListener = db.collection('driverTrips')
 .where('status', '==', 'active')
 .onSnapshot(snapshot => {
@@ -1503,28 +1489,23 @@ snapshot.forEach(doc => {
 currentIds.add(doc.id);
 activeCount++;
 });
-
 // ✅ للراكب: تحديث العداد وتنبيه صوتي عند ظهور رحلة جديدة
 if (!currentDriver) {
 updateDriverTripsCount(activeCount);
-
 if (driverTripsFirstLoad) {
 lastDriverTripsIds = currentIds;
 driverTripsFirstLoad = false;
 return;
 }
-
 let hasNew = false;
 currentIds.forEach(id => {
 if (!lastDriverTripsIds.has(id)) hasNew = true;
 });
 lastDriverTripsIds = currentIds;
-
 if (hasNew && activeCount > 0) {
 showNotificationArrow('passengerViewTripsBtn', 'newTripArrow', 'indigo', '🔻');
 Utils.playSound('newTripSound');
 showToast('🚌 رحلة جديدة متاحة! اضغط لعرضها', 'info', 3000);
-
 // ✅ تحديث القائمة إذا كانت مفتوحة
 if (document.getElementById('viewTripsModal').classList.contains('active')) {
 loadAvailableTripsForPassenger();
@@ -1538,7 +1519,6 @@ lastDriverTripsIds = currentIds;
 driverTripsFirstLoad = false;
 return;
 }
-
 // التحقق من وجود رحلة جديدة خاصة بالسائق الحالي
 let hasNewMyTrip = false;
 snapshot.forEach(doc => {
@@ -1548,14 +1528,12 @@ hasNewMyTrip = true;
 }
 });
 lastDriverTripsIds = currentIds;
-
 if (hasNewMyTrip) {
 showToast('🎫 تم نشر رحلتك بنجاح!', 'success', 2500);
 }
 }
 }, err => console.error('خطأ في مستمع الرحلات الجماعية:', err));
 }
-
 function stopDriverTripsListener() {
 if (driverTripsListener) { driverTripsListener(); driverTripsListener = null; }
 if (driverTripBookingsListener) { driverTripBookingsListener(); driverTripBookingsListener = null; }
@@ -1563,7 +1541,6 @@ clearNotificationArrow('newTripArrow');
 const countEl = document.getElementById('driverTripsCount');
 if (countEl) countEl.remove();
 }
-
 function startPassengerSpecialRequestsListener() {
 if (!currentUser?.uid) return;
 if (passengerSpecialListener) { passengerSpecialListener(); passengerSpecialListener = null; }
@@ -1591,7 +1568,6 @@ loadUserHistory();
 function stopPassengerSpecialRequestsListener() {
 if (passengerSpecialListener) { passengerSpecialListener(); passengerSpecialListener = null; }
 }
-
 // ✅ دوال جديدة لنظام الرحلات الجماعية
 function openCreateTripModal() {
 document.getElementById('createTripModal').classList.add('active');
@@ -1605,7 +1581,6 @@ document.getElementById('ctPhone').value = currentDriver.phone;
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('ctDate').value = today;
 }
-
 function closeCreateTripModal() {
 document.getElementById('createTripModal').classList.remove('active');
 document.getElementById('ctPickup').value = '';
@@ -1616,7 +1591,6 @@ document.getElementById('ctSeats').value = '4';
 document.getElementById('ctDate').value = '';
 document.getElementById('ctTime').value = '';
 }
-
 async function submitCreateTrip() {
 const pickup = document.getElementById('ctPickup').value.trim();
 const dest = document.getElementById('ctDest').value.trim();
@@ -1625,7 +1599,6 @@ const time = document.getElementById('ctTime').value;
 const price = document.getElementById('ctPrice').value;
 const seats = parseInt(document.getElementById('ctSeats').value) || 4;
 const phone = document.getElementById('ctPhone').value.trim();
-
 if (!pickup || !dest || !price || !phone || !date || !time) {
 showToast('⚠️ يرجى ملء جميع الحقول', 'warning');
 return;
@@ -1634,7 +1607,6 @@ if (seats < 1 || seats > 20) {
 showToast('⚠️ عدد المقاعد يجب أن يكون بين 1 و 20', 'warning');
 return;
 }
-
 try {
 await db.collection('driverTrips').add({
 driverId: currentDriver.uid,
@@ -1658,42 +1630,34 @@ console.error(e);
 showToast('❌ حدث خطأ أثناء نشر الرحلة', 'error');
 }
 }
-
 function openViewTripsModal() {
 document.getElementById('viewTripsModal').classList.add('active');
 clearNotificationArrow('newTripArrow');
 loadAvailableTripsForPassenger();
 }
-
 function closeViewTripsModal() {
 document.getElementById('viewTripsModal').classList.remove('active');
 }
-
 async function loadAvailableTripsForPassenger() {
 const list = document.getElementById('viewTripsList');
 const countEl = document.getElementById('viewTripsCount');
 list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
-
 try {
 const snapshot = await db.collection('driverTrips')
 .where('status', '==', 'active')
 .get();
-
 if (snapshot.empty) {
 list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>لا توجد رحلات متاحة حالياً</p><button class="refresh-btn" onclick="loadAvailableTripsForPassenger()">🔄 تحديث</button></div>';
 if (countEl) countEl.textContent = '0';
 return;
 }
-
 if (countEl) countEl.textContent = snapshot.size;
-
 let html = '';
 snapshot.forEach(doc => {
 const t = doc.data();
 const isBooked = t.passengers && t.passengers.some(p => p.passengerId === currentUser.uid);
 const isFull = t.bookedSeats >= t.totalSeats;
 const availableSeats = t.totalSeats - t.bookedSeats;
-
 html += `
 <div class="trip-card">
 <div class="trip-header">
@@ -1718,18 +1682,17 @@ ${isBooked
 </div>
 </div>`;
 });
-
 list.innerHTML = html;
 } catch (e) {
 console.error(e);
 list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>';
 }
 }
-
 function openBookTripModal(tripId, pickup, dest, price, date, time) {
 currentBookingTripId = tripId;
 document.getElementById('bookTripModal').classList.add('active');
 document.getElementById('bookTripPhone').value = '';
+document.getElementById('bookTripSeats').value = '1'; // ✅ إعادة تعيين عدد المقاعد
 document.getElementById('bookTripSummary').innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px;">
 <div>📍 <strong>من:</strong> ${pickup}</div>
@@ -1739,15 +1702,15 @@ document.getElementById('bookTripSummary').innerHTML = `
 </div>
 `;
 }
-
 function closeBookTripModal() {
 document.getElementById('bookTripModal').classList.remove('active');
 currentBookingTripId = null;
 }
-
 // ✅ دالة تأكيد الحجز المحسّنة باستخدام Transaction
 async function confirmBookTrip() {
 const phone = document.getElementById('bookTripPhone').value.trim();
+const seatsToBook = parseInt(document.getElementById('bookTripSeats').value) || 1; // ✅ جلب عدد المقاعد المطلوبة
+
 if (!phone) {
 showToast('⚠️ يرجى إدخال رقم هاتفك', 'warning');
 return;
@@ -1756,37 +1719,33 @@ if (phone.length < 8) {
 showToast('⚠️ رقم الهاتف غير صحيح', 'warning');
 return;
 }
-
-if (!currentBookingTripId) return;
-
-const btn = event?.target;
-if (btn) { 
-btn.disabled = true; 
-btn.textContent = '🔄 جاري الحجز...'; 
+if (seatsToBook < 1) {
+showToast('⚠️ يرجى اختيار مقعد واحد على الأقل', 'warning');
+return;
 }
-
+if (!currentBookingTripId) return;
+const btn = event?.target;
+if (btn) {
+btn.disabled = true;
+btn.textContent = '🔄 جاري الحجز...';
+}
 try {
 const tripRef = db.collection('driverTrips').doc(currentBookingTripId);
-
 // ✅ استخدام transaction لضمان الذرية والتعامل مع الحقول غير الموجودة
 await db.runTransaction(async (transaction) => {
 const tripDoc = await transaction.get(tripRef);
-
 if (!tripDoc.exists) {
 throw new Error('الرحلة لم تعد متاحة');
 }
-
 const tripData = tripDoc.data();
-
-// ✅ التحقق من عدم الحجز المسبق
+// ✅ التحقق من عدم الحجز المسبق (إذا كان المستخدم قد حجز بالفعل)
 if (tripData.passengers && tripData.passengers.some(p => p.passengerId === currentUser.uid)) {
 throw new Error('لقد قمت بحجز هذه الرحلة مسبقاً');
 }
-
-// ✅ التحقق من وجود مقاعد
+// ✅ التحقق من وجود مقاعد كافية
 const currentBooked = tripData.bookedSeats || 0;
-if (currentBooked >= tripData.totalSeats) {
-throw new Error('اكتملت المقاعد');
+if ((currentBooked + seatsToBook) > tripData.totalSeats) {
+throw new Error(`عذراً، المتبقي فقط ${tripData.totalSeats - currentBooked} مقاعد`);
 }
 
 // ✅ إنشاء الحجز مع استخدام Date بدلاً من serverTimestamp
@@ -1794,58 +1753,50 @@ const passengerEntry = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
 passengerEmail: currentUser.email || '',
-bookedAt: new Date()
+bookedAt: new Date(),
+seatsBooked: seatsToBook // ✅ حفظ عدد المقاعد المحجوزة
 };
-
 // ✅ إضافة الحجز للمصفوفة
 const currentPassengers = tripData.passengers || [];
 currentPassengers.push(passengerEntry);
-
 // ✅ تحديث المستند
 transaction.update(tripRef, {
 passengers: currentPassengers,
-bookedSeats: currentBooked + 1,
+bookedSeats: currentBooked + seatsToBook, // ✅ زيادة العدد بالمقاعد المطلوبة
 lastBookingAt: firebase.firestore.FieldValue.serverTimestamp()
 });
 });
-
-showToast('✅ تم الحجز بنجاح! سيتواصل معك السائق قريباً', 'success', 4000);
+showToast(`✅ تم حجز ${seatsToBook} مقعد بنجاح! سيتواصل معك السائق قريباً`, 'success', 4000);
 closeBookTripModal();
 loadAvailableTripsForPassenger();
-
 // ✅ تشغيل صوت للحجز
 Utils.playSound('requestSound');
-
 } catch (e) {
 console.error('خطأ في الحجز:', e);
 // ✅ إظهار رسالة الخطأ الفعلية للمستخدم
 showToast('❌ ' + (e.message || 'حدث خطأ أثناء الحجز'), 'error', 4000);
 } finally {
-if (btn) { 
-btn.disabled = false; 
-btn.textContent = '✅ تأكيد الحجز'; 
+if (btn) {
+btn.disabled = false;
+btn.textContent = '✅ تأكيد الحجز';
 }
 }
 }
-
 // ✅ عرض حجوزات الرحلة للسائق
 async function openDriverTripBookingsModal(tripId) {
 currentViewingTripId = tripId;
 document.getElementById('driverTripBookingsModal').classList.add('active');
 await loadDriverTripBookings(tripId);
 }
-
 function closeDriverTripBookingsModal() {
 document.getElementById('driverTripBookingsModal').classList.remove('active');
 if (driverTripBookingsListener) { driverTripBookingsListener(); driverTripBookingsListener = null; }
 currentViewingTripId = null;
 }
-
 async function loadDriverTripBookings(tripId) {
 if (!tripId) return;
 const detailsEl = document.getElementById('driverTripDetails');
 const listEl = document.getElementById('driverTripPassengersList');
-
 try {
 const tripDoc = await db.collection('driverTrips').doc(tripId).get();
 if (!tripDoc.exists) {
@@ -1853,9 +1804,7 @@ showToast('❌ الرحلة غير موجودة', 'error');
 closeDriverTripBookingsModal();
 return;
 }
-
 const t = tripDoc.data();
-
 detailsEl.innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px; font-size:0.9em;">
 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1868,26 +1817,24 @@ detailsEl.innerHTML = `
 <div>💰 <strong>السعر:</strong> ${t.price} د.ج | 💺 <strong>المقاعد:</strong> ${t.bookedSeats}/${t.totalSeats}</div>
 </div>
 `;
-
 updateTripBookingsCount(t.bookedSeats, t.totalSeats);
-
 // ✅ الاستماع المباشر للحجوزات الجديدة
 if (driverTripBookingsListener) driverTripBookingsListener();
 driverTripBookingsListener = db.collection('driverTrips').doc(tripId).onSnapshot(doc => {
 if (!doc.exists) return;
 const data = doc.data();
 const passengers = data.passengers || [];
-
 if (passengers.length === 0) {
 listEl.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>لا توجد حجوزات بعد</p></div>';
 } else {
 let html = '';
 passengers.forEach((p, idx) => {
 const bookedTime = p.bookedAt?.toDate ? p.bookedAt.toDate().toLocaleString('ar-DZ') : '';
+const seats = p.seatsBooked || 1;
 html += `
 <div class="booked-passenger-card">
 <div class="passenger-info">
-<div class="passenger-name">👤 راكب #${idx + 1}</div>
+<div class="passenger-name">👤 راكب #${idx + 1} (${seats} مقاعد)</div>
 <div class="passenger-phone">📞 ${p.passengerPhone}</div>
 ${bookedTime ? `<div class="passenger-time">🕐 ${bookedTime}</div>` : ''}
 </div>
@@ -1897,9 +1844,7 @@ ${bookedTime ? `<div class="passenger-time">🕐 ${bookedTime}</div>` : ''}
 });
 listEl.innerHTML = html;
 }
-
 updateTripBookingsCount(data.bookedSeats, data.totalSeats);
-
 // ✅ تحديث التفاصيل
 detailsEl.innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px; font-size:0.9em;">
@@ -1914,18 +1859,18 @@ detailsEl.innerHTML = `
 </div>
 `;
 });
-
 } catch (e) {
 console.error(e);
 showToast('❌ خطأ في التحميل', 'error');
 }
 }
-
 // ✅ دالة إكمال الرحلة (تختفي من الركاب وتظهر فقط لمن حجزوا)
 async function completeDriverTrip(tripId) {
 if (!tripId) return;
-if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟\n\n• ستختفي الرحلة من قائمة الركاب الجدد\n• ستبقى ظاهرة فقط للركاب الذين حجزوا\n• لا يمكن التراجع عن هذا الإجراء')) return;
-
+if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟
+• ستختفي الرحلة من قائمة الركاب الجدد
+• ستبقى ظاهرة فقط للركاب الذين حجزوا
+• لا يمكن التراجع عن هذا الإجراء')) return;
 try {
 await db.collection('driverTrips').doc(tripId).update({
 status: 'completed',
@@ -1938,7 +1883,6 @@ console.error(e);
 showToast('❌ حدث خطأ', 'error');
 }
 }
-
 function openDriverSavedSpecialModal() {
 document.getElementById('driverSavedSpecialModal').classList.add('active');
 clearNotificationArrow('savedSpecialArrow');
@@ -3060,20 +3004,17 @@ window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true
 function setupSpecialAutocomplete(iid, rid) {
 const inp = document.getElementById(iid);
 const res = document.getElementById(rid);
-inp.addEventListener('focus', function() {
-showFixedLocationsInSpecial(iid, rid);
-});
-inp.addEventListener('click', function() {
-showFixedLocationsInSpecial(iid, rid);
-});
+
+// ✅ التعديل المطلوب: منع ظهور المقترحات عند الضغط أو التركيز في نافذة إنشاء الرحلة
+// تم إزالة مستمعات focus و click التي كانت تستدعي showFixedLocationsInSpecial
+
 const performSearch = async function() {
 const q = inp.value.trim();
 if (q.length < 2) {
-showFixedLocationsInSpecial(iid, rid);
+// حتى عند الكتابة أقل من حرفين، لا تظهر القائمة في هذه النافذة تحديداً
 return;
 }
 if (/^\d+$/.test(q)) {
-showFixedLocationsInSpecial(iid, rid);
 return;
 }
 try {
@@ -3326,6 +3267,7 @@ html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px s
 </div>
 <div class="record-actions">
 <button class="record-action-btn edit" style="background: linear-gradient(135deg, #FF7043, #E64A19);" onclick="openDriverTripBookingsModal('${r.id}')">👥 عرض الحجوزات</button>
+<button class="record-action-btn delete" onclick="deleteDriverTripRecord('${r.id}', this)">🗑️ حذف</button>
 </div>
 </div>`;
 } else if (r.type === 'special') {
@@ -3405,6 +3347,23 @@ card.style.transform = 'translateX(20px)';
 setTimeout(() => card.remove(), 200);
 }
 showToast('✅ تم الحذف', 'success');
+} catch (e) {
+console.error(e);
+showToast('حدث خطأ أثناء الحذف', 'error');
+}
+}
+// ✅ دالة جديدة لحذف رحلة السائق الجماعية
+window.deleteDriverTripRecord = async function(tripId, btnElement) {
+if (!confirm('هل أنت متأكد من حذف هذه الرحلة الجماعية؟')) return;
+try {
+await db.collection('driverTrips').doc(tripId).delete();
+const card = btnElement.closest('.record-card');
+if(card) {
+card.style.opacity = '0';
+card.style.transform = 'translateX(20px)';
+setTimeout(() => card.remove(), 200);
+}
+showToast('✅ تم حذف الرحلة', 'success');
 } catch (e) {
 console.error(e);
 showToast('حدث خطأ أثناء الحذف', 'error');
