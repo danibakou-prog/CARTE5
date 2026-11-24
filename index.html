@@ -1759,73 +1759,43 @@ return;
 if (!currentBookingTripId) return;
 
 const btn = event?.target;
-if (btn) { 
-btn.disabled = true; 
-btn.textContent = '🔄 جاري الحجز...'; 
-}
+if (btn) { btn.disabled = true; btn.textContent = '🔄 جاري الحجز...'; }
 
 try {
 const tripRef = db.collection('driverTrips').doc(currentBookingTripId);
-
-// ✅ استخدام transaction لضمان الذرية والتعامل مع الحقول غير الموجودة
-await db.runTransaction(async (transaction) => {
-const tripDoc = await transaction.get(tripRef);
+const tripDoc = await tripRef.get();
 
 if (!tripDoc.exists) {
-throw new Error('الرحلة لم تعد متاحة');
+showToast('❌ الرحلة لم تعد متاحة', 'error');
+closeBookTripModal();
+return;
 }
 
 const tripData = tripDoc.data();
 
 // ✅ التحقق من عدم الحجز المسبق
 if (tripData.passengers && tripData.passengers.some(p => p.passengerId === currentUser.uid)) {
-throw new Error('لقد قمت بحجز هذه الرحلة مسبقاً');
+showToast('⚠️ لقد قمت بحجز هذه الرحلة مسبقاً', 'warning');
+closeBookTripModal();
+return;
 }
 
 // ✅ التحقق من وجود مقاعد
-const currentBooked = tripData.bookedSeats || 0;
-if (currentBooked >= tripData.totalSeats) {
-throw new Error('اكتملت المقاعد');
+if (tripData.bookedSeats >= tripData.totalSeats) {
+showToast('⚠️ اكتملت المقاعد', 'warning');
+closeBookTripModal();
+loadAvailableTripsForPassenger();
+return;
 }
 
-// ✅ إنشاء الحجز مع استخدام Date بدلاً من serverTimestamp
+// ✅ إضافة الحجز
 const passengerEntry = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
 passengerEmail: currentUser.email || '',
-bookedAt: new Date()
+bookedAt: firebase.firestore.FieldValue.serverTimestamp()
 };
 
-// ✅ إضافة الحجز للمصفوفة
-const currentPassengers = tripData.passengers || [];
-currentPassengers.push(passengerEntry);
-
-// ✅ تحديث المستند
-transaction.update(tripRef, {
-passengers: currentPassengers,
-bookedSeats: currentBooked + 1,
-lastBookingAt: firebase.firestore.FieldValue.serverTimestamp()
-});
-});
-
-showToast('✅ تم الحجز بنجاح! سيتواصل معك السائق قريباً', 'success', 4000);
-closeBookTripModal();
-loadAvailableTripsForPassenger();
-
-// ✅ تشغيل صوت للحجز
-Utils.playSound('requestSound');
-
-} catch (e) {
-console.error('خطأ في الحجز:', e);
-// ✅ إظهار رسالة الخطأ الفعلية للمستخدم
-showToast('❌ ' + (e.message || 'حدث خطأ أثناء الحجز'), 'error', 4000);
-} finally {
-if (btn) { 
-btn.disabled = false; 
-btn.textContent = '✅ تأكيد الحجز'; 
-}
-}
-}
 await tripRef.update({
 passengers: firebase.firestore.FieldValue.arrayUnion(passengerEntry),
 bookedSeats: firebase.firestore.FieldValue.increment(1)
