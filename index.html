@@ -1745,6 +1745,7 @@ document.getElementById('bookTripModal').classList.remove('active');
 currentBookingTripId = null;
 }
 
+// ✅ دالة تأكيد الحجز المحسّنة باستخدام Transaction
 async function confirmBookTrip() {
 const phone = document.getElementById('bookTripPhone').value.trim();
 if (!phone) {
@@ -1759,60 +1760,71 @@ return;
 if (!currentBookingTripId) return;
 
 const btn = event?.target;
-if (btn) { btn.disabled = true; btn.textContent = '🔄 جاري الحجز...'; }
+if (btn) { 
+btn.disabled = true; 
+btn.textContent = '🔄 جاري الحجز...'; 
+}
 
 try {
 const tripRef = db.collection('driverTrips').doc(currentBookingTripId);
-const tripDoc = await tripRef.get();
+
+// ✅ استخدام transaction لضمان الذرية والتعامل مع الحقول غير الموجودة
+await db.runTransaction(async (transaction) => {
+const tripDoc = await transaction.get(tripRef);
 
 if (!tripDoc.exists) {
-showToast('❌ الرحلة لم تعد متاحة', 'error');
-closeBookTripModal();
-return;
+throw new Error('الرحلة لم تعد متاحة');
 }
 
 const tripData = tripDoc.data();
 
 // ✅ التحقق من عدم الحجز المسبق
 if (tripData.passengers && tripData.passengers.some(p => p.passengerId === currentUser.uid)) {
-showToast('⚠️ لقد قمت بحجز هذه الرحلة مسبقاً', 'warning');
-closeBookTripModal();
-return;
+throw new Error('لقد قمت بحجز هذه الرحلة مسبقاً');
 }
 
 // ✅ التحقق من وجود مقاعد
-if (tripData.bookedSeats >= tripData.totalSeats) {
-showToast('⚠️ اكتملت المقاعد', 'warning');
-closeBookTripModal();
-loadAvailableTripsForPassenger();
-return;
+const currentBooked = tripData.bookedSeats || 0;
+if (currentBooked >= tripData.totalSeats) {
+throw new Error('اكتملت المقاعد');
 }
 
-// ✅ إضافة الحجز
+// ✅ إنشاء الحجز مع استخدام Date بدلاً من serverTimestamp
 const passengerEntry = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
 passengerEmail: currentUser.email || '',
-bookedAt: firebase.firestore.FieldValue.serverTimestamp()
+bookedAt: new Date()
 };
 
-await tripRef.update({
-passengers: firebase.firestore.FieldValue.arrayUnion(passengerEntry),
-bookedSeats: firebase.firestore.FieldValue.increment(1)
+// ✅ إضافة الحجز للمصفوفة
+const currentPassengers = tripData.passengers || [];
+currentPassengers.push(passengerEntry);
+
+// ✅ تحديث المستند
+transaction.update(tripRef, {
+passengers: currentPassengers,
+bookedSeats: currentBooked + 1,
+lastBookingAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 });
 
 showToast('✅ تم الحجز بنجاح! سيتواصل معك السائق قريباً', 'success', 4000);
 closeBookTripModal();
 loadAvailableTripsForPassenger();
 
-// ✅ إشعار السائق
+// ✅ تشغيل صوت للحجز
 Utils.playSound('requestSound');
 
 } catch (e) {
-console.error(e);
-showToast('❌ حدث خطأ أثناء الحجز', 'error');
+console.error('خطأ في الحجز:', e);
+// ✅ إظهار رسالة الخطأ الفعلية للمستخدم
+showToast('❌ ' + (e.message || 'حدث خطأ أثناء الحجز'), 'error', 4000);
 } finally {
-if (btn) { btn.disabled = false; btn.textContent = '✅ تأكيد الحجز'; }
+if (btn) { 
+btn.disabled = false; 
+btn.textContent = '✅ تأكيد الحجز'; 
+}
 }
 }
 
@@ -2488,7 +2500,7 @@ for (const d of ds.docs) {
 const x = d.data();
 if (x.location && rd.pickup?.lat) {
 const dist = Utils.calculateDistance(rd.pickup.lat, rd.pickup.lng, x.location.lat, x.location.lng);
-if (dist <= 15 && d.id !== my && !sk.includes(d.id)) nb.push({ id: d.id, ...x, distance: dist });
+if (dist <= 15 && d.id !== my && !sk.includes(d.id)) { nb.push({ id: d.id, ...x, distance: dist }); }
 }
 }
 nb.sort((a, b) => a.distance - b.distance);
