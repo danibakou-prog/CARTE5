@@ -979,22 +979,22 @@ gap: 5px;
 </div>
 </div>
 </div>
-<!-- ✅ نافذة تأكيد الحجز (إدخال رقم الهاتف) -->
+<!-- ✅ نافذة تأكيد الحجز (إدخال رقم الهاتف + عدد المقاعد) -->
 <div id="bookTripModal" class="modal-overlay">
 <div class="modal-content" style="max-width: 380px;">
 <button class="close-modal" onclick="closeBookTripModal()">×</button>
 <div style="font-size: 3em; margin-bottom: 10px;">🎫</div>
 <h3 style="color: #3949AB; margin-bottom: 15px; font-weight: 800;">تأكيد الحجز</h3>
 <p style="color: #555; margin-bottom: 20px; font-size: 0.92em; line-height: 1.5;">
-أدخل رقم هاتفك وعدد المقاعد ليتمكن السائق من التواصل معك
+أدخل بياناتك لإتمام الحجز
 </p>
 <div class="form-group">
 <label>📞 رقم هاتفك</label>
 <input type="tel" id="bookTripPhone" class="auth-input" placeholder="مثال: 0555123456">
 </div>
-<!-- ✅ حقل إدخال عدد المقاعد الجديد -->
+<!-- ✅ إضافة حقل عدد المقاعد -->
 <div class="form-group">
-<label>💺 عدد المقاعد المطلوبة</label>
+<label>💺 عدد المقاعد</label>
 <input type="number" id="bookTripSeats" class="auth-input" placeholder="1" min="1" value="1">
 </div>
 <div id="bookTripSummary" style="background: #E8EAF6; padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 0.88em; text-align: right;"></div>
@@ -1866,10 +1866,7 @@ showToast('❌ خطأ في التحميل', 'error');
 // ✅ دالة إكمال الرحلة (تختفي من الركاب وتظهر فقط لمن حجزوا)
 async function completeDriverTrip(tripId) {
 if (!tripId) return;
-if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟
-• ستختفي الرحلة من قائمة الركاب الجدد
-• ستبقى ظاهرة فقط للركاب الذين حجزوا
-• لا يمكن التراجع عن هذا الإجراء')) return;
+if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟\n• ستختفي الرحلة من قائمة الركاب الجدد\n• ستبقى ظاهرة فقط للركاب الذين حجزوا\n• لا يمكن التراجع عن هذا الإجراء')) return;
 try {
 await db.collection('driverTrips').doc(tripId).update({
 status: 'completed',
@@ -1943,11 +1940,7 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 }
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
-سيتم:
-• إزالة الطلب من قائمتك
-• إشعار الراكب فوراً بالإلغاء
-• إعادة تفعيل حسابك كمتاح`)) return;
+if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح`)) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -2269,9 +2262,7 @@ list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
-رقم الهاتف: ${phone}
-سيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -3341,8 +3332,7 @@ try {
 // تحديد المجموعة بناءً على نوع السجل (يمكن تحسينه لاحقاً)
 // نفترض أنه رحلة عادية أو رحلة جماعية
 // بما أن ID فريد، نحاول حذفه من rideRequests أولاً ثم driverTrips إذا فشل (أو العكس حسب المنطق)
-// لكن الأفضل هو معرفة النوع. هنا سنحاول الحذف من الجدولين لتجنب الخطأ أو نستخدم منطق بسيط:
-// بما أن الزر يظهر في سجل السائق للرحلات الجماعية والعادية، سنحذف من المكان المناسب.
+// لكن الأفضل هو معرفة النوع. هنا سنحاول حذفه من الجدولين لتجنب الخطأ أو نعرف النوع من الـ DOM لو أردنا دقة أعلى.
 // للتبسيط، سنحذف من rideRequests وإذا لم يوجد، قد يحتاج لمنطق آخر، لكن Firebase لا يرمي خطأ إذا لم يوجد المستند عند الحذف.
 // ومع ذلك، الرحلات الجماعية في driverTrips.
 // لذا سنحاول حذفه من كلا المجموعتين لضمان الحذف (أو نعرف النوع من الـ DOM لو أردنا دقة أعلى).
