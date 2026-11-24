@@ -992,7 +992,7 @@ gap: 5px;
 <label>📞 رقم هاتفك</label>
 <input type="tel" id="bookTripPhone" class="auth-input" placeholder="مثال: 0555123456">
 </div>
-<!-- ✅ إضافة حقل عدد المقاعد -->
+<!-- ✅ حقل إدخال عدد المقاعد الجديد -->
 <div class="form-group">
 <label>💺 عدد المقاعد المطلوبة</label>
 <input type="number" id="bookTripSeats" class="auth-input" placeholder="1" min="1" value="1">
@@ -1571,8 +1571,9 @@ if (passengerSpecialListener) { passengerSpecialListener(); passengerSpecialList
 // ✅ دوال جديدة لنظام الرحلات الجماعية
 function openCreateTripModal() {
 document.getElementById('createTripModal').classList.add('active');
-setupSpecialAutocomplete('ctPickup', 'ctPickupResults');
-setupSpecialAutocomplete('ctDest', 'ctDestResults');
+// ✅ تم إزالة setupSpecialAutocomplete لمنع ظهور المقترحات
+// setupSpecialAutocomplete('ctPickup', 'ctPickupResults');
+// setupSpecialAutocomplete('ctDest', 'ctDestResults');
 // ✅ تعبئة رقم الهاتف تلقائياً إذا كان محفوظاً
 if (currentDriver?.phone) {
 document.getElementById('ctPhone').value = currentDriver.phone;
@@ -1692,7 +1693,7 @@ function openBookTripModal(tripId, pickup, dest, price, date, time) {
 currentBookingTripId = tripId;
 document.getElementById('bookTripModal').classList.add('active');
 document.getElementById('bookTripPhone').value = '';
-document.getElementById('bookTripSeats').value = '1'; // ✅ إعادة تعيين عدد المقاعد
+document.getElementById('bookTripSeats').value = '1'; // إعادة تعيين عدد المقاعد
 document.getElementById('bookTripSummary').innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px;">
 <div>📍 <strong>من:</strong> ${pickup}</div>
@@ -1709,7 +1710,7 @@ currentBookingTripId = null;
 // ✅ دالة تأكيد الحجز المحسّنة باستخدام Transaction
 async function confirmBookTrip() {
 const phone = document.getElementById('bookTripPhone').value.trim();
-const seatsToBook = parseInt(document.getElementById('bookTripSeats').value) || 1; // ✅ جلب عدد المقاعد المطلوبة
+const seatsRequested = parseInt(document.getElementById('bookTripSeats').value) || 1;
 
 if (!phone) {
 showToast('⚠️ يرجى إدخال رقم هاتفك', 'warning');
@@ -1719,8 +1720,8 @@ if (phone.length < 8) {
 showToast('⚠️ رقم الهاتف غير صحيح', 'warning');
 return;
 }
-if (seatsToBook < 1) {
-showToast('⚠️ يرجى اختيار مقعد واحد على الأقل', 'warning');
+if (seatsRequested < 1) {
+showToast('⚠️ عدد المقاعد يجب أن يكون 1 على الأقل', 'warning');
 return;
 }
 if (!currentBookingTripId) return;
@@ -1738,23 +1739,22 @@ if (!tripDoc.exists) {
 throw new Error('الرحلة لم تعد متاحة');
 }
 const tripData = tripDoc.data();
-// ✅ التحقق من عدم الحجز المسبق (إذا كان المستخدم قد حجز بالفعل)
+// ✅ التحقق من عدم الحجز المسبق
 if (tripData.passengers && tripData.passengers.some(p => p.passengerId === currentUser.uid)) {
 throw new Error('لقد قمت بحجز هذه الرحلة مسبقاً');
 }
 // ✅ التحقق من وجود مقاعد كافية
 const currentBooked = tripData.bookedSeats || 0;
-if ((currentBooked + seatsToBook) > tripData.totalSeats) {
-throw new Error(`عذراً، المتبقي فقط ${tripData.totalSeats - currentBooked} مقاعد`);
+if ((currentBooked + seatsRequested) > tripData.totalSeats) {
+throw new Error('لا توجد مقاعد كافية للحجز');
 }
-
 // ✅ إنشاء الحجز مع استخدام Date بدلاً من serverTimestamp
 const passengerEntry = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
 passengerEmail: currentUser.email || '',
 bookedAt: new Date(),
-seatsBooked: seatsToBook // ✅ حفظ عدد المقاعد المحجوزة
+seats: seatsRequested
 };
 // ✅ إضافة الحجز للمصفوفة
 const currentPassengers = tripData.passengers || [];
@@ -1762,11 +1762,11 @@ currentPassengers.push(passengerEntry);
 // ✅ تحديث المستند
 transaction.update(tripRef, {
 passengers: currentPassengers,
-bookedSeats: currentBooked + seatsToBook, // ✅ زيادة العدد بالمقاعد المطلوبة
+bookedSeats: currentBooked + seatsRequested,
 lastBookingAt: firebase.firestore.FieldValue.serverTimestamp()
 });
 });
-showToast(`✅ تم حجز ${seatsToBook} مقعد بنجاح! سيتواصل معك السائق قريباً`, 'success', 4000);
+showToast(`✅ تم حجز ${seatsRequested} مقعد بنجاح! سيتواصل معك السائق قريباً`, 'success', 4000);
 closeBookTripModal();
 loadAvailableTripsForPassenger();
 // ✅ تشغيل صوت للحجز
@@ -1830,11 +1830,10 @@ listEl.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>لا
 let html = '';
 passengers.forEach((p, idx) => {
 const bookedTime = p.bookedAt?.toDate ? p.bookedAt.toDate().toLocaleString('ar-DZ') : '';
-const seats = p.seatsBooked || 1;
 html += `
 <div class="booked-passenger-card">
 <div class="passenger-info">
-<div class="passenger-name">👤 راكب #${idx + 1} (${seats} مقاعد)</div>
+<div class="passenger-name">👤 راكب #${idx + 1} (${p.seats || 1} مقعد)</div>
 <div class="passenger-phone">📞 ${p.passengerPhone}</div>
 ${bookedTime ? `<div class="passenger-time">🕐 ${bookedTime}</div>` : ''}
 </div>
@@ -3004,17 +3003,20 @@ window.addEventListener('resize', ()=>res.classList.remove('show'),{passive:true
 function setupSpecialAutocomplete(iid, rid) {
 const inp = document.getElementById(iid);
 const res = document.getElementById(rid);
-
-// ✅ التعديل المطلوب: منع ظهور المقترحات عند الضغط أو التركيز في نافذة إنشاء الرحلة
-// تم إزالة مستمعات focus و click التي كانت تستدعي showFixedLocationsInSpecial
-
+inp.addEventListener('focus', function() {
+showFixedLocationsInSpecial(iid, rid);
+});
+inp.addEventListener('click', function() {
+showFixedLocationsInSpecial(iid, rid);
+});
 const performSearch = async function() {
 const q = inp.value.trim();
 if (q.length < 2) {
-// حتى عند الكتابة أقل من حرفين، لا تظهر القائمة في هذه النافذة تحديداً
+showFixedLocationsInSpecial(iid, rid);
 return;
 }
 if (/^\d+$/.test(q)) {
+showFixedLocationsInSpecial(iid, rid);
 return;
 }
 try {
@@ -3254,20 +3256,21 @@ const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('ar-D
 if (r.type === 'driverTrip') {
 const statusColor = r.status === 'active' ? '#FF7043' : '#43A047';
 const statusText = r.status === 'active' ? '🟢 نشطة' : '✅ مكتملة';
+// ✅ إضافة زر الحذف هنا
 html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}; background: linear-gradient(135deg, #FBE9E7, #FFCCBC); position: relative;">
-<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+<button onclick="deleteRideRecord('${r.id}', this)" style="position: absolute; top: 8px; left: 8px; background: #EF5350; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.75em; cursor: pointer; z-index: 10;">🗑️ حذف</button>
+<div style="display:flex; justify-content:space-between; margin-bottom:8px; padding-left: 50px;">
 <span style="font-weight:700; font-size:0.9em;">🚌 رحلة جماعية • ${date}</span>
 <span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:10px; font-size:0.75em;">${statusText}</span>
 </div>
-<div style="font-size:0.85em; color:#555; margin-bottom:5px;">📍 من: ${r.pickup}</div>
-<div style="font-size:0.85em; color:#555; margin-bottom:5px;">🏁 إلى: ${r.destination}</div>
-<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #ddd; padding-top:8px;">
+<div style="font-size:0.85em; color:#555; margin-bottom:5px; padding-left: 50px;">📍 من: ${r.pickup}</div>
+<div style="font-size:0.85em; color:#555; margin-bottom:5px; padding-left: 50px;">🏁 إلى: ${r.destination}</div>
+<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #ddd; padding-top:8px; padding-left: 50px;">
 <span style="font-weight:700; color:#E64A19;">💰 ${r.price} د.ج</span>
 <span style="font-size:0.8em;">💺 ${r.bookedSeats}/${r.totalSeats} راكب</span>
 </div>
-<div class="record-actions">
+<div class="record-actions" style="padding-left: 50px;">
 <button class="record-action-btn edit" style="background: linear-gradient(135deg, #FF7043, #E64A19);" onclick="openDriverTripBookingsModal('${r.id}')">👥 عرض الحجوزات</button>
-<button class="record-action-btn delete" onclick="deleteDriverTripRecord('${r.id}', this)">🗑️ حذف</button>
 </div>
 </div>`;
 } else if (r.type === 'special') {
@@ -3335,7 +3338,18 @@ container.innerHTML = `<div style="text-align:center;color:red; padding:20px;">�
 }
 window.deleteRideRecord = async function(rideId, btnElement) {
 try {
+// تحديد المجموعة بناءً على نوع السجل (يمكن تحسينه لاحقاً)
+// نفترض أنه رحلة عادية أو رحلة جماعية
+// بما أن ID فريد، نحاول حذفه من rideRequests أولاً ثم driverTrips إذا فشل (أو العكس حسب المنطق)
+// لكن الأفضل هو معرفة النوع. هنا سنحاول الحذف من الجدولين لتجنب الخطأ أو نستخدم منطق بسيط:
+// بما أن الزر يظهر في سجل السائق للرحلات الجماعية والعادية، سنحذف من المكان المناسب.
+// للتبسيط، سنحذف من rideRequests وإذا لم يوجد، قد يحتاج لمنطق آخر، لكن Firebase لا يرمي خطأ إذا لم يوجد المستند عند الحذف.
+// ومع ذلك، الرحلات الجماعية في driverTrips.
+// لذا سنحاول حذفه من كلا المجموعتين لضمان الحذف (أو نعرف النوع من الـ DOM لو أردنا دقة أعلى).
+// الحل الأبسط والأكثر أماناً:
 await db.collection('rideRequests').doc(rideId).delete();
+await db.collection('driverTrips').doc(rideId).delete(); // محاولة حذف من جدول الرحلات الجماعية أيضاً
+
 const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs';
 let logs = JSON.parse(localStorage.getItem(key) || '[]');
 logs = logs.filter(l => l.id !== rideId);
@@ -3347,23 +3361,6 @@ card.style.transform = 'translateX(20px)';
 setTimeout(() => card.remove(), 200);
 }
 showToast('✅ تم الحذف', 'success');
-} catch (e) {
-console.error(e);
-showToast('حدث خطأ أثناء الحذف', 'error');
-}
-}
-// ✅ دالة جديدة لحذف رحلة السائق الجماعية
-window.deleteDriverTripRecord = async function(tripId, btnElement) {
-if (!confirm('هل أنت متأكد من حذف هذه الرحلة الجماعية؟')) return;
-try {
-await db.collection('driverTrips').doc(tripId).delete();
-const card = btnElement.closest('.record-card');
-if(card) {
-card.style.opacity = '0';
-card.style.transform = 'translateX(20px)';
-setTimeout(() => card.remove(), 200);
-}
-showToast('✅ تم حذف الرحلة', 'success');
 } catch (e) {
 console.error(e);
 showToast('حدث خطأ أثناء الحذف', 'error');
