@@ -90,7 +90,6 @@ animation: pulse-yellow-soft 3s infinite;
 }
 .report-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(255, 193, 7, 0.7); }
 .report-btn:active { transform: scale(0.95); }
-/* ✅ زر إنشاء رحلة جماعية للسائق */
 .create-trip-btn {
 position: absolute; top: 292px; left: 0; width: 46px; height: 46px; border-radius: 16px;
 background: linear-gradient(135deg, #FF7043, #E64A19); color: white; border: 2px solid rgba(255,255,255,0.8);
@@ -105,7 +104,6 @@ animation: pulse-orange-soft 3s infinite;
 }
 .create-trip-btn:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 25px rgba(230, 74, 25, 0.7); }
 .create-trip-btn:active { transform: scale(0.95); }
-/* ✅ زر عرض رحلات السائق للراكب */
 .view-trips-btn {
 position: absolute; top: 348px; left: 0; width: 46px; height: 46px; border-radius: 16px;
 background: linear-gradient(135deg, #5C6BC0, #3949AB); color: white; border: 2px solid rgba(255,255,255,0.8);
@@ -542,7 +540,6 @@ to { opacity: 0; transform: translateY(-30px) scale(0.9); }
 .toast.hiding {
 animation: toastSlideUp 0.3s ease forwards;
 }
-/* ✅ أنماط جديدة لنافذة إنشاء رحلة السائق */
 .create-trip-modal-content {
 max-width: 420px;
 text-align: right;
@@ -566,7 +563,6 @@ padding: 14px;
 font-size: 0.95em;
 }
 .create-trip-submit-btn:hover { background: linear-gradient(135deg, #E64A19, #D84315); }
-/* ✅ أنماط جديدة لنافذة عرض رحلات السائق للراكب */
 .view-trips-modal {
 position: fixed;
 top: 0;
@@ -701,7 +697,6 @@ align-items: center;
 gap: 5px;
 }
 .complete-trip-btn:hover { background: linear-gradient(135deg, #2E7D32, #1B5E20); }
-/* ✅ بطاقة راكب محجوز */
 .booked-passenger-card {
 background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
 border-radius: 12px;
@@ -786,9 +781,7 @@ gap: 5px;
 <button class="report-btn" id="reportBtn" onclick="openReportModal()" title="إرسال تبليغ" style="display:none;">📢</button>
 <button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">📂📨</button>
 <button class="saved-special-btn" id="driverSavedSpecialBtn" onclick="openDriverSavedSpecialModal()" title="الطلبات المحجوزة المؤكدة" style="display:none;">💼✅</button>
-<!-- ✅ زر إنشاء رحلة جماعية للسائق (تم تغيير الأيقونة والترتيب) -->
 <button class="create-trip-btn" id="driverCreateTripBtn" onclick="openCreateTripModal()" title="إنشاء رحلة جماعية" style="display:none;">🚌</button>
-<!-- ✅ زر عرض رحلات السائق للراكب -->
 <button class="view-trips-btn" id="passengerViewTripsBtn" onclick="openViewTripsModal()" title="رحلات السائقين المتاحة" style="display:none;">🚌</button>
 <div class="dropdown-menu" id="userDropdownMenu">
 <div class="dropdown-header">
@@ -909,7 +902,6 @@ gap: 5px;
 <button class="auth-btn special-submit-btn" id="specialSubmitBtn" onclick="submitSpecialRequest()">✅ إرسال الطلب للسائقين</button>
 </div>
 </div>
-<!-- ✅ نافذة إنشاء رحلة جماعية للسائق -->
 <div id="createTripModal" class="modal-overlay">
 <div class="modal-content create-trip-modal-content">
 <button class="close-modal" onclick="closeCreateTripModal()">×</button>
@@ -953,7 +945,6 @@ gap: 5px;
 <button class="auth-btn create-trip-submit-btn" onclick="submitCreateTrip()">✅ نشر الرحلة للركاب</button>
 </div>
 </div>
-<!-- ✅ نافذة عرض رحلات السائق للراكب -->
 <div id="viewTripsModal" class="view-trips-modal">
 <div class="view-trips-box">
 <div class="popup-header" style="background: linear-gradient(135deg, #5C6BC0, #3949AB); color: white;">
@@ -979,7 +970,6 @@ gap: 5px;
 </div>
 </div>
 </div>
-<!-- ✅ نافذة تأكيد الحجز (إدخال رقم الهاتف + عدد المقاعد) -->
 <div id="bookTripModal" class="modal-overlay">
 <div class="modal-content" style="max-width: 380px;">
 <button class="close-modal" onclick="closeBookTripModal()">×</button>
@@ -992,7 +982,6 @@ gap: 5px;
 <label>📞 رقم هاتفك</label>
 <input type="tel" id="bookTripPhone" class="auth-input" placeholder="مثال: 0555123456">
 </div>
-<!-- ✅ إضافة حقل عدد المقاعد -->
 <div class="form-group">
 <label>💺 عدد المقاعد</label>
 <input type="number" id="bookTripSeats" class="auth-input" placeholder="1" min="1" value="1">
@@ -1067,7 +1056,6 @@ gap: 5px;
 </div>
 </div>
 </div>
-<!-- ✅ نافذة عرض حجوزات رحلة السائق (مع الركاب المحجوزين وزر مكتمل) -->
 <div id="driverTripBookingsModal" class="driver-popup-overlay">
 <div class="driver-popup-box">
 <div class="popup-header" style="background: linear-gradient(135deg, #FF7043, #E64A19); color: white;">
@@ -1090,7 +1078,6 @@ gap: 5px;
 </div>
 <div style="padding: 14px 0; border-top: 1px solid var(--border); background: transparent; margin-top:auto; display: flex; gap: 10px;">
 <button class="refresh-btn" onclick="loadDriverTripBookings(currentViewingTripId)" style="background: linear-gradient(135deg, #FF7043, #E64A19); color: white; font-weight: 700; flex: 1;">🔄 تحديث</button>
-<!-- ✅ زر إلغاء الرحلة -->
 <button class="complete-trip-btn" style="background: linear-gradient(135deg, #EF5350, #C62828); flex: 1; justify-content: center; padding: 12px;" onclick="cancelActiveTrip(currentViewingTripId)">❌ إلغاء الرحلة</button>
 <button class="complete-trip-btn" onclick="completeDriverTrip(currentViewingTripId)" style="flex: 1; justify-content: center; padding: 12px;">✅ مكتمل</button>
 </div>
@@ -1220,7 +1207,6 @@ let specialFirstLoad = true;
 let savedFirstLoad = true;
 let passengerSpecialListener = null;
 let lastSeenCancelledSpecials = new Set();
-// ✅ متغيرات جديدة لنظام الرحلات الجماعية
 let driverTripsListener = null;
 let lastDriverTripsIds = new Set();
 let driverTripsFirstLoad = true;
@@ -1230,7 +1216,7 @@ let driverTripBookingsListener = null;
 const FIXED_LOCATIONS = [
 { id: '01', name: 'وسط المدينة', lat: 35.633438, lng: 3.222985 },
 { id: 'مستشفى 60 سرير', name: 'مستشفى 60 سرير', lat: 35.620169, lng: 3.213308 },
-{ id: 'الاستعجازات الطبية الجراحية', name: 'الاستعجازات الطبية الجراحية', lat: 35.643940, lng: 3.226869 },
+{ id: 'الاستعجلات الطبية الجراحية', name: 'الاستعجلات الطبية الجراحية', lat: 35.643940, lng: 3.226869 },
 { id: '04', name: 'العيادة المتعددة الخدمات', lat: 35.630634, lng: 3.227513 },
 { id: 'البريد و المواصلات وسط المدينة', name: 'البريد و المواصلات وسط المدينة', lat: 35.635127, lng: 3.223945 },
 { id: 'مركز التكوين المهني', name: 'مركز التكوين المهني', lat: 35.627146, lng: 3.229616 },
@@ -1369,7 +1355,6 @@ countEl.textContent = count;
 if (countEl) countEl.remove();
 }
 }
-// ✅ دالة جديدة: تحديث عداد الرحلات الجماعية للراكب
 function updateDriverTripsCount(count) {
 const btn = document.getElementById('passengerViewTripsBtn');
 if (!btn) return;
@@ -1386,7 +1371,6 @@ countEl.textContent = count;
 if (countEl) countEl.remove();
 }
 }
-// ✅ دالة جديدة: تحديث عداد حجوزات الرحلة للسائق
 function updateTripBookingsCount(count, totalSeats) {
 const countEl = document.getElementById('driverTripBookingsCount');
 if (countEl) {
@@ -1476,7 +1460,6 @@ if (countEl1) countEl1.remove();
 const countEl2 = document.getElementById('specialReqCount');
 if (countEl2) countEl2.remove();
 }
-// ✅ دالة جديدة: بدء الاستماع للرحلات الجماعية (للسائق والراكب)
 function startDriverTripsListener() {
 if (!currentUser?.uid) return;
 if (driverTripsListener) { driverTripsListener(); driverTripsListener = null; }
@@ -1491,7 +1474,6 @@ snapshot.forEach(doc => {
 currentIds.add(doc.id);
 activeCount++;
 });
-// ✅ للراكب: تحديث العداد وتنبيه صوتي عند ظهور رحلة جديدة
 if (!currentDriver) {
 updateDriverTripsCount(activeCount);
 if (driverTripsFirstLoad) {
@@ -1508,20 +1490,17 @@ if (hasNew && activeCount > 0) {
 showNotificationArrow('passengerViewTripsBtn', 'newTripArrow', 'indigo', '🔻');
 Utils.playSound('newTripSound');
 showToast('🚌 رحلة جديدة متاحة! اضغط لعرضها', 'info', 3000);
-// ✅ تحديث القائمة إذا كانت مفتوحة
 if (document.getElementById('viewTripsModal').classList.contains('active')) {
 loadAvailableTripsForPassenger();
 }
 }
 }
-// ✅ للسائق: تحديث قائمة حجوزاته إذا ظهرت رحلة جديدة خاصة به
 else {
 if (driverTripsFirstLoad) {
 lastDriverTripsIds = currentIds;
 driverTripsFirstLoad = false;
 return;
 }
-// التحقق من وجود رحلة جديدة خاصة بالسائق الحالي
 let hasNewMyTrip = false;
 snapshot.forEach(doc => {
 const data = doc.data();
@@ -1570,14 +1549,11 @@ loadUserHistory();
 function stopPassengerSpecialRequestsListener() {
 if (passengerSpecialListener) { passengerSpecialListener(); passengerSpecialListener = null; }
 }
-// ✅ دوال جديدة لنظام الرحلات الجماعية
 function openCreateTripModal() {
 document.getElementById('createTripModal').classList.add('active');
-// ✅ تعبئة رقم الهاتف تلقائياً إذا كان محفوظاً
 if (currentDriver?.phone) {
 document.getElementById('ctPhone').value = currentDriver.phone;
 }
-// ✅ تعيين التاريخ اليوم كقيمة افتراضية
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('ctDate').value = today;
 }
@@ -1611,7 +1587,7 @@ try {
 await db.collection('driverTrips').add({
 driverId: currentDriver.uid,
 driverName: currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق',
-driverPhone: phone, // ✅ حفظ رقم الهاتف
+driverPhone: phone,
 pickup: pickup,
 destination: dest,
 date: date,
@@ -1672,7 +1648,6 @@ html += `
 <div class="trip-info-item">💰 السعر<strong>${t.price} د.ج</strong></div>
 <div class="trip-info-item">👨‍✈️ السائق<strong style="font-size:0.85em;">${t.driverName || 'السائق'}</strong></div>
 </div>
-<!-- ✅ إظهار رقم هاتف السائق -->
 <div style="text-align:center; font-size:0.85em; color:#555; margin-bottom:8px;">📞 ${t.driverPhone || 'غير متوفر'}</div>
 <div class="trip-actions">
 ${isBooked
@@ -1694,7 +1669,7 @@ function openBookTripModal(tripId, pickup, dest, price, date, time) {
 currentBookingTripId = tripId;
 document.getElementById('bookTripModal').classList.add('active');
 document.getElementById('bookTripPhone').value = '';
-document.getElementById('bookTripSeats').value = '1'; // إعادة تعيين عدد المقاعد
+document.getElementById('bookTripSeats').value = '1';
 document.getElementById('bookTripSummary').innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px;">
 <div>📍 <strong>من:</strong> ${pickup}</div>
@@ -1708,7 +1683,6 @@ function closeBookTripModal() {
 document.getElementById('bookTripModal').classList.remove('active');
 currentBookingTripId = null;
 }
-// ✅ دالة تأكيد الحجز المحسّنة باستخدام Transaction
 async function confirmBookTrip() {
 const phone = document.getElementById('bookTripPhone').value.trim();
 const seatsRequested = parseInt(document.getElementById('bookTripSeats').value) || 1;
@@ -1732,23 +1706,19 @@ btn.textContent = '🔄 جاري الحجز...';
 }
 try {
 const tripRef = db.collection('driverTrips').doc(currentBookingTripId);
-// ✅ استخدام transaction لضمان الذرية والتعامل مع الحقول غير الموجودة
 await db.runTransaction(async (transaction) => {
 const tripDoc = await transaction.get(tripRef);
 if (!tripDoc.exists) {
 throw new Error('الرحلة لم تعد متاحة');
 }
 const tripData = tripDoc.data();
-// ✅ التحقق من عدم الحجز المسبق
 if (tripData.passengers && tripData.passengers.some(p => p.passengerId === currentUser.uid)) {
 throw new Error('لقد قمت بحجز هذه الرحلة مسبقاً');
 }
-// ✅ التحقق من وجود مقاعد كافية
 const currentBooked = tripData.bookedSeats || 0;
 if ((currentBooked + seatsRequested) > tripData.totalSeats) {
 throw new Error('لا توجد مقاعد كافية للحجز');
 }
-// ✅ إنشاء الحجز مع استخدام Date بدلاً من serverTimestamp
 const passengerEntry = {
 passengerId: currentUser.uid,
 passengerPhone: phone,
@@ -1756,10 +1726,8 @@ passengerEmail: currentUser.email || '',
 bookedAt: new Date(),
 seats: seatsRequested
 };
-// ✅ إضافة الحجز للمصفوفة
 const currentPassengers = tripData.passengers || [];
 currentPassengers.push(passengerEntry);
-// ✅ تحديث المستند
 transaction.update(tripRef, {
 passengers: currentPassengers,
 bookedSeats: currentBooked + seatsRequested,
@@ -1769,11 +1737,9 @@ lastBookingAt: firebase.firestore.FieldValue.serverTimestamp()
 showToast(`✅ تم حجز ${seatsRequested} مقعد بنجاح! سيتواصل معك السائق قريباً`, 'success', 4000);
 closeBookTripModal();
 loadAvailableTripsForPassenger();
-// ✅ تشغيل صوت للحجز
 Utils.playSound('requestSound');
 } catch (e) {
 console.error('خطأ في الحجز:', e);
-// ✅ إظهار رسالة الخطأ الفعلية للمستخدم
 showToast('❌ ' + (e.message || 'حدث خطأ أثناء الحجز'), 'error', 4000);
 } finally {
 if (btn) {
@@ -1782,7 +1748,6 @@ btn.textContent = '✅ تأكيد الحجز';
 }
 }
 }
-// ✅ عرض حجوزات الرحلة للسائق
 async function openDriverTripBookingsModal(tripId) {
 currentViewingTripId = tripId;
 document.getElementById('driverTripBookingsModal').classList.add('active');
@@ -1818,7 +1783,6 @@ detailsEl.innerHTML = `
 </div>
 `;
 updateTripBookingsCount(t.bookedSeats, t.totalSeats);
-// ✅ الاستماع المباشر للحجوزات الجديدة
 if (driverTripBookingsListener) driverTripBookingsListener();
 driverTripBookingsListener = db.collection('driverTrips').doc(tripId).onSnapshot(doc => {
 if (!doc.exists) return;
@@ -1844,7 +1808,6 @@ ${bookedTime ? `<div class="passenger-time">🕐 ${bookedTime}</div>` : ''}
 listEl.innerHTML = html;
 }
 updateTripBookingsCount(data.bookedSeats, data.totalSeats);
-// ✅ تحديث التفاصيل
 detailsEl.innerHTML = `
 <div style="display:flex; flex-direction:column; gap:6px; font-size:0.9em;">
 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1857,28 +1820,15 @@ detailsEl.innerHTML = `
 <div>💰 <strong>السعر:</strong> ${data.price} د.ج | 💺 <strong>المقاعد:</strong> ${data.bookedSeats}/${data.totalSeats}</div>
 </div>
 `;
-// ✅ إشعار وصوت عند حجز جديد (مقارنة بسيطة للتحقق من الزيادة)
-// ملاحظة: هذا التنبيه قد يظهر عند كل تحديث، لذا يمكن تحسينه بمقارنة الطول السابق
-// لكن لغرض الإشعار الفوري، سنعتبر أي تحديث زيادة في الحجوزات هو حدث جديد إذا لم يكن فارغاً
-if (passengers.length > 0 && data.status === 'active') {
-     // يمكننا هنا إضافة منطق أكثر تعقيداً لمعرفة ما إذا كان الراكب جديداً حقاً
-     // لكن للبساطة، سنصدر صوتاً عند كل تحديث للقائمة إذا كانت هناك حجوزات
-     // Utils.playSound('requestSound'); 
-     // showToast('🔔 تم تحديث قائمة الحجوزات', 'info', 2000);
-}
 });
 } catch (e) {
 console.error(e);
 showToast('❌ خطأ في التحميل', 'error');
 }
 }
-// ✅ دالة إكمال الرحلة (تختفي من الركاب وتظهر فقط لمن حجزوا)
 async function completeDriverTrip(tripId) {
 if (!tripId) return;
-if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟
-• ستختفي الرحلة من قائمة الركاب الجدد
-• ستبقى ظاهرة فقط للركاب الذين حجزوا
-• لا يمكن التراجع عن هذا الإجراء')) return;
+if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟\n• ستختفي الرحلة من قائمة الركاب الجدد\n• ستبقى ظاهرة فقط للركاب الذين حجزوا\n• لا يمكن التراجع عن هذا الإجراء')) return;
 try {
 await db.collection('driverTrips').doc(tripId).update({
 status: 'completed',
@@ -1952,11 +1902,7 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 }
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
-سيتم:
-• إزالة الطلب من قائمتك
-• إشعار الراكب فوراً بالإلغاء
-• إعادة تفعيل حسابك كمتاح`)) return;
+if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح`)) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -2205,7 +2151,7 @@ if(!currentDriver) return;
 list.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span> جاري التحميل...</div>';
 try {
 const snapshot = await db.collection('specialRequests')
-.where('status', '==', 'pending')
+.where('status', 'in', ['pending', 'negotiating'])
 .get();
 const myCarType = currentDriver.carType.trim();
 const matchingDocs = [];
@@ -2278,9 +2224,7 @@ list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
-رقم الهاتف: ${phone}
-سيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -2472,17 +2416,60 @@ document.getElementById('registerForm').style.display = tab==='register'?'flex':
 }
 async function handleAuth(type) {
 const btn = type==='login'?document.getElementById('loginBtn'):document.getElementById('regBtn');
-btn.disabled=true; btn.textContent='🔄 جاري...';
+btn.disabled=true; 
+btn.textContent='🔄 جاري...';
+
 const email = type==='login'?document.getElementById('loginEmail').value:document.getElementById('regEmail').value;
 const pass = type==='login'?document.getElementById('loginPassword').value:document.getElementById('regPassword').value;
-try {
-if(type==='login') await auth.signInWithEmailAndPassword(email, pass);
-else { await auth.createUserWithEmailAndPassword(email, pass); await db.collection('users').doc(auth.currentUser.uid).set({email, role:'passenger', createdAt:firebase.firestore.FieldValue.serverTimestamp()}); }
-} catch(e) {
-console.error(e);
-showToast('❌ ' + (e.message || 'خطأ في المصادقة'), 'error');
+
+if (!email || !pass) {
+    showToast('⚠️ يرجى ملء جميع الحقول', 'warning');
+    btn.disabled=false;
+    btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب';
+    return;
 }
-finally { btn.disabled=false; btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب'; }
+
+try {
+    if(type==='login') {
+        await auth.signInWithEmailAndPassword(email, pass);
+        showToast('✅ تم تسجيل الدخول بنجاح', 'success');
+    } else {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+        const user = userCredential.user;
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+            await db.collection('users').doc(user.uid).set({
+                email: email,
+                role: 'passenger',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        showToast('✅ تم إنشاء الحساب بنجاح', 'success');
+    }
+} catch(e) {
+    console.error('خطأ في المصادقة:', e);
+    let errorMessage = 'خطأ في المصادقة';
+    
+    if (e.code === 'auth/user-not-found') {
+        errorMessage = '❌ المستخدم غير موجود';
+    } else if (e.code === 'auth/wrong-password') {
+        errorMessage = '❌ كلمة المرور غير صحيحة';
+    } else if (e.code === 'auth/email-already-in-use') {
+        errorMessage = '❌ البريد الإلكتروني مستخدم مسبقاً';
+    } else if (e.code === 'auth/weak-password') {
+        errorMessage = '❌ كلمة المرور ضعيفة (6 أحرف على الأقل)';
+    } else if (e.code === 'auth/invalid-email') {
+        errorMessage = '❌ البريد الإلكتروني غير صالح';
+    } else {
+        errorMessage = '❌ ' + (e.message || 'خطأ غير معروف');
+    }
+    
+    showToast(errorMessage, 'error', 4000);
+} finally {
+    btn.disabled=false;
+    btn.textContent=type==='login'?'🔐 دخول':'✅ إنشاء حساب';
+}
 }
 async function completeDriverSetup() {
 const btn = document.getElementById('setupBtn'); btn.disabled = true; btn.textContent = '🔄 حفظ...';
@@ -2506,7 +2493,6 @@ document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex';
-// ✅ إظهار زر إنشاء رحلة جماعية وإخفاء زر عرض الرحلات
 document.getElementById('driverCreateTripBtn').style.display = 'flex';
 document.getElementById('passengerViewTripsBtn').style.display = 'none';
 startLocationUpdates(currentUser.uid); startDriverRequestListener();
@@ -2555,62 +2541,121 @@ setInterval(() => { if(currentDriver?.uid && lastOnlineState !== navigator.onLin
 } catch(e) { console.error(e); setTimeout(()=>{ document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('mainApp').style.display='block'; }, 1500); }
 }
 async function routeUserAfterAuth(user) {
-const ud = await db.collection('users').doc(user.uid).get(); if(!ud.exists) return switchView('view-auth');
-const d = ud.data(), switchModeBtn = document.getElementById('switchModeHeaderBtn');
-if(d.role === 'driver') {
-const dd = await db.collection('drivers').doc(user.uid).get();
-if(dd.exists) {
-currentDriver = dd.data(); driverAvailable = currentDriver.available !== false; updateAvailabilityButton();
-document.getElementById('userIconBtn').textContent = '🚕'; document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
-document.getElementById('settingsTabBtn').style.display = 'block'; document.getElementById('driverAvailabilityBtn').style.display = 'flex';
-switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '👤 التبديل لراكب'; switchModeBtn.className = 'register-car-btn mode-to-passenger'; switchModeBtn.onclick = toggleUserRole;
-document.getElementById('driverReceiveRequestsTop').style.display = 'block'; document.getElementById('passengerMyRequestsTop').style.display = 'none';
-document.getElementById('mainRequestBtn').style.display = 'none';
-document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`; document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
-document.getElementById('menuCarType').value = currentDriver.carType; document.getElementById('menuCarName').value = currentDriver.carName;
-document.getElementById('driverSpecialReqBtn').style.display = 'flex';
-document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
-document.getElementById('passengerSpecialReqBtn').style.display = 'none';
-document.getElementById('reportBtn').style.display = 'flex';
-// ✅ إظهار زر إنشاء رحلة جماعية وإخفاء زر عرض الرحلات
-document.getElementById('driverCreateTripBtn').style.display = 'flex';
-document.getElementById('passengerViewTripsBtn').style.display = 'none';
-startLocationUpdates(user.uid); startDriverRequestListener();
-startSpecialRequestsNotificationListener();
-startDriverTripsListener();
-stopPassengerSpecialRequestsListener();
-switchView('view-request');
-} else { openDriverSetupModal(); }
-} else {
-document.getElementById('userIconBtn').textContent = '👤'; document.getElementById('menuUserName').textContent = 'راكب';
-document.getElementById('settingsTabBtn').style.display = 'none'; document.getElementById('driverAvailabilityBtn').style.display = 'none';
-const ddCheck = await db.collection('drivers').doc(user.uid).get();
-if (ddCheck.exists) { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 التبديل لسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = toggleUserRole; }
-else { switchModeBtn.style.display = 'block'; switchModeBtn.innerHTML = '🚕 سجل كسائق'; switchModeBtn.className = 'register-car-btn mode-to-driver'; switchModeBtn.onclick = openDriverSetupModal; }
-document.getElementById('passengerMyRequestsTop').style.display = 'block'; document.getElementById('driverReceiveRequestsTop').style.display = 'none';
-document.getElementById('mainRequestBtn').style.display = 'flex';
-document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
-document.getElementById('reportBtn').style.display = 'flex';
-document.getElementById('driverSpecialReqBtn').style.display = 'none';
-document.getElementById('driverSavedSpecialBtn').style.display = 'none';
-// ✅ إخفاء زر إنشاء رحلة جماعية وإظهار زر عرض الرحلات
-document.getElementById('driverCreateTripBtn').style.display = 'none';
-document.getElementById('passengerViewTripsBtn').style.display = 'flex';
-stopSpecialRequestsNotificationListener();
-startPassengerSpecialRequestsListener();
-startDriverTripsListener();
-switchView('view-request'); startPassengerLocationTracking();
-}
-const menuCarType = document.getElementById('menuCarType');
-const menuCarName = document.getElementById('menuCarName');
-const saveBtn = document.getElementById('saveDriverProfileBtn');
-if(menuCarType && menuCarName && saveBtn) {
-const resetSaveBtn = () => {
-saveBtn.textContent = '💾 حفظ التغيرات';
-saveBtn.style.background = '';
-};
-menuCarType.addEventListener('change', resetSaveBtn);
-menuCarName.addEventListener('input', resetSaveBtn);
+try {
+    const ud = await db.collection('users').doc(user.uid).get();
+    
+    if(!ud.exists) {
+        console.log('⚠️ مستند المستخدم غير موجود، جاري إنشائه...');
+        await db.collection('users').doc(user.uid).set({
+            email: user.email,
+            role: 'passenger',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('⚠️ تم إنشاء حسابك تلقائياً', 'warning', 3000);
+    }
+    
+    const d = ud.exists ? ud.data() : { role: 'passenger' };
+    const switchModeBtn = document.getElementById('switchModeHeaderBtn');
+    
+    if(d.role === 'driver') {
+        const dd = await db.collection('drivers').doc(user.uid).get();
+        if(dd.exists) {
+            currentDriver = dd.data();
+            driverAvailable = currentDriver.available !== false;
+            updateAvailabilityButton();
+            
+            document.getElementById('userIconBtn').textContent = '🚕';
+            document.getElementById('menuUserName').textContent = currentDriver.carName || 'سائق';
+            document.getElementById('settingsTabBtn').style.display = 'block';
+            document.getElementById('driverAvailabilityBtn').style.display = 'flex';
+            
+            switchModeBtn.style.display = 'block';
+            switchModeBtn.innerHTML = '👤 التبديل لراكب';
+            switchModeBtn.className = 'register-car-btn mode-to-passenger';
+            switchModeBtn.onclick = toggleUserRole;
+            
+            document.getElementById('driverReceiveRequestsTop').style.display = 'block';
+            document.getElementById('passengerMyRequestsTop').style.display = 'none';
+            document.getElementById('mainRequestBtn').style.display = 'none';
+            
+            document.getElementById('popupDriverName').textContent = `${currentDriver.carName || 'سائق'} | ${currentDriver.carType}`;
+            document.getElementById('popupDriverArea').textContent = `🚗 ${currentDriver.carType}`;
+            
+            document.getElementById('menuCarType').value = currentDriver.carType;
+            document.getElementById('menuCarName').value = currentDriver.carName;
+            
+            document.getElementById('driverSpecialReqBtn').style.display = 'flex';
+            document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
+            document.getElementById('passengerSpecialReqBtn').style.display = 'none';
+            document.getElementById('reportBtn').style.display = 'flex';
+            document.getElementById('driverCreateTripBtn').style.display = 'flex';
+            document.getElementById('passengerViewTripsBtn').style.display = 'none';
+            
+            startLocationUpdates(user.uid);
+            startDriverRequestListener();
+            startSpecialRequestsNotificationListener();
+            startDriverTripsListener();
+            stopPassengerSpecialRequestsListener();
+            
+            switchView('view-request');
+            showToast('✅ مرحباً بك كسائق', 'success');
+        } else {
+            openDriverSetupModal();
+        }
+    } else {
+        document.getElementById('userIconBtn').textContent = '👤';
+        document.getElementById('menuUserName').textContent = 'راكب';
+        document.getElementById('settingsTabBtn').style.display = 'none';
+        document.getElementById('driverAvailabilityBtn').style.display = 'none';
+        
+        const ddCheck = await db.collection('drivers').doc(user.uid).get();
+        if (ddCheck.exists) {
+            switchModeBtn.style.display = 'block';
+            switchModeBtn.innerHTML = '🚕 التبديل لسائق';
+            switchModeBtn.className = 'register-car-btn mode-to-driver';
+            switchModeBtn.onclick = toggleUserRole;
+        } else {
+            switchModeBtn.style.display = 'block';
+            switchModeBtn.innerHTML = '🚕 سجل كسائق';
+            switchModeBtn.className = 'register-car-btn mode-to-driver';
+            switchModeBtn.onclick = openDriverSetupModal;
+        }
+        
+        document.getElementById('passengerMyRequestsTop').style.display = 'block';
+        document.getElementById('driverReceiveRequestsTop').style.display = 'none';
+        document.getElementById('mainRequestBtn').style.display = 'flex';
+        document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
+        document.getElementById('reportBtn').style.display = 'flex';
+        document.getElementById('driverSpecialReqBtn').style.display = 'none';
+        document.getElementById('driverSavedSpecialBtn').style.display = 'none';
+        document.getElementById('driverCreateTripBtn').style.display = 'none';
+        document.getElementById('passengerViewTripsBtn').style.display = 'flex';
+        
+        stopSpecialRequestsNotificationListener();
+        startPassengerSpecialRequestsListener();
+        startDriverTripsListener();
+        
+        switchView('view-request');
+        startPassengerLocationTracking();
+        showToast('✅ مرحباً بك كراكب', 'success');
+    }
+    
+    const menuCarType = document.getElementById('menuCarType');
+    const menuCarName = document.getElementById('menuCarName');
+    const saveBtn = document.getElementById('saveDriverProfileBtn');
+    
+    if(menuCarType && menuCarName && saveBtn) {
+        const resetSaveBtn = () => {
+            saveBtn.textContent = '💾 حفظ التغيرات';
+            saveBtn.style.background = '';
+        };
+        menuCarType.addEventListener('change', resetSaveBtn);
+        menuCarName.addEventListener('input', resetSaveBtn);
+    }
+} catch(e) {
+    console.error('خطأ في routeUserAfterAuth:', e);
+    showToast('❌ حدث خطأ أثناء تحميل البيانات', 'error');
+    switchView('view-auth');
 }
 }
 function startLocationUpdates(uid) {
@@ -2700,7 +2745,7 @@ const cid=await createChat(rideId,r.passengerId,currentDriver.uid);
 const dn=currentDriver.carName||currentDriver.email?.split('@')[0]||'السائق';
 await sendMessage(cid,currentDriver.uid,'driver',`✅ تم قبول طلبك! أنا في الطريق.`);
 currentActiveRide={id:rideId,...r,status:'accepted'};
-saveToLocalLog({id:rideId, status:'accepted', pickup:r.pickup, destination:r.destination, price:r.price, createdAt:r.createdAt?.toDate?.()||new Date().toISOString()});
+saveToLocalLog({id:rideId, status:'accepted', pickup:r.pickup, destination:r.destination, price:r.price, createdAt:r.createdAt?.toDate?.() || new Date().toISOString()});
 showChatInterface(rideId,r.passengerId,currentDriver.uid,'driver',dn,currentActiveRide);
 showChatButton(rideId,cid,'driver',dn,currentActiveRide);
 if(currentDriver?.location&&r.pickup?.lat) MapUtils.drawDualRoute(map,[currentDriver.location.lat,currentDriver.location.lng],[r.pickup.lat,r.pickup.lng],[r.destination.lat,r.destination.lng]);
@@ -2727,7 +2772,7 @@ if(dist<=15&&d.id!==my&&!sk.includes(d.id))nb.push({id:d.id,...x,distance:dist})
 nb.sort((a,b)=>a.distance-b.distance);
 if(nb.length>0){ const nx=nb[0]; await ref.update({status:'pending', assignedDriverId:nx.id, assignedAt:firebase.firestore.FieldValue.serverTimestamp(), skippedBy:sk, dispatchStage:firebase.firestore.FieldValue.increment(1)}); }
 else { await ref.update({status:'expired',skippedBy:sk}); }
-saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.()||new Date().toISOString()});
+saveToLocalLog({id:rideId, status:'declined', pickup:rd.pickup, destination:rd.destination, price:rd.price, createdAt:rd.createdAt?.toDate?.() || new Date().toISOString()});
 }catch(e){console.error(e);}
 finally{if(b){b.disabled=false;b.textContent='❌ رفض';}loadRequests();}
 };
@@ -3231,7 +3276,6 @@ let allRecords = [];
 let querySnapshot;
 if (currentDriver) {
 querySnapshot = await db.collection('rideRequests').where('acceptedBy', '==', currentUser.uid).limit(50).get();
-// ✅ إضافة رحلات السائق الجماعية للسجل
 const tripsSnapshot = await db.collection('driverTrips').where('driverId', '==', currentUser.uid).limit(50).get();
 tripsSnapshot.forEach(doc => {
 allRecords.push({ id: doc.id, type: 'driverTrip', ...doc.data() });
@@ -3249,12 +3293,6 @@ const specialSnapshot = await db.collection('specialRequests')
 specialSnapshot.forEach(doc => {
 allRecords.push({ id: doc.id, type: 'special', ...doc.data() });
 });
-// ✅ إضافة حجوزات الراكب في الرحلات الجماعية
-const bookedTripsSnapshot = await db.collection('driverTrips').where('passengers', 'array-contains', {passengerId: currentUser.uid}).limit(50).get();
-// ملاحظة: array-contains مع كائن قد لا يعمل بشكل مثالي في جميع قواعد البيانات، لذا نفضل جلب الكل وتصفيتهم في JS إذا لزم الأمر، لكن هنا سنحاول جلب الرحلات النشطة والمكتملة وتصفيتها
-// لتحسين الأداء، سنجلب الرحلات التي تحتوي على معرف المستخدم في مصفوفة الركاب (إذا كانت مدعومة) أو نجلب جميع رحلات السائقين ونفلتر.
-// الحل الأفضل: جلب الرحلات التي حالتها active أو completed والتي تحتوي على المستخدم في passengers
-// بما أن Firestore لا يدعم query معقد على مصفوفة من الكائنات بسهولة، سنقوم بجلب الرحلات النشطة والمكتملة وتصفيتها يدوياً للأمان
 const allTripsSnapshot = await db.collection('driverTrips').where('status', 'in', ['active', 'completed']).limit(100).get();
 allTripsSnapshot.forEach(doc => {
 const data = doc.data();
@@ -3278,7 +3316,6 @@ const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('ar-D
 if (r.type === 'driverTrip') {
 const statusColor = r.status === 'active' ? '#FF7043' : '#43A047';
 const statusText = r.status === 'active' ? '🟢 نشطة' : '✅ مكتملة';
-// ✅ إضافة زر الحذف هنا
 html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}; background: linear-gradient(135deg, #FBE9E7, #FFCCBC); position: relative;">
 <button onclick="deleteRideRecord('${r.id}', this)" style="position: absolute; top: 8px; left: 8px; background: #EF5350; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.75em; cursor: pointer; z-index: 10;">🗑️ حذف</button>
 <div style="display:flex; justify-content:space-between; margin-bottom:8px; padding-left: 50px;">
@@ -3296,7 +3333,6 @@ html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px s
 </div>
 </div>`;
 } else if (r.type === 'passengerBooking') {
-// ✅ عرض حجوزات الراكب في الرحلات الجماعية مع زر تعديل وحذف
 const statusColor = r.status === 'active' ? '#5C6BC0' : '#43A047';
 const statusText = r.status === 'active' ? '🟢 نشطة' : '✅ مكتملة';
 html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}; background: linear-gradient(135deg, #E8EAF6, #C5CAE9); position: relative;">
@@ -3378,16 +3414,8 @@ container.innerHTML = `<div style="text-align:center;color:red; padding:20px;">�
 }
 window.deleteRideRecord = async function(rideId, btnElement) {
 try {
-// تحديد المجموعة بناءً على نوع السجل (يمكن تحسينه لاحقاً)
-// نفترض أنه رحلة عادية أو رحلة جماعية
-// بما أن ID فريد، نحاول حذفه من rideRequests أولاً ثم driverTrips إذا فشل (أو العكس حسب المنطق)
-// لكن الأفضل هو معرفة النوع. هنا سنحاول حذفه من الجدولين لتجنب الخطأ أو نعرف النوع من الـ DOM لو أردنا دقة أعلى.
-// للتبسيط، سنحذف من rideRequests وإذا لم يوجد، قد يحتاج لمنطق آخر، لكن Firebase لا يرمي خطأ إذا لم يوجد المستند عند الحذف.
-// ومع ذلك، الرحلات الجماعية في driverTrips.
-// لذا سنحاول حذفه من كلا المجموعتين لضمان الحذف (أو نعرف النوع من الـ DOM لو أردنا دقة أعلى).
-// الحل الأبسط والأكثر أماناً:
 await db.collection('rideRequests').doc(rideId).delete();
-await db.collection('driverTrips').doc(rideId).delete(); // محاولة حذف من جدول الرحلات الجماعية أيضاً
+await db.collection('driverTrips').doc(rideId).delete();
 const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs';
 let logs = JSON.parse(localStorage.getItem(key) || '[]');
 logs = logs.filter(l => l.id !== rideId);
@@ -3404,7 +3432,6 @@ console.error(e);
 showToast('حدث خطأ أثناء الحذف', 'error');
 }
 }
-// ✅ دالة جديدة لحذف حجز الراكب من الرحلة الجماعية
 window.deletePassengerBooking = async function(tripId, btnElement) {
 if (!confirm('هل أنت متأكد من إلغاء حجزك في هذه الرحلة؟')) return;
 try {
@@ -3421,7 +3448,6 @@ passengers: newPassengers,
 bookedSeats: firebase.firestore.FieldValue.increment(-seatsToRemove)
 });
 });
-// إشعار السائق (اختياري، يمكن إرسال رسالة في الشات إذا وجد)
 showToast('✅ تم إلغاء الحجز بنجاح', 'success');
 const card = btnElement.closest('.record-card');
 if(card) {
@@ -3429,29 +3455,18 @@ card.style.opacity = '0';
 card.style.transform = 'translateX(20px)';
 setTimeout(() => card.remove(), 200);
 }
-// تحديث القائمة
 loadUserHistory();
 } catch (e) {
 console.error(e);
 showToast('❌ حدث خطأ أثناء إلغاء الحجز', 'error');
 }
 }
-// ✅ دالة جديدة لتعديل حجز الراكب (فتح نافذة الحجز مرة أخرى)
 window.editPassengerBooking = function(tripId) {
-// يمكن هنا فتح نافذة الحجز مرة أخرى مع تعبئة البيانات الحالية
-// للتبسيط، سنقوم بإلغاء الحجز الحالي وفتح نافذة الحجز الجديدة
 if(confirm('سيتم إلغاء حجزك الحالي لإعادة الحجز. هل توافق؟')) {
-// نجد العنصر في DOM لاستخدام دالة الحذف
-// أو نستدعي دالة الحذف مباشرة ثم نفتح نافذة الحجز
-// لكن الأفضل هو فتح نافذة الحجز وتعديل البيانات مباشرة إذا أمكن، لكن بما أن النظام يعتمد على Transaction، فالإلغاء ثم الحجز أسهل.
-// سنبحث عن بيانات الرحلة لفتح نافذة الحجز
 db.collection('driverTrips').doc(tripId).get().then(doc => {
 if(doc.exists) {
 const t = doc.data();
-// أولاً نلغي الحجز القديم
-const btn = document.createElement('button'); // عنصر وهمي لتمريره لدالة الحذف
-// ملاحظة: هذا حل سريع، الأفضل هو دمج العمليتين
-deletePassengerBooking(tripId, { closest: () => null }); // إلغاء بدون تأثير على DOM حالياً
+deletePassengerBooking(tripId, { closest: () => null });
 setTimeout(() => {
 openBookTripModal(tripId, t.pickup, t.destination, t.price, t.date, t.time);
 }, 500);
@@ -3514,7 +3529,6 @@ document.getElementById('passengerSpecialReqBtn').style.display = 'flex';
 document.getElementById('reportBtn').style.display = 'flex';
 document.getElementById('driverSpecialReqBtn').style.display = 'none';
 document.getElementById('driverSavedSpecialBtn').style.display = 'none';
-// ✅ تبديل الأزرار
 document.getElementById('driverCreateTripBtn').style.display = 'none';
 document.getElementById('passengerViewTripsBtn').style.display = 'flex';
 startPassengerLocationTracking();
@@ -3535,7 +3549,6 @@ document.getElementById('driverSpecialReqBtn').style.display = 'flex';
 document.getElementById('driverSavedSpecialBtn').style.display = 'flex';
 document.getElementById('passengerSpecialReqBtn').style.display = 'none';
 document.getElementById('reportBtn').style.display = 'flex';
-// ✅ تبديل الأزرار
 document.getElementById('driverCreateTripBtn').style.display = 'flex';
 document.getElementById('passengerViewTripsBtn').style.display = 'none';
 stopPassengerSpecialRequestsListener();
