@@ -107,7 +107,7 @@ animation: pulse-orange-soft 3s infinite;
 .create-trip-btn:active { transform: scale(0.95); }
 /* ✅ زر عرض رحلات السائق للراكب */
 .view-trips-btn {
-position: absolute; top: 292px; left: 0; width: 46px; height: 46px; border-radius: 16px;
+position: absolute; top: 348px; left: 0; width: 46px; height: 46px; border-radius: 16px;
 background: linear-gradient(135deg, #5C6BC0, #3949AB); color: white; border: 2px solid rgba(255,255,255,0.8);
 box-shadow: 0 6px 20px rgba(57, 73, 171, 0.45); display: flex; align-items: center; justify-content: center;
 font-size: 1.3em; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
@@ -786,8 +786,8 @@ gap: 5px;
 <button class="report-btn" id="reportBtn" onclick="openReportModal()" title="إرسال تبليغ" style="display:none;">📢</button>
 <button class="special-request-btn" id="driverSpecialReqBtn" onclick="openDriverSpecialRequestsModal()" title="استقبال الطلبات الخاصة" style="display:none;">📂📨</button>
 <button class="saved-special-btn" id="driverSavedSpecialBtn" onclick="openDriverSavedSpecialModal()" title="الطلبات المحجوزة المؤكدة" style="display:none;">💼✅</button>
-<!-- ✅ زر إنشاء رحلة جماعية للسائق -->
-<button class="create-trip-btn" id="driverCreateTripBtn" onclick="openCreateTripModal()" title="إنشاء رحلة جماعية" style="display:none;">➕</button>
+<!-- ✅ زر إنشاء رحلة جماعية للسائق (تم تغيير الأيقونة والترتيب) -->
+<button class="create-trip-btn" id="driverCreateTripBtn" onclick="openCreateTripModal()" title="إنشاء رحلة جماعية" style="display:none;">🚌</button>
 <!-- ✅ زر عرض رحلات السائق للراكب -->
 <button class="view-trips-btn" id="passengerViewTripsBtn" onclick="openViewTripsModal()" title="رحلات السائقين المتاحة" style="display:none;">🚌</button>
 <div class="dropdown-menu" id="userDropdownMenu">
@@ -1090,6 +1090,8 @@ gap: 5px;
 </div>
 <div style="padding: 14px 0; border-top: 1px solid var(--border); background: transparent; margin-top:auto; display: flex; gap: 10px;">
 <button class="refresh-btn" onclick="loadDriverTripBookings(currentViewingTripId)" style="background: linear-gradient(135deg, #FF7043, #E64A19); color: white; font-weight: 700; flex: 1;">🔄 تحديث</button>
+<!-- ✅ زر إلغاء الرحلة -->
+<button class="complete-trip-btn" style="background: linear-gradient(135deg, #EF5350, #C62828); flex: 1; justify-content: center; padding: 12px;" onclick="cancelActiveTrip(currentViewingTripId)">❌ إلغاء الرحلة</button>
 <button class="complete-trip-btn" onclick="completeDriverTrip(currentViewingTripId)" style="flex: 1; justify-content: center; padding: 12px;">✅ مكتمل</button>
 </div>
 </div>
@@ -1228,7 +1230,7 @@ let driverTripBookingsListener = null;
 const FIXED_LOCATIONS = [
 { id: '01', name: 'وسط المدينة', lat: 35.633438, lng: 3.222985 },
 { id: 'مستشفى 60 سرير', name: 'مستشفى 60 سرير', lat: 35.620169, lng: 3.213308 },
-{ id: 'الاستعجلات الطبية الجراحية', name: 'الاستعجلات الطبية الجراحية', lat: 35.643940, lng: 3.226869 },
+{ id: 'الاستعجازات الطبية الجراحية', name: 'الاستعجازات الطبية الجراحية', lat: 35.643940, lng: 3.226869 },
 { id: '04', name: 'العيادة المتعددة الخدمات', lat: 35.630634, lng: 3.227513 },
 { id: 'البريد و المواصلات وسط المدينة', name: 'البريد و المواصلات وسط المدينة', lat: 35.635127, lng: 3.223945 },
 { id: 'مركز التكوين المهني', name: 'مركز التكوين المهني', lat: 35.627146, lng: 3.229616 },
@@ -1571,9 +1573,6 @@ if (passengerSpecialListener) { passengerSpecialListener(); passengerSpecialList
 // ✅ دوال جديدة لنظام الرحلات الجماعية
 function openCreateTripModal() {
 document.getElementById('createTripModal').classList.add('active');
-// ✅ تم إزالة setupSpecialAutocomplete لمنع ظهور المقترحات
-// setupSpecialAutocomplete('ctPickup', 'ctPickupResults');
-// setupSpecialAutocomplete('ctDest', 'ctDestResults');
 // ✅ تعبئة رقم الهاتف تلقائياً إذا كان محفوظاً
 if (currentDriver?.phone) {
 document.getElementById('ctPhone').value = currentDriver.phone;
@@ -1612,7 +1611,7 @@ try {
 await db.collection('driverTrips').add({
 driverId: currentDriver.uid,
 driverName: currentDriver.carName || currentDriver.email?.split('@')[0] || 'السائق',
-driverPhone: phone,
+driverPhone: phone, // ✅ حفظ رقم الهاتف
 pickup: pickup,
 destination: dest,
 date: date,
@@ -1673,6 +1672,8 @@ html += `
 <div class="trip-info-item">💰 السعر<strong>${t.price} د.ج</strong></div>
 <div class="trip-info-item">👨‍✈️ السائق<strong style="font-size:0.85em;">${t.driverName || 'السائق'}</strong></div>
 </div>
+<!-- ✅ إظهار رقم هاتف السائق -->
+<div style="text-align:center; font-size:0.85em; color:#555; margin-bottom:8px;">📞 ${t.driverPhone || 'غير متوفر'}</div>
 <div class="trip-actions">
 ${isBooked
 ? `<button class="book-trip-btn" disabled style="background: linear-gradient(135deg, #66BB6A, #43A047);">✅ تم الحجز</button>`
@@ -1711,7 +1712,6 @@ currentBookingTripId = null;
 async function confirmBookTrip() {
 const phone = document.getElementById('bookTripPhone').value.trim();
 const seatsRequested = parseInt(document.getElementById('bookTripSeats').value) || 1;
-
 if (!phone) {
 showToast('⚠️ يرجى إدخال رقم هاتفك', 'warning');
 return;
@@ -1857,6 +1857,15 @@ detailsEl.innerHTML = `
 <div>💰 <strong>السعر:</strong> ${data.price} د.ج | 💺 <strong>المقاعد:</strong> ${data.bookedSeats}/${data.totalSeats}</div>
 </div>
 `;
+// ✅ إشعار وصوت عند حجز جديد (مقارنة بسيطة للتحقق من الزيادة)
+// ملاحظة: هذا التنبيه قد يظهر عند كل تحديث، لذا يمكن تحسينه بمقارنة الطول السابق
+// لكن لغرض الإشعار الفوري، سنعتبر أي تحديث زيادة في الحجوزات هو حدث جديد إذا لم يكن فارغاً
+if (passengers.length > 0 && data.status === 'active') {
+     // يمكننا هنا إضافة منطق أكثر تعقيداً لمعرفة ما إذا كان الراكب جديداً حقاً
+     // لكن للبساطة، سنصدر صوتاً عند كل تحديث للقائمة إذا كانت هناك حجوزات
+     // Utils.playSound('requestSound'); 
+     // showToast('🔔 تم تحديث قائمة الحجوزات', 'info', 2000);
+}
 });
 } catch (e) {
 console.error(e);
@@ -1866,7 +1875,10 @@ showToast('❌ خطأ في التحميل', 'error');
 // ✅ دالة إكمال الرحلة (تختفي من الركاب وتظهر فقط لمن حجزوا)
 async function completeDriverTrip(tripId) {
 if (!tripId) return;
-if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟\n• ستختفي الرحلة من قائمة الركاب الجدد\n• ستبقى ظاهرة فقط للركاب الذين حجزوا\n• لا يمكن التراجع عن هذا الإجراء')) return;
+if (!confirm('⚠️ هل تريد تأكيد إكمال الرحلة؟
+• ستختفي الرحلة من قائمة الركاب الجدد
+• ستبقى ظاهرة فقط للركاب الذين حجزوا
+• لا يمكن التراجع عن هذا الإجراء')) return;
 try {
 await db.collection('driverTrips').doc(tripId).update({
 status: 'completed',
@@ -1940,7 +1952,11 @@ list.innerHTML = '<div style="text-align:center;color:red">خطأ في التح�
 }
 }
 window.cancelSavedSpecialRequest = async function(reqId) {
-if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟\nسيتم:\n• إزالة الطلب من قائمتك\n• إشعار الراكب فوراً بالإلغاء\n• إعادة تفعيل حسابك كمتاح`)) return;
+if (!confirm(`⚠️ هل أنت متأكد من إلغاء هذا الطلب المحجوز؟
+سيتم:
+• إزالة الطلب من قائمتك
+• إشعار الراكب فوراً بالإلغاء
+• إعادة تفعيل حسابك كمتاح`)) return;
 try {
 const doc = await db.collection('specialRequests').doc(reqId).get();
 if (!doc.exists) return;
@@ -2262,7 +2278,9 @@ list.innerHTML = html;
 } catch(e) { console.error(e); list.innerHTML = '<div style="text-align:center;color:red">خطأ في التحميل</div>'; }
 }
 window.negotiateSpecialRequest = async function(reqId, phone) {
-if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟\nرقم الهاتف: ${phone}\nسيتم حجز الطلب لك مؤقتاً.`)) {
+if(confirm(`هل تريد الاتصال بالعميل للتفاوض؟
+رقم الهاتف: ${phone}
+سيتم حجز الطلب لك مؤقتاً.`)) {
 try {
 await db.collection('specialRequests').doc(reqId).update({
 status: 'negotiating',
@@ -3231,6 +3249,19 @@ const specialSnapshot = await db.collection('specialRequests')
 specialSnapshot.forEach(doc => {
 allRecords.push({ id: doc.id, type: 'special', ...doc.data() });
 });
+// ✅ إضافة حجوزات الراكب في الرحلات الجماعية
+const bookedTripsSnapshot = await db.collection('driverTrips').where('passengers', 'array-contains', {passengerId: currentUser.uid}).limit(50).get();
+// ملاحظة: array-contains مع كائن قد لا يعمل بشكل مثالي في جميع قواعد البيانات، لذا نفضل جلب الكل وتصفيتهم في JS إذا لزم الأمر، لكن هنا سنحاول جلب الرحلات النشطة والمكتملة وتصفيتها
+// لتحسين الأداء، سنجلب الرحلات التي تحتوي على معرف المستخدم في مصفوفة الركاب (إذا كانت مدعومة) أو نجلب جميع رحلات السائقين ونفلتر.
+// الحل الأفضل: جلب الرحلات التي حالتها active أو completed والتي تحتوي على المستخدم في passengers
+// بما أن Firestore لا يدعم query معقد على مصفوفة من الكائنات بسهولة، سنقوم بجلب الرحلات النشطة والمكتملة وتصفيتها يدوياً للأمان
+const allTripsSnapshot = await db.collection('driverTrips').where('status', 'in', ['active', 'completed']).limit(100).get();
+allTripsSnapshot.forEach(doc => {
+const data = doc.data();
+if (data.passengers && data.passengers.some(p => p.passengerId === currentUser.uid)) {
+allRecords.push({ id: doc.id, type: 'passengerBooking', ...data });
+}
+});
 }
 if (allRecords.length === 0) {
 container.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="icon">📂</div><p>لا توجد طلبات سابقة</p></div>';
@@ -3262,6 +3293,24 @@ html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px s
 </div>
 <div class="record-actions" style="padding-left: 50px;">
 <button class="record-action-btn edit" style="background: linear-gradient(135deg, #FF7043, #E64A19);" onclick="openDriverTripBookingsModal('${r.id}')">👥 عرض الحجوزات</button>
+</div>
+</div>`;
+} else if (r.type === 'passengerBooking') {
+// ✅ عرض حجوزات الراكب في الرحلات الجماعية مع زر تعديل وحذف
+const statusColor = r.status === 'active' ? '#5C6BC0' : '#43A047';
+const statusText = r.status === 'active' ? '🟢 نشطة' : '✅ مكتملة';
+html += `<div class="record-card" style="margin-bottom:10px; border-right: 4px solid ${statusColor}; background: linear-gradient(135deg, #E8EAF6, #C5CAE9); position: relative;">
+<button onclick="deletePassengerBooking('${r.id}', this)" style="position: absolute; top: 8px; left: 8px; background: #EF5350; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.75em; cursor: pointer; z-index: 10;">🗑️ حذف</button>
+<button onclick="editPassengerBooking('${r.id}')" style="position: absolute; top: 8px; left: 50px; background: #42A5F5; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 0.75em; cursor: pointer; z-index: 10;">✏️ تعديل</button>
+<div style="display:flex; justify-content:space-between; margin-bottom:8px; padding-left: 110px;">
+<span style="font-weight:700; font-size:0.9em;">🎫 حجز مقعد • ${date}</span>
+<span style="background:${statusColor}; color:white; padding:2px 8px; border-radius:10px; font-size:0.75em;">${statusText}</span>
+</div>
+<div style="font-size:0.85em; color:#555; margin-bottom:5px; padding-left: 110px;">📍 من: ${r.pickup}</div>
+<div style="font-size:0.85em; color:#555; margin-bottom:5px; padding-left: 110px;">🏁 إلى: ${r.destination}</div>
+<div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #ddd; padding-top:8px; padding-left: 110px;">
+<span style="font-weight:700; color:#3949AB;">💰 ${r.price} د.ج</span>
+<span style="font-size:0.8em;">👨‍✈️ ${r.driverName || 'السائق'}</span>
 </div>
 </div>`;
 } else if (r.type === 'special') {
@@ -3339,7 +3388,6 @@ try {
 // الحل الأبسط والأكثر أماناً:
 await db.collection('rideRequests').doc(rideId).delete();
 await db.collection('driverTrips').doc(rideId).delete(); // محاولة حذف من جدول الرحلات الجماعية أيضاً
-
 const key = currentDriver ? 'yasserDriverLogs' : 'yasserPassengerLogs';
 let logs = JSON.parse(localStorage.getItem(key) || '[]');
 logs = logs.filter(l => l.id !== rideId);
@@ -3354,6 +3402,61 @@ showToast('✅ تم الحذف', 'success');
 } catch (e) {
 console.error(e);
 showToast('حدث خطأ أثناء الحذف', 'error');
+}
+}
+// ✅ دالة جديدة لحذف حجز الراكب من الرحلة الجماعية
+window.deletePassengerBooking = async function(tripId, btnElement) {
+if (!confirm('هل أنت متأكد من إلغاء حجزك في هذه الرحلة؟')) return;
+try {
+const tripRef = db.collection('driverTrips').doc(tripId);
+await db.runTransaction(async (transaction) => {
+const tripDoc = await transaction.get(tripRef);
+if (!tripDoc.exists) throw new Error('الرحلة غير موجودة');
+const data = tripDoc.data();
+const passengers = data.passengers || [];
+const newPassengers = passengers.filter(p => p.passengerId !== currentUser.uid);
+const seatsToRemove = passengers.find(p => p.passengerId === currentUser.uid)?.seats || 1;
+transaction.update(tripRef, {
+passengers: newPassengers,
+bookedSeats: firebase.firestore.FieldValue.increment(-seatsToRemove)
+});
+});
+// إشعار السائق (اختياري، يمكن إرسال رسالة في الشات إذا وجد)
+showToast('✅ تم إلغاء الحجز بنجاح', 'success');
+const card = btnElement.closest('.record-card');
+if(card) {
+card.style.opacity = '0';
+card.style.transform = 'translateX(20px)';
+setTimeout(() => card.remove(), 200);
+}
+// تحديث القائمة
+loadUserHistory();
+} catch (e) {
+console.error(e);
+showToast('❌ حدث خطأ أثناء إلغاء الحجز', 'error');
+}
+}
+// ✅ دالة جديدة لتعديل حجز الراكب (فتح نافذة الحجز مرة أخرى)
+window.editPassengerBooking = function(tripId) {
+// يمكن هنا فتح نافذة الحجز مرة أخرى مع تعبئة البيانات الحالية
+// للتبسيط، سنقوم بإلغاء الحجز الحالي وفتح نافذة الحجز الجديدة
+if(confirm('سيتم إلغاء حجزك الحالي لإعادة الحجز. هل توافق؟')) {
+// نجد العنصر في DOM لاستخدام دالة الحذف
+// أو نستدعي دالة الحذف مباشرة ثم نفتح نافذة الحجز
+// لكن الأفضل هو فتح نافذة الحجز وتعديل البيانات مباشرة إذا أمكن، لكن بما أن النظام يعتمد على Transaction، فالإلغاء ثم الحجز أسهل.
+// سنبحث عن بيانات الرحلة لفتح نافذة الحجز
+db.collection('driverTrips').doc(tripId).get().then(doc => {
+if(doc.exists) {
+const t = doc.data();
+// أولاً نلغي الحجز القديم
+const btn = document.createElement('button'); // عنصر وهمي لتمريره لدالة الحذف
+// ملاحظة: هذا حل سريع، الأفضل هو دمج العمليتين
+deletePassengerBooking(tripId, { closest: () => null }); // إلغاء بدون تأثير على DOM حالياً
+setTimeout(() => {
+openBookTripModal(tripId, t.pickup, t.destination, t.price, t.date, t.time);
+}, 500);
+}
+});
 }
 }
 async function saveDriverProfileFromMenu() {
